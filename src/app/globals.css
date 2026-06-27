@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  /* Color tokens - "market board" palette */
-  --color-soil: #1A1410;       /* near-black, used for dark sections + primary text */
-  --color-grain: #F7F2E7;      /* unbleached sack/grain cream - base background */
-  --color-grain-dim: #EDE5D3;  /* slightly deeper cream for cards/dividers */
-  --color-pepper: #C7461A;     /* dried-pepper terracotta - primary accent, CTAs */
-  --color-pepper-deep: #A8380F;
-  --color-okra: #5B7345;       /* muted okra-leaf green - secondary accent, used sparingly */
-  --color-turmeric: #E8A33D;   /* palm-oil gold - highlights, badges */
-  --color-stone: #8A8073;      /* muted text on cream */
+  /* Color tokens - WEN brand palette (navy + leaf green + white, from logo) */
+  --color-soil: #0F2940;       /* logo navy - primary text + dark sections */
+  --color-grain: #FFFFFF;      /* white - base background */
+  --color-grain-dim: #F4F6F8;  /* soft cool-white for cards/dividers on white bg */
+  --color-pepper: #8BC34A;     /* logo leaf green - primary accent, CTAs */
+  --color-pepper-deep: #6FA037;
+  --color-okra: #0F2940;       /* navy reused as secondary accent (badges, icons) */
+  --color-turmeric: #B7DD8C;   /* light green tint - highlights, soft badges */
+  --color-stone: #6B7785;      /* muted navy-gray text on white */
 }
 
 @theme inline {
@@ -45,3 +45,4 @@ h1, h2, h3, .font-display {
     radial-gradient(circle at 20% 30%, rgba(255,255,255,0.025) 0%, transparent 40%),
     radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 45%);
 }
+
