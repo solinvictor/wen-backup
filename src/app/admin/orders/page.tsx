@@ -10,6 +10,8 @@ interface Order {
   status: 'pending' | 'matched' | 'in_progress' | 'delivered' | 'cancelled'
   notes: string | null
   created_at: string
+  delivered_by: string | null
+  delivered_at: string | null
   buyer: { full_name: string; phone_number: string } | null
   farmer: { full_name: string } | null
 }
@@ -34,7 +36,7 @@ export default function AdminOrdersPage() {
     const supabase = createClient()
     const { data } = await supabase
       .from('orders')
-      .select('*, buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
+      .select('*, delivered_by, delivered_at, buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
       .order('created_at', { ascending: false })
     setOrders((data as any) || [])
     setLoading(false)
@@ -42,8 +44,20 @@ export default function AdminOrdersPage() {
 
   async function updateStatus(id: string, status: Order['status']) {
     const supabase = createClient()
-    await supabase.from('orders').update({ status }).eq('id', id)
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)))
+    const updates: Partial<Order> = { status }
+    // Auto-stamp the delivery time the moment it's marked delivered —
+    // "delivered_by" is filled in separately since it's manual MVP delivery.
+    if (status === 'delivered') {
+      updates.delivered_at = new Date().toISOString()
+    }
+    await supabase.from('orders').update(updates).eq('id', id)
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...updates } : o)))
+  }
+
+  async function updateDeliveredBy(id: string, deliveredBy: string) {
+    const supabase = createClient()
+    await supabase.from('orders').update({ delivered_by: deliveredBy }).eq('id', id)
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, delivered_by: deliveredBy } : o)))
   }
 
   return (
@@ -76,7 +90,28 @@ export default function AdminOrdersPage() {
                   ))}
                 </select>
               </div>
-              {o.notes && <p className="text-[13px] text-soil/60">{o.notes}</p>}
+              {o.notes && <p className="text-[13px] text-soil/60 mb-3">{o.notes}</p>}
+
+              {(o.status === 'in_progress' || o.status === 'delivered') && (
+                <div className="flex items-center gap-2.5 mt-1 pt-3 border-t border-soil/8">
+                  <label className="text-[11.5px] text-soil/50 font-medium shrink-0">Delivered by</label>
+                  <input
+                    defaultValue={o.delivered_by || ''}
+                    onBlur={(e) => {
+                      if (e.target.value !== (o.delivered_by || '')) {
+                        updateDeliveredBy(o.id, e.target.value)
+                      }
+                    }}
+                    placeholder="e.g. Musa (WEN staff)"
+                    className="flex-1 text-[13px] border border-soil/15 rounded-md px-2.5 py-1.5 outline-none focus:border-pepper transition-colors bg-white"
+                  />
+                  {o.delivered_at && (
+                    <span className="font-data text-[10.5px] text-soil/40 shrink-0 whitespace-nowrap">
+                      {new Date(o.delivered_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -84,3 +119,4 @@ export default function AdminOrdersPage() {
     </AdminShell>
   )
 }
+
