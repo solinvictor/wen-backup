@@ -9,7 +9,7 @@ import SectionTransition from '@/components/landing/SectionTransition'
 import { ArrowRight, Leaf, Users, Truck, Scale, Recycle } from 'lucide-react'
 
 const CATEGORIES = [
-  { name: 'Tomatoes', unit: 'per basket', price: '₦8,500', image: 'https://images.pexels.com/photos/162830/tomatoes-tomato-harvest-healthy-food-162830.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Tomatoes', unit: 'per basket', price: '₦8,500', image: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
   { name: 'Yam', unit: 'per tuber', price: '₦1,200', image: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
   { name: 'Catfish', unit: 'per kg', price: '₦2,800', image: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
   { name: 'Rice', unit: 'per bag', price: '₦42,000', image: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
@@ -85,11 +85,14 @@ export default function HomePage() {
   const heroImgRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroImgRef,
-    offset: ['start start', 'end start'],
+    // Tracks the image's full transit through the viewport — from when its
+    // bottom edge first appears (start end) to when its top edge exits
+    // (end start) — not just its own height, so the drift is actually
+    // visible against normal scroll speed.
+    offset: ['start end', 'end start'],
   })
-  // Background drifts slower than the page scrolls — the classic parallax cue,
-  // applied only here in the hero where it earns its keep.
-  const heroImgY = useTransform(heroProgress, [0, 1], ['0%', '20%'])
+  // Background drifts slower than the page scrolls — the classic parallax cue.
+  const heroImgY = useTransform(heroProgress, [0, 1], ['-15%', '15%'])
 
   return (
     <>
@@ -129,8 +132,8 @@ export default function HomePage() {
                 <motion.img
                   src="https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
                   alt="Fresh produce at market"
-                  className="absolute inset-0 w-full h-[130%] object-cover"
-                  style={{ y: heroImgY, top: '-15%' }}
+                  className="absolute inset-0 w-full h-[140%] object-cover"
+                  style={{ y: heroImgY, top: '-20%' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-soil/40 via-transparent to-transparent" />
               </div>
