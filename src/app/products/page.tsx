@@ -23,12 +23,41 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: 'Other',
 }
 
+const CATEGORY_IMAGES: Record<string, string> = {
+  vegetables: 'https://images.pexels.com/photos/37321079/pexels-photo-37321079.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  grains: 'https://images.pexels.com/photos/5273080/pexels-photo-5273080.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  tubers: 'https://images.pexels.com/photos/27567597/pexels-photo-27567597.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  poultry: 'https://images.pexels.com/photos/8827287/pexels-photo-8827287.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  fish: 'https://images.pexels.com/photos/1363850/pexels-photo-1363850.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  other: 'https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+}
+
 const FALLBACK_CATEGORIES = [
-  { category: 'vegetables', items: ['Tomatoes', 'Pepper', 'Spinach', 'Okra'] },
-  { category: 'grains', items: ['Rice', 'Beans', 'Maize'] },
-  { category: 'tubers', items: ['Yam', 'Cassava', 'Sweet Potato'] },
-  { category: 'poultry', items: ['Chicken', 'Eggs'] },
-  { category: 'fish', items: ['Catfish', 'Tilapia'] },
+  {
+    category: 'vegetables',
+    items: ['Tomatoes', 'Pepper', 'Spinach', 'Okra'],
+    image: 'https://images.pexels.com/photos/37321079/pexels-photo-37321079.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  },
+  {
+    category: 'grains',
+    items: ['Rice', 'Beans', 'Maize'],
+    image: 'https://images.pexels.com/photos/5273080/pexels-photo-5273080.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  },
+  {
+    category: 'tubers',
+    items: ['Yam', 'Cassava', 'Sweet Potato'],
+    image: 'https://images.pexels.com/photos/27567597/pexels-photo-27567597.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  },
+  {
+    category: 'poultry',
+    items: ['Chicken', 'Eggs'],
+    image: 'https://images.pexels.com/photos/8827287/pexels-photo-8827287.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  },
+  {
+    category: 'fish',
+    items: ['Catfish', 'Tilapia'],
+    image: 'https://images.pexels.com/photos/1363850/pexels-photo-1363850.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  },
 ]
 
 export default function ProductsPage() {
@@ -83,32 +112,43 @@ export default function ProductsPage() {
             {loading ? (
               <p className="text-stone text-[14px]">Loading...</p>
             ) : hasRealData ? (
-              <div className="space-y-10">
+              <div className="space-y-12">
                 {Object.entries(grouped).map(([category, items]) => (
-                  <div key={category}>
-                    <h2 className="font-display text-soil text-xl mb-4">{CATEGORY_LABELS[category] || category}</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {items.map((item) => (
-                        <div key={item.id} className="bg-grain-dim rounded-xl px-4 py-3.5 border border-soil/8">
-                          <p className="text-soil text-[14px] font-medium">{item.name}</p>
-                          {item.unit && <p className="font-data text-[11px] text-stone mt-0.5">{item.unit}</p>}
-                        </div>
-                      ))}
+                  <div key={category} className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-5">
+                    <div className="rounded-2xl overflow-hidden aspect-[3/2] sm:aspect-square">
+                      <img src={CATEGORY_IMAGES[category] || CATEGORY_IMAGES.other} alt={CATEGORY_LABELS[category] || category}
+                        className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <h2 className="font-display text-soil text-xl mb-4">{CATEGORY_LABELS[category] || category}</h2>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {items.map((item) => (
+                          <div key={item.id} className="bg-grain-dim rounded-xl px-4 py-3.5 border border-soil/8">
+                            <p className="text-soil text-[14px] font-medium">{item.name}</p>
+                            {item.unit && <p className="font-data text-[11px] text-stone mt-0.5">{item.unit}</p>}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="space-y-10">
-                {FALLBACK_CATEGORIES.map(({ category, items }) => (
-                  <div key={category}>
-                    <h2 className="font-display text-soil text-xl mb-4">{CATEGORY_LABELS[category]}</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {items.map((item) => (
-                        <div key={item} className="bg-grain-dim rounded-xl px-4 py-3.5 border border-soil/8">
-                          <p className="text-soil text-[14px] font-medium">{item}</p>
-                        </div>
-                      ))}
+              <div className="space-y-12">
+                {FALLBACK_CATEGORIES.map(({ category, items, image }) => (
+                  <div key={category} className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-5">
+                    <div className="rounded-2xl overflow-hidden aspect-[3/2] sm:aspect-square">
+                      <img src={image} alt={CATEGORY_LABELS[category]} className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <h2 className="font-display text-soil text-xl mb-4">{CATEGORY_LABELS[category]}</h2>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {items.map((item) => (
+                          <div key={item} className="bg-grain-dim rounded-xl px-4 py-3.5 border border-soil/8">
+                            <p className="text-soil text-[14px] font-medium">{item}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}

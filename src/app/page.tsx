@@ -4,12 +4,12 @@ import { Footer } from '@/components/Footer'
 import { ArrowRight, Leaf, Users, Truck, Scale, Recycle } from 'lucide-react'
 
 const CATEGORIES = [
-  { name: 'Tomatoes', unit: 'per basket', price: '₦8,500' },
-  { name: 'Yam', unit: 'per tuber', price: '₦1,200' },
-  { name: 'Catfish', unit: 'per kg', price: '₦2,800' },
-  { name: 'Rice', unit: 'per bag', price: '₦42,000' },
-  { name: 'Pepper', unit: 'per basket', price: '₦6,000' },
-  { name: 'Eggs', unit: 'per crate', price: '₦3,400' },
+  { name: 'Tomatoes', unit: 'per basket', price: '₦8,500', image: 'https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Yam', unit: 'per tuber', price: '₦1,200', image: 'https://images.pexels.com/photos/27567597/pexels-photo-27567597.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Catfish', unit: 'per kg', price: '₦2,800', image: 'https://images.pexels.com/photos/8827356/pexels-photo-8827356.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Rice', unit: 'per bag', price: '₦42,000', image: 'https://images.pexels.com/photos/5273080/pexels-photo-5273080.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Pepper', unit: 'per basket', price: '₦6,000', image: 'https://images.pexels.com/photos/37321079/pexels-photo-37321079.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Eggs', unit: 'per crate', price: '₦3,400', image: 'https://images.pexels.com/photos/8827287/pexels-photo-8827287.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
 ]
 
 const STEPS = [
@@ -44,39 +44,54 @@ export default function HomePage() {
         {/* ── HERO — market board ───────────────────────────────────── */}
         <section className="market-board relative overflow-hidden">
           <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-20 pb-16 sm:pt-28 sm:pb-24">
-            <div className="max-w-2xl">
-              <p className="font-data text-[12px] text-turmeric uppercase tracking-[0.2em] mb-5">
-                Farm to Market, Direct
-              </p>
-              <h1 className="font-display text-grain leading-[1.05] tracking-tight mb-6" style={{ fontSize: 'clamp(38px, 6vw, 64px)' }}>
-                Fresh farm produce,<br />
-                <span className="italic text-turmeric">direct</span> from trusted farmers.
-              </h1>
-              <p className="text-grain/70 text-[16px] sm:text-[17px] leading-relaxed max-w-lg mb-9">
-                WEN connects farmers directly to buyers to ensure fresh produce, fair pricing, and faster delivery across communities.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/products" className="inline-flex items-center gap-2 bg-pepper text-grain text-[14px] font-medium px-5 py-3 rounded-full hover:bg-pepper-deep transition-colors">
-                  Browse Products <ArrowRight size={15} />
-                </Link>
-                <Link href="/farmers" className="inline-flex items-center gap-2 border border-grain/25 text-grain text-[14px] font-medium px-5 py-3 rounded-full hover:bg-grain/5 transition-colors">
-                  Become a Farmer
-                </Link>
-                <Link href="/buyers" className="inline-flex items-center gap-2 border border-grain/25 text-grain text-[14px] font-medium px-5 py-3 rounded-full hover:bg-grain/5 transition-colors">
-                  Become a Buyer
-                </Link>
+            <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-14 items-center">
+              <div className="max-w-2xl">
+                <p className="font-data text-[12px] text-turmeric uppercase tracking-[0.2em] mb-5">
+                  Farm to Market, Direct
+                </p>
+                <h1 className="font-display text-grain leading-[1.05] tracking-tight mb-6" style={{ fontSize: 'clamp(38px, 6vw, 64px)' }}>
+                  Fresh farm produce,<br />
+                  <span className="italic text-turmeric">direct</span> from trusted farmers.
+                </h1>
+                <p className="text-grain/70 text-[16px] sm:text-[17px] leading-relaxed max-w-lg mb-9">
+                  WEN connects farmers directly to buyers to ensure fresh produce, fair pricing, and faster delivery across communities.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/products" className="inline-flex items-center gap-2 bg-pepper text-grain text-[14px] font-medium px-5 py-3 rounded-full hover:bg-pepper-deep transition-colors">
+                    Browse Products <ArrowRight size={15} />
+                  </Link>
+                  <Link href="/farmers" className="inline-flex items-center gap-2 border border-grain/25 text-grain text-[14px] font-medium px-5 py-3 rounded-full hover:bg-grain/5 transition-colors">
+                    Become a Farmer
+                  </Link>
+                  <Link href="/buyers" className="inline-flex items-center gap-2 border border-grain/25 text-grain text-[14px] font-medium px-5 py-3 rounded-full hover:bg-grain/5 transition-colors">
+                    Become a Buyer
+                  </Link>
+                </div>
+              </div>
+
+              {/* Real produce photography — gives the hero something to "feel" beyond type+color */}
+              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-square">
+                <img
+                  src="https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
+                  alt="Fresh produce at market"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-soil/40 via-transparent to-transparent" />
               </div>
             </div>
 
-            {/* Market board — signature element: chalkboard price strip */}
+            {/* Market board — signature element: chalkboard price strip with thumbnails */}
             <div className="mt-16 sm:mt-20 border-t border-grain/10 pt-8">
               <p className="font-data text-[11px] text-grain/40 uppercase tracking-[0.2em] mb-4">Today at the market</p>
-              <div className="flex flex-wrap gap-x-8 gap-y-3">
+              <div className="flex flex-wrap gap-x-7 gap-y-4">
                 {CATEGORIES.map((c) => (
-                  <div key={c.name} className="flex items-baseline gap-2">
-                    <span className="font-display text-grain text-[16px]">{c.name}</span>
-                    <span className="font-data text-[12px] text-turmeric">{c.price}</span>
-                    <span className="font-data text-[11px] text-grain/40">{c.unit}</span>
+                  <div key={c.name} className="flex items-center gap-2.5">
+                    <img src={c.image} alt={c.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-display text-grain text-[15px]">{c.name}</span>
+                      <span className="font-data text-[12px] text-turmeric">{c.price}</span>
+                      <span className="font-data text-[11px] text-grain/40">{c.unit}</span>
+                    </div>
                   </div>
                 ))}
               </div>
