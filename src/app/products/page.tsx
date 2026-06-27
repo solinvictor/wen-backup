@@ -24,7 +24,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  vegetables: 'https://images.pexels.com/photos/162830/pexels-photo-162830.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  vegetables: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   grains: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   tubers: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   poultry: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
@@ -36,7 +36,7 @@ const FALLBACK_CATEGORIES = [
   {
     category: 'vegetables',
     items: ['Tomatoes', 'Pepper', 'Spinach', 'Okra'],
-    image: 'https://images.pexels.com/photos/162830/pexels-photo-162830.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    image: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   },
   {
     category: 'grains',
@@ -170,3 +170,4 @@ export default function ProductsPage() {
     </>
   )
 }
+
