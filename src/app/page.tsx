@@ -1,6 +1,11 @@
+'use client'
+
 import Link from 'next/link'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
+import SectionTransition from '@/components/landing/SectionTransition'
 import { ArrowRight, Leaf, Users, Truck, Scale, Recycle } from 'lucide-react'
 
 const CATEGORIES = [
@@ -16,14 +21,17 @@ const STEPS = [
   {
     title: 'Farmers list produce',
     body: 'Farmers upload available farm produce such as vegetables, grains, poultry, and more.',
+    image: 'https://images.pexels.com/photos/7728332/pexels-photo-7728332.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop',
   },
   {
     title: 'Buyers place orders',
     body: 'Households, restaurants, and businesses browse and order directly.',
+    image: 'https://images.pexels.com/photos/8476597/pexels-photo-8476597.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop',
   },
   {
     title: 'WEN coordinates delivery',
     body: 'We connect, confirm, and ensure smooth delivery from farm to buyer.',
+    image: 'https://images.pexels.com/photos/12725414/pexels-photo-12725414.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop',
   },
 ]
 
@@ -35,7 +43,54 @@ const WHY = [
   { icon: Truck, text: 'Reliable sourcing for homes and businesses' },
 ]
 
+function StepBlock({ step, index }: { step: typeof STEPS[number]; index: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start 0.8', 'start 0.3'],
+  })
+  const numberScale = useTransform(scrollYProgress, [0, 1], [0.7, 1])
+  const numberOpacity = useTransform(scrollYProgress, [0, 1], [0.15, 0.4])
+  const imgScale = useTransform(scrollYProgress, [0, 1], [1.08, 1])
+
+  const reversed = index % 2 === 1
+
+  return (
+    <div ref={ref} className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center py-16 sm:py-24 border-b border-soil/8 last:border-b-0">
+      <div className={reversed ? 'lg:order-2' : ''}>
+        <motion.p
+          className="font-data text-okra leading-none mb-5 select-none"
+          style={{ scale: numberScale, opacity: numberOpacity, fontSize: 'clamp(64px, 10vw, 120px)', transformOrigin: 'left center' }}
+        >
+          {String(index + 1).padStart(2, '0')}
+        </motion.p>
+        <h3 className="font-display text-soil text-2xl sm:text-3xl tracking-tight mb-3">{step.title}</h3>
+        <p className="text-stone text-[15px] sm:text-[16px] leading-relaxed max-w-md">{step.body}</p>
+      </div>
+      <div className={reversed ? 'lg:order-1' : ''}>
+        <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+          <motion.img
+            src={step.image}
+            alt={step.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ scale: imgScale }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function HomePage() {
+  const heroImgRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroImgRef,
+    offset: ['start start', 'end start'],
+  })
+  // Background drifts slower than the page scrolls — the classic parallax cue,
+  // applied only here in the hero where it earns its keep.
+  const heroImgY = useTransform(heroProgress, [0, 1], ['0%', '20%'])
+
   return (
     <>
       <Nav />
@@ -70,11 +125,12 @@ export default function HomePage() {
               </div>
 
               {/* Real produce photography — gives the hero something to "feel" beyond type+color */}
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-square">
-                <img
+              <div ref={heroImgRef} className="relative rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-square">
+                <motion.img
                   src="https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
                   alt="Fresh produce at market"
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-[130%] object-cover"
+                  style={{ y: heroImgY, top: '-15%' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-soil/40 via-transparent to-transparent" />
               </div>
@@ -99,39 +155,40 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── HOW IT WORKS ───────────────────────────────────────────── */}
-        <section className="bg-grain py-20 sm:py-28">
-          <div className="max-w-6xl mx-auto px-5 sm:px-8">
-            <h2 className="font-display text-soil text-3xl sm:text-4xl tracking-tight mb-12">How it works</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10">
-              {STEPS.map((step, i) => (
-                <div key={step.title}>
-                  <p className="font-data text-pepper text-[13px] mb-3">{String(i + 1).padStart(2, '0')}</p>
-                  <h3 className="font-display text-soil text-xl mb-2.5">{step.title}</h3>
-                  <p className="text-stone text-[14.5px] leading-relaxed">{step.body}</p>
-                </div>
-              ))}
+        {/* ── HOW IT WORKS — sequential scroll blocks, not a flat grid ── */}
+        <SectionTransition>
+          <section className="bg-grain py-16 sm:py-20">
+            <div className="max-w-6xl mx-auto px-5 sm:px-8">
+              <h2 className="font-display text-soil text-3xl sm:text-4xl tracking-tight mb-2">How it works</h2>
+              <p className="text-stone text-[15px] mb-4 max-w-md">Three steps, start to finish.</p>
+              <div>
+                {STEPS.map((step, i) => (
+                  <StepBlock key={step.title} step={step} index={i} />
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </SectionTransition>
 
         {/* ── WHY WEN ────────────────────────────────────────────────── */}
-        <section className="bg-grain-dim py-20 sm:py-28">
-          <div className="max-w-6xl mx-auto px-5 sm:px-8">
-            <h2 className="font-display text-soil text-3xl sm:text-4xl tracking-tight mb-3">Why WEN</h2>
-            <p className="text-stone text-[15px] mb-12 max-w-md">
-              Reduced food waste, fair pricing on both sides, and a direct line between farm and table.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
-              {WHY.map(({ icon: Icon, text }) => (
-                <div key={text} className="bg-grain rounded-2xl p-5 sm:p-6 border border-soil/8">
-                  <Icon size={20} className="text-okra mb-4" />
-                  <p className="text-soil text-[14px] sm:text-[15px] leading-snug">{text}</p>
-                </div>
-              ))}
+        <SectionTransition>
+          <section className="bg-grain-dim py-20 sm:py-28">
+            <div className="max-w-6xl mx-auto px-5 sm:px-8">
+              <h2 className="font-display text-soil text-3xl sm:text-4xl tracking-tight mb-3">Why WEN</h2>
+              <p className="text-stone text-[15px] mb-12 max-w-md">
+                Reduced food waste, fair pricing on both sides, and a direct line between farm and table.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+                {WHY.map(({ icon: Icon, text }) => (
+                  <div key={text} className="bg-grain rounded-2xl p-5 sm:p-6 border border-soil/8">
+                    <Icon size={20} className="text-okra mb-4" />
+                    <p className="text-soil text-[14px] sm:text-[15px] leading-snug">{text}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </SectionTransition>
 
         {/* ── CLOSING CTA ────────────────────────────────────────────── */}
         <section className="market-board py-20 sm:py-28">
@@ -158,4 +215,5 @@ export default function HomePage() {
     </>
   )
 }
+
 
