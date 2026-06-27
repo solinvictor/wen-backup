@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+:root {
+  /* Color tokens - "market board" palette */
+  --color-soil: #1A1410;       /* near-black, used for dark sections + primary text */
+  --color-grain: #F7F2E7;      /* unbleached sack/grain cream - base background */
+  --color-grain-dim: #EDE5D3;  /* slightly deeper cream for cards/dividers */
+  --color-pepper: #C7461A;     /* dried-pepper terracotta - primary accent, CTAs */
+  --color-pepper-deep: #A8380F;
+  --color-okra: #5B7345;       /* muted okra-leaf green - secondary accent, used sparingly */
+  --color-turmeric: #E8A33D;   /* palm-oil gold - highlights, badges */
+  --color-stone: #8A8073;      /* muted text on cream */
+}
+
+@theme inline {
+  --color-soil: var(--color-soil);
+  --color-grain: var(--color-grain);
+  --color-grain-dim: var(--color-grain-dim);
+  --color-pepper: var(--color-pepper);
+  --color-pepper-deep: var(--color-pepper-deep);
+  --color-okra: var(--color-okra);
+  --color-turmeric: var(--color-turmeric);
+  --color-stone: var(--color-stone);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  font-family: var(--font-body), sans-serif;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), serif;
+}
+
+.font-data {
+  font-family: var(--font-mono), monospace;
+}
+
+/* Chalkboard / market-board signature texture - subtle grain on dark panels */
+.market-board {
+  background-color: var(--color-soil);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.025) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 45%);
+}
