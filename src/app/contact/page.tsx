@@ -5,6 +5,11 @@ import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
 import { Check, Loader2, Phone, Mail, MapPin } from 'lucide-react'
 
+// TODO before demo: replace with WEN's real contact phone and email.
+// Currently shown as "Available on request" everywhere on this page.
+const CONTACT_PHONE = '' // e.g. '+234 800 000 0000'
+const CONTACT_EMAIL = '' // e.g. 'hello@wen.ng'
+
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
   const [submitting, setSubmitting] = useState(false)
@@ -50,11 +55,11 @@ export default function ContactPage() {
               <div className="space-y-4 mb-9">
                 <div className="flex items-center gap-3 text-soil/80 text-[14.5px]">
                   <Phone size={16} className="text-pepper" />
-                  <span>Available on request</span>
+                  <span>{CONTACT_PHONE || 'Available on request'}</span>
                 </div>
                 <div className="flex items-center gap-3 text-soil/80 text-[14.5px]">
                   <Mail size={16} className="text-pepper" />
-                  <span>Available on request</span>
+                  <span>{CONTACT_EMAIL || 'Available on request'}</span>
                 </div>
                 <div className="flex items-center gap-3 text-soil/80 text-[14.5px]">
                   <MapPin size={16} className="text-pepper" />
@@ -115,3 +120,4 @@ export default function ContactPage() {
     </>
   )
 }
+
