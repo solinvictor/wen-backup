@@ -35,7 +35,8 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#F7F2E7] text-[#1A1410]">{children}</body>
+      <body className="min-h-full flex flex-col bg-grain text-soil">{children}</body>
     </html>
   );
 }
+
