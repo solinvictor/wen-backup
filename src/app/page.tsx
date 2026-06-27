@@ -4,12 +4,12 @@ import { Footer } from '@/components/Footer'
 import { ArrowRight, Leaf, Users, Truck, Scale, Recycle } from 'lucide-react'
 
 const CATEGORIES = [
-  { name: 'Tomatoes', unit: 'per basket', price: '₦8,500', image: 'https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
-  { name: 'Yam', unit: 'per tuber', price: '₦1,200', image: 'https://images.pexels.com/photos/27567597/pexels-photo-27567597.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
-  { name: 'Catfish', unit: 'per kg', price: '₦2,800', image: 'https://images.pexels.com/photos/8827356/pexels-photo-8827356.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
-  { name: 'Rice', unit: 'per bag', price: '₦42,000', image: 'https://images.pexels.com/photos/5273080/pexels-photo-5273080.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
-  { name: 'Pepper', unit: 'per basket', price: '₦6,000', image: 'https://images.pexels.com/photos/37321079/pexels-photo-37321079.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
-  { name: 'Eggs', unit: 'per crate', price: '₦3,400', image: 'https://images.pexels.com/photos/8827287/pexels-photo-8827287.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Tomatoes', unit: 'per basket', price: '₦8,500', image: 'https://images.pexels.com/photos/162830/tomatoes-tomato-harvest-healthy-food-162830.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Yam', unit: 'per tuber', price: '₦1,200', image: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Catfish', unit: 'per kg', price: '₦2,800', image: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Rice', unit: 'per bag', price: '₦42,000', image: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Pepper', unit: 'per basket', price: '₦6,000', image: 'https://images.pexels.com/photos/4033324/pexels-photo-4033324.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
+  { name: 'Eggs', unit: 'per crate', price: '₦3,400', image: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
 ]
 
 const STEPS = [

@@ -24,11 +24,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  vegetables: 'https://images.pexels.com/photos/37321079/pexels-photo-37321079.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-  grains: 'https://images.pexels.com/photos/5273080/pexels-photo-5273080.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-  tubers: 'https://images.pexels.com/photos/27567597/pexels-photo-27567597.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-  poultry: 'https://images.pexels.com/photos/8827287/pexels-photo-8827287.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-  fish: 'https://images.pexels.com/photos/1363850/pexels-photo-1363850.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  vegetables: 'https://images.pexels.com/photos/162830/pexels-photo-162830.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  grains: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  tubers: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  poultry: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+  fish: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   other: 'https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
 }
 
@@ -36,27 +36,27 @@ const FALLBACK_CATEGORIES = [
   {
     category: 'vegetables',
     items: ['Tomatoes', 'Pepper', 'Spinach', 'Okra'],
-    image: 'https://images.pexels.com/photos/37321079/pexels-photo-37321079.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    image: 'https://images.pexels.com/photos/162830/pexels-photo-162830.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   },
   {
     category: 'grains',
     items: ['Rice', 'Beans', 'Maize'],
-    image: 'https://images.pexels.com/photos/5273080/pexels-photo-5273080.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    image: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   },
   {
     category: 'tubers',
     items: ['Yam', 'Cassava', 'Sweet Potato'],
-    image: 'https://images.pexels.com/photos/27567597/pexels-photo-27567597.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    image: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   },
   {
     category: 'poultry',
     items: ['Chicken', 'Eggs'],
-    image: 'https://images.pexels.com/photos/8827287/pexels-photo-8827287.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    image: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   },
   {
     category: 'fish',
     items: ['Catfish', 'Tilapia'],
-    image: 'https://images.pexels.com/photos/1363850/pexels-photo-1363850.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    image: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
   },
 ]
 
