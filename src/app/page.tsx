@@ -252,15 +252,19 @@ function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>(FALLBACK)
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('products')
-      .select('id, name, category, unit, is_available')
-      .eq('is_available', true)
-      .limit(8)
-      .then(({ data }) => {
-        if (data && data.length > 0) setProducts(data as Product[])
-      })
+    try {
+      const supabase = createClient()
+      supabase
+        .from('products')
+        .select('id, name, category, unit, is_available')
+        .eq('is_available', true)
+        .limit(8)
+        .then(({ data }) => {
+          if (data && data.length > 0) setProducts(data as Product[])
+        }, () => {}) // silent — fallback already showing
+    } catch {
+      // env vars not set — fallback already in state
+    }
   }, [])
 
   return (
