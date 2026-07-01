@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
-import { Plus, Minus, ShoppingBasket, X, Check, Loader2, ArrowLeft } from 'lucide-react'
+import { Plus, Minus, ShoppingBasket, X, Check, Loader2, ArrowLeft, Search } from 'lucide-react'
 
 interface Product {
   id: string
@@ -74,6 +74,7 @@ export default function ProductsPage() {
   const [form, setForm] = useState({ fullName: '', phoneNumber: '', location: '', buyerType: 'household', notes: '' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -102,12 +103,15 @@ export default function ProductsPage() {
   }, [])
 
   const grouped = useMemo(() => {
-    return products.reduce<Record<string, Product[]>>((acc, p) => {
+    const filtered = query.trim()
+      ? products.filter(p => p.name.toLowerCase().includes(query.trim().toLowerCase()))
+      : products
+    return filtered.reduce<Record<string, Product[]>>((acc, p) => {
       acc[p.category] = acc[p.category] || []
       acc[p.category].push(p)
       return acc
     }, {})
-  }, [products])
+  }, [products, query])
 
   const cartLines = Object.values(cart)
   const cartCount = cartLines.reduce((sum, l) => sum + l.quantity, 0)
@@ -196,6 +200,16 @@ export default function ProductsPage() {
                 Showing typical categories — live availability updates as farmers list produce.
               </p>
             )}
+
+            <div className="relative mt-7 max-w-sm">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone/50" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search produce, e.g. tomatoes"
+                className="w-full bg-grain-dim border border-soil/10 rounded-full pl-11 pr-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors"
+              />
+            </div>
           </div>
         </section>
 
@@ -203,6 +217,10 @@ export default function ProductsPage() {
           <div className="max-w-5xl mx-auto px-5 sm:px-8">
             {loading ? (
               <p className="text-stone text-[14px]">Loading...</p>
+            ) : Object.keys(grouped).length === 0 ? (
+              <p className="text-stone text-[14px] py-8 text-center">
+                No produce matching "{query}". Try a different search.
+              </p>
             ) : (
               <div className="space-y-12">
                 {Object.entries(grouped).map(([category, items]) => (
