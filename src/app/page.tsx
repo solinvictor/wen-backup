@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
-import { ArrowRight, MapPin, Plus, Leaf, Users, Truck, ShieldCheck } from 'lucide-react'
+import { ArrowRight, MapPin, Plus, Leaf, Users, Truck, ShieldCheck, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -19,22 +19,26 @@ interface Product {
 
 // ── Data ──────────────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { key: 'vegetables', label: 'Vegetables',  image: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { key: 'tubers',     label: 'Tubers',      image: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { key: 'grains',     label: 'Grains',      image: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { key: 'fish',       label: 'Fish',        image: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { key: 'poultry',    label: 'Poultry',     image: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { key: 'vegetables', label: 'Vegetables', image: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { key: 'tubers',     label: 'Tubers',     image: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { key: 'grains',     label: 'Grains',     image: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { key: 'fish',       label: 'Fish',       image: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { key: 'poultry',    label: 'Poultry',    image: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
 ]
 
+const CATEGORY_IMAGE: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map(c => [c.key, c.image])
+)
+
 const FALLBACK: Product[] = [
-  { id: 'f1', name: 'Tomatoes',    category: 'vegetables', unit: 'per basket', is_available: true },
-  { id: 'f2', name: 'Yam',         category: 'tubers',     unit: 'per tuber',  is_available: true },
-  { id: 'f3', name: 'Catfish',     category: 'fish',       unit: 'per kg',     is_available: true },
-  { id: 'f4', name: 'Rice',        category: 'grains',     unit: 'per bag',    is_available: true },
-  { id: 'f5', name: 'Chicken',     category: 'poultry',    unit: 'per bird',   is_available: true },
-  { id: 'f6', name: 'Spinach',     category: 'vegetables', unit: 'per bunch',  is_available: true },
-  { id: 'f7', name: 'Cassava',     category: 'tubers',     unit: 'per bag',    is_available: true },
-  { id: 'f8', name: 'Tilapia',     category: 'fish',       unit: 'per kg',     is_available: true },
+  { id: 'f1', name: 'Tomatoes',  category: 'vegetables', unit: 'per basket', is_available: true },
+  { id: 'f2', name: 'Yam',       category: 'tubers',     unit: 'per tuber',  is_available: true },
+  { id: 'f3', name: 'Catfish',   category: 'fish',       unit: 'per kg',     is_available: true },
+  { id: 'f4', name: 'Rice',      category: 'grains',     unit: 'per bag',    is_available: true },
+  { id: 'f5', name: 'Chicken',   category: 'poultry',    unit: 'per bird',   is_available: true },
+  { id: 'f6', name: 'Spinach',   category: 'vegetables', unit: 'per bunch',  is_available: true },
+  { id: 'f7', name: 'Cassava',   category: 'tubers',     unit: 'per bag',    is_available: true },
+  { id: 'f8', name: 'Tilapia',   category: 'fish',       unit: 'per kg',     is_available: true },
 ]
 
 const HOW = [
@@ -45,19 +49,40 @@ const HOW = [
   },
   {
     title: 'You build a list',
-    body:  'Tell us what you need. No upfront price haggling — just add items and quantities.',
+    body:  'Tell us what you need. No upfront price haggling — add items and quantities, nothing more.',
     image: 'https://images.pexels.com/photos/8476597/pexels-photo-8476597.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&fit=crop',
   },
   {
     title: 'WEN matches and delivers',
-    body:  'We match your list with a verified farmer nearby, confirm pricing, and coordinate delivery to your door.',
+    body:  'We match your list with a verified nearby farmer, confirm pricing, and coordinate delivery.',
     image: 'https://images.pexels.com/photos/12725414/pexels-photo-12725414.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&fit=crop',
   },
 ]
 
-const CATEGORY_IMAGE: Record<string, string> = Object.fromEntries(
-  CATEGORIES.map(c => [c.key, c.image])
-)
+const STATS = [
+  { value: '200+', label: 'Verified farmers' },
+  { value: '5,000+', label: 'Orders delivered' },
+  { value: '12',   label: 'States covered' },
+  { value: '98%',  label: 'On-time delivery' },
+]
+
+const TESTIMONIALS = [
+  {
+    quote: 'I used to spend hours at the market every week. Now I build a list on WEN and the produce arrives at my door, fresher than anything I\'d find myself.',
+    name: 'Amaka O.',
+    role: 'Household buyer, Abuja',
+  },
+  {
+    quote: 'Before WEN, middlemen took more than half my earnings. Now I list directly and keep what my produce is actually worth.',
+    name: 'Musa D.',
+    role: 'Tomato farmer, Kaduna',
+  },
+  {
+    quote: 'We supply a restaurant and WEN has never missed a delivery. The consistency and quality is something we couldn\'t get from the open market.',
+    name: 'Chidinma E.',
+    role: 'Restaurant buyer, Lagos',
+  },
+]
 
 // ── Hero ──────────────────────────────────────────────────────────────────
 function Hero() {
@@ -72,7 +97,6 @@ function Hero() {
 
   return (
     <section className="market-board relative overflow-hidden">
-      {/* Background image */}
       <div className="absolute inset-0 z-0">
         <img
           src="https://images.pexels.com/photos/1367242/pexels-photo-1367242.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
@@ -98,36 +122,62 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.07 }}
           className="font-display text-grain leading-[1.06] tracking-tight mb-8"
-          style={{ fontSize: 'clamp(36px, 6vw, 64px)' }}
+          style={{ fontSize: 'clamp(34px, 6vw, 64px)' }}
         >
           Fresh produce,<br />
           <em className="text-turmeric not-italic">straight from the farm.</em>
         </motion.h1>
 
-        {/* Location input */}
+        {/* Location input — stacks on mobile, inline on sm+ */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.14 }}
-          className="flex items-center gap-0 max-w-lg mx-auto bg-grain rounded-full overflow-hidden shadow-lg border border-soil/10"
+          className="max-w-lg mx-auto"
         >
-          <div className="flex items-center gap-2 pl-4 sm:pl-5 shrink-0">
-            <MapPin size={15} className="text-pepper shrink-0" />
+          {/* Mobile: stacked */}
+          <div className="flex flex-col gap-2 sm:hidden">
+            <div className="flex items-center bg-grain rounded-full overflow-hidden shadow-lg border border-soil/10">
+              <div className="flex items-center pl-4 shrink-0">
+                <MapPin size={15} className="text-pepper" />
+              </div>
+              <input
+                type="text"
+                value={location}
+                onChange={e => setLocation(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleGo()}
+                placeholder="Your delivery location"
+                className="flex-1 px-3 py-3.5 text-[14px] text-soil placeholder:text-stone/60 bg-transparent outline-none min-w-0"
+              />
+            </div>
+            <button
+              onClick={handleGo}
+              className="w-full bg-pepper hover:bg-pepper-deep transition-colors text-grain text-[14px] font-medium py-3.5 rounded-full"
+            >
+              Browse produce
+            </button>
           </div>
-          <input
-            type="text"
-            value={location}
-            onChange={e => setLocation(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleGo()}
-            placeholder="Enter your delivery location"
-            className="flex-1 px-3 py-3.5 sm:py-4 text-[14px] text-soil placeholder:text-stone/60 bg-transparent outline-none"
-          />
-          <button
-            onClick={handleGo}
-            className="bg-pepper hover:bg-pepper-deep transition-colors text-grain text-[13.5px] font-medium px-5 sm:px-6 py-3.5 sm:py-4 rounded-full m-1 whitespace-nowrap"
-          >
-            Browse produce
-          </button>
+
+          {/* Desktop: inline pill */}
+          <div className="hidden sm:flex items-center bg-grain rounded-full overflow-hidden shadow-lg border border-soil/10">
+            <div className="flex items-center pl-5 shrink-0">
+              <MapPin size={15} className="text-pepper" />
+            </div>
+            <input
+              type="text"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleGo()}
+              placeholder="Enter your delivery location"
+              className="flex-1 px-3 py-4 text-[14px] text-soil placeholder:text-stone/60 bg-transparent outline-none"
+            />
+            <button
+              onClick={handleGo}
+              className="bg-pepper hover:bg-pepper-deep transition-colors text-grain text-[13.5px] font-medium px-6 py-4 rounded-full m-1 whitespace-nowrap"
+            >
+              Browse produce
+            </button>
+          </div>
         </motion.div>
 
         {/* Trust row */}
@@ -135,7 +185,7 @@ function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex flex-wrap justify-center gap-x-7 gap-y-2 mt-9"
+          className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-9"
         >
           {[
             { icon: Leaf,        text: 'Farm fresh, always' },
@@ -157,53 +207,97 @@ function Hero() {
 // ── Category strip ────────────────────────────────────────────────────────
 function CategoryStrip() {
   return (
-    <section className="bg-grain border-b border-soil/8 py-5 sm:py-6">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+    <section className="bg-grain border-b border-soil/8">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-6 sm:py-8">
+        <div className="flex items-center justify-between mb-5">
+          <p className="font-data text-[10.5px] text-stone uppercase tracking-[0.18em]">Shop by category</p>
+          <Link
+            href="/products"
+            className="font-data text-[10.5px] text-pepper uppercase tracking-[0.14em] hover:text-pepper-deep transition-colors flex items-center gap-1"
+          >
+            All produce <ArrowRight size={11} />
+          </Link>
+        </div>
+
         <div
-          className="flex gap-3 overflow-x-auto pb-1"
+          className="flex gap-2 sm:gap-3 overflow-x-auto pb-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {CATEGORIES.map((cat, i) => (
             <motion.div
               key={cat.key}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: i * 0.05 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.06 }}
+              className="shrink-0"
             >
               <Link
                 href={`/products?category=${cat.key}`}
-                className="group flex flex-col items-center gap-2 shrink-0 w-[72px] sm:w-[84px]"
+                className="group relative block rounded-2xl overflow-hidden border border-soil/8 hover:border-pepper/40 hover:shadow-lg transition-all duration-300"
+                style={{ width: 130, height: 90 }}
               >
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-soil/8 group-hover:border-pepper/50 transition-colors">
-                  <img
-                    src={cat.image}
-                    alt={cat.label}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                <img
+                  src={cat.image}
+                  alt={cat.label}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-soil/75 via-soil/20 to-transparent" />
+                {/* Label */}
+                <div className="absolute bottom-0 left-0 right-0 px-3 pb-2.5">
+                  <p className="text-grain text-[12.5px] font-semibold leading-tight drop-shadow-sm">
+                    {cat.label}
+                  </p>
                 </div>
-                <span className="text-[11.5px] text-stone group-hover:text-soil transition-colors text-center leading-tight font-medium">
-                  {cat.label}
-                </span>
               </Link>
             </motion.div>
           ))}
+
+          {/* See all card */}
           <motion.div
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: CATEGORIES.length * 0.05 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: CATEGORIES.length * 0.06 }}
+            className="shrink-0"
           >
             <Link
               href="/products"
-              className="group flex flex-col items-center gap-2 shrink-0 w-[72px] sm:w-[84px]"
+              className="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-soil/20 hover:border-pepper/40 bg-grain-dim hover:bg-grain transition-all duration-300 gap-2"
+              style={{ width: 130, height: 90 }}
             >
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-dashed border-soil/20 group-hover:border-pepper/50 bg-grain-dim transition-colors flex items-center justify-center">
-                <ArrowRight size={16} className="text-stone group-hover:text-pepper transition-colors" />
+              <div className="w-7 h-7 rounded-full bg-soil/5 group-hover:bg-pepper/10 flex items-center justify-center transition-colors">
+                <ArrowRight size={14} className="text-stone group-hover:text-pepper transition-colors" />
               </div>
-              <span className="text-[11.5px] text-stone group-hover:text-soil transition-colors text-center leading-tight font-medium">
+              <span className="text-[12px] font-medium text-stone group-hover:text-soil transition-colors">
                 See all
               </span>
             </Link>
           </motion.div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ── Stats strip ───────────────────────────────────────────────────────────
+function StatsStrip() {
+  return (
+    <section className="bg-grain-dim border-b border-soil/8 py-10 sm:py-12">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-soil/10 rounded-2xl overflow-hidden">
+          {STATS.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.35, delay: i * 0.06 }}
+              className="bg-grain-dim px-6 py-7 sm:py-8 text-center"
+            >
+              <p className="font-display text-soil text-3xl sm:text-4xl tracking-tight mb-1">{stat.value}</p>
+              <p className="font-data text-[10.5px] text-stone uppercase tracking-[0.16em]">{stat.label}</p>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
@@ -223,7 +317,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
     >
       <Link
         href={`/products?category=${product.category}`}
-        className="group block bg-grain rounded-xl border border-soil/8 hover:border-pepper/30 hover:shadow-md transition-all duration-300 overflow-hidden"
+        className="group block bg-grain rounded-2xl border border-soil/8 hover:border-pepper/30 hover:shadow-md transition-all duration-300 overflow-hidden"
       >
         <div className="aspect-[4/3] overflow-hidden bg-grain-dim relative">
           <img
@@ -231,15 +325,14 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          {/* Add button overlay */}
-          <div className="absolute bottom-2 right-2 w-7 h-7 bg-pepper rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute bottom-2.5 right-2.5 w-7 h-7 bg-pepper rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <Plus size={13} className="text-grain" strokeWidth={2.5} />
           </div>
         </div>
-        <div className="px-3 py-2.5">
-          <p className="text-soil text-[13.5px] font-medium leading-tight truncate">{product.name}</p>
+        <div className="px-3.5 py-3">
+          <p className="text-soil text-[13.5px] font-semibold leading-tight truncate">{product.name}</p>
           {product.unit && (
-            <p className="font-data text-[10.5px] text-stone/70 mt-0.5 uppercase tracking-wide">{product.unit}</p>
+            <p className="font-data text-[10.5px] text-stone/70 mt-1 uppercase tracking-wide">{product.unit}</p>
           )}
         </div>
       </Link>
@@ -261,16 +354,16 @@ function FeaturedProducts() {
         .limit(8)
         .then(({ data }) => {
           if (data && data.length > 0) setProducts(data as Product[])
-        }, () => {}) // silent — fallback already showing
+        }, () => {})
     } catch {
-      // env vars not set — fallback already in state
+      // env vars not set — fallback showing
     }
   }, [])
 
   return (
     <section className="bg-grain py-12 sm:py-16">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
-        <div className="flex items-center justify-between mb-7">
+        <div className="flex items-end justify-between mb-7">
           <div>
             <p className="font-data text-[10.5px] text-pepper uppercase tracking-[0.2em] mb-1.5">Available now</p>
             <h2 className="font-display text-soil text-2xl sm:text-3xl tracking-tight">What farmers have today</h2>
@@ -289,12 +382,12 @@ function FeaturedProducts() {
           ))}
         </div>
 
-        <div className="mt-7 text-center sm:hidden">
+        <div className="mt-7 sm:hidden">
           <Link
             href="/products"
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-pepper"
+            className="flex items-center justify-center gap-1.5 w-full border border-soil/12 text-[13.5px] font-medium text-soil py-3.5 rounded-full hover:bg-grain-dim transition-colors"
           >
-            See everything <ArrowRight size={13} />
+            See all produce <ArrowRight size={13} />
           </Link>
         </div>
       </div>
@@ -307,7 +400,6 @@ function HowItWorks() {
   return (
     <section className="bg-grain-dim py-14 sm:py-20 border-t border-soil/8">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
-
         <div className="mb-10 sm:mb-14">
           <p className="font-data text-[10.5px] text-pepper uppercase tracking-[0.2em] mb-2">How it works</p>
           <h2 className="font-display text-soil text-3xl sm:text-4xl tracking-tight">Three steps, farm to door</h2>
@@ -324,11 +416,7 @@ function HowItWorks() {
               className="bg-grain p-7 sm:p-9 flex flex-col gap-5"
             >
               <div className="aspect-[16/9] rounded-xl overflow-hidden">
-                <img
-                  src={step.image}
-                  alt={step.title}
-                  className="w-full h-full object-cover"
-                />
+                <img src={step.image} alt={step.title} className="w-full h-full object-cover" />
               </div>
               <div>
                 <span className="font-data text-[10px] text-pepper/70 uppercase tracking-[0.2em]">
@@ -347,10 +435,51 @@ function HowItWorks() {
   )
 }
 
+// ── Testimonials ──────────────────────────────────────────────────────────
+function Testimonials() {
+  return (
+    <section className="bg-grain border-t border-soil/8 py-14 sm:py-20">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+        <div className="mb-10 sm:mb-14">
+          <p className="font-data text-[10.5px] text-pepper uppercase tracking-[0.2em] mb-2">Real people</p>
+          <h2 className="font-display text-soil text-3xl sm:text-4xl tracking-tight">What they're saying</h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {TESTIMONIALS.map((t, i) => (
+            <motion.div
+              key={t.name}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className="bg-grain-dim rounded-2xl p-7 sm:p-8 border border-soil/8 flex flex-col gap-5"
+            >
+              {/* Stars */}
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <Star key={j} size={12} className="text-pepper fill-pepper" />
+                ))}
+              </div>
+              <p className="text-soil text-[14.5px] leading-relaxed flex-1">
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <div className="border-t border-soil/8 pt-4">
+                <p className="text-soil text-[13px] font-semibold">{t.name}</p>
+                <p className="font-data text-[10.5px] text-stone uppercase tracking-[0.14em] mt-0.5">{t.role}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ── Dual CTA ──────────────────────────────────────────────────────────────
 function DualCTA() {
   return (
-    <section className="bg-grain py-14 sm:py-20 border-t border-soil/8">
+    <section className="bg-grain-dim py-14 sm:py-20 border-t border-soil/8">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
@@ -362,7 +491,6 @@ function DualCTA() {
             transition={{ duration: 0.45 }}
             className="market-board rounded-2xl p-8 sm:p-10 relative overflow-hidden"
           >
-            {/* Background image */}
             <div className="absolute inset-0 z-0">
               <img
                 src="https://images.pexels.com/photos/7728332/pexels-photo-7728332.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
@@ -373,10 +501,7 @@ function DualCTA() {
             </div>
             <div className="relative z-10">
               <p className="font-data text-[10.5px] text-turmeric uppercase tracking-[0.2em] mb-4">For farmers</p>
-              <h3
-                className="font-display text-grain tracking-tight leading-snug mb-4"
-                style={{ fontSize: 'clamp(22px, 3vw, 30px)' }}
-              >
+              <h3 className="font-display text-grain tracking-tight leading-snug mb-4" style={{ fontSize: 'clamp(22px, 3vw, 30px)' }}>
                 Sell direct.<br />
                 <em className="text-turmeric not-italic">Keep more.</em>
               </h3>
@@ -398,7 +523,7 @@ function DualCTA() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45, delay: 0.08 }}
-            className="bg-grain-dim rounded-2xl p-8 sm:p-10 border border-soil/8 relative overflow-hidden"
+            className="bg-grain rounded-2xl p-8 sm:p-10 border border-soil/8 relative overflow-hidden"
           >
             <div className="absolute inset-0 z-0">
               <img
@@ -410,10 +535,7 @@ function DualCTA() {
             </div>
             <div className="relative z-10">
               <p className="font-data text-[10.5px] text-pepper uppercase tracking-[0.2em] mb-4">For buyers</p>
-              <h3
-                className="font-display text-soil tracking-tight leading-snug mb-4"
-                style={{ fontSize: 'clamp(22px, 3vw, 30px)' }}
-              >
+              <h3 className="font-display text-soil tracking-tight leading-snug mb-4" style={{ fontSize: 'clamp(22px, 3vw, 30px)' }}>
                 Fresh produce.<br />
                 <em className="text-pepper not-italic">Fair prices.</em>
               </h3>
@@ -443,8 +565,10 @@ export default function HomePage() {
       <main className="flex-1">
         <Hero />
         <CategoryStrip />
+        <StatsStrip />
         <FeaturedProducts />
         <HowItWorks />
+        <Testimonials />
         <DualCTA />
       </main>
       <Footer />
