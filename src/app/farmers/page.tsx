@@ -45,7 +45,18 @@ export default function FarmersPage() {
     <>
       <Nav />
       <main className="flex-1">
-        <section className="market-board py-20 sm:py-28">
+        <section className="market-board py-20 sm:py-28 relative overflow-hidden">
+          {/* Hero background — farmer in field */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="https://images.pexels.com/photos/7728332/pexels-photo-7728332.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
+              alt=""
+              aria-hidden
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-soil/78" />
+          </div>
+          <div className="relative z-10 w-full">
           <div className="max-w-5xl mx-auto px-5 sm:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
 
             <div>
@@ -119,6 +130,7 @@ export default function FarmersPage() {
               )}
             </div>
 
+          </div>
           </div>
         </section>
       </main>
