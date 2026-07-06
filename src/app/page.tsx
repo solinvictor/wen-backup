@@ -85,12 +85,14 @@ function Hero() {
       {/* Hero background image */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
+          src="https://images.pexels.com/photos/2252584/pexels-photo-2252584.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
           alt=""
           aria-hidden
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-white/82" />
+        {/* layered overlay: deep green base + warm gradient so text is readable but image breathes */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(15,41,64,0.72) 0%, rgba(44,90,32,0.55) 50%, rgba(139,195,74,0.28) 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 100%)' }} />
       </div>
       <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 pt-10 pb-8 sm:pt-14 sm:pb-12">
 
@@ -99,7 +101,7 @@ function Hero() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="text-[12px] font-semibold text-pepper uppercase tracking-[0.18em] mb-3"
+          className="text-[12px] font-semibold text-green-300 uppercase tracking-[0.18em] mb-3"
         >
           Farm fresh · delivered fast
         </motion.p>
@@ -109,11 +111,11 @@ function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.06 }}
-          className="font-display text-soil leading-[1.08] tracking-tight mb-6"
+          className="font-display text-white leading-[1.08] tracking-tight mb-6"
           style={{ fontSize: 'clamp(32px, 5.5vw, 58px)' }}
         >
           Fresh produce,<br />
-          <span className="text-pepper">straight from the farm.</span>
+          <span className="text-green-300">straight from the farm.</span>
         </motion.h1>
 
         {/* Search bar — Instacart-style */}
@@ -155,9 +157,9 @@ function Hero() {
             { icon: ShieldCheck, text: 'Verified farmers' },
             { icon: Truck,       text: 'Fast logistics' },
           ].map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-1.5 bg-grain-dim rounded-full px-3 py-1.5">
-              <Icon size={12} className="text-pepper" />
-              <span className="text-[12px] font-medium text-stone">{text}</span>
+            <div key={text} className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1.5">
+              <Icon size={12} className="text-green-300" />
+              <span className="text-[12px] font-medium text-white/85">{text}</span>
             </div>
           ))}
         </motion.div>
@@ -442,3 +444,4 @@ export default function HomePage() {
     </>
   )
 }
+
