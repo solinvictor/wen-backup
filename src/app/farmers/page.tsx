@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { validateName, validatePhone, validateLocation, validateText, type FieldError } from '@/lib/validate'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
 import { Check, Loader2 } from 'lucide-react'
@@ -20,10 +21,22 @@ export default function FarmersPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<FieldError>({})
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    const errs: FieldError = {}
+    const nameErr = validateName(form.fullName)
+    const phoneErr = validatePhone(form.phoneNumber)
+    const locationErr = validateLocation(form.location)
+    const produceErr = validateText(form.produceType, 'Type of produce')
+    if (nameErr) errs.fullName = nameErr
+    if (phoneErr) errs.phoneNumber = phoneErr
+    if (locationErr) errs.location = locationErr
+    if (produceErr) errs.produceType = produceErr
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/farmers', {
@@ -91,24 +104,28 @@ export default function FarmersPage() {
                   <div>
                     <label className="block text-[13px] font-medium text-soil mb-1.5">Full Name</label>
                     <input required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                      className="w-full border border-soil/15 rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-pepper transition-colors bg-white" />
+                      className={`w-full border rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-pepper transition-colors bg-white ${fieldErrors.fullName ? "border-red-400" : "border-soil/15"}`} />
+                    {fieldErrors.fullName && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.fullName}</p>}
                   </div>
                   <div>
                     <label className="block text-[13px] font-medium text-soil mb-1.5">Phone Number</label>
                     <input required type="tel" value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
-                      className="w-full border border-soil/15 rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-pepper transition-colors bg-white" />
+                      className={`w-full border rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-pepper transition-colors bg-white ${fieldErrors.phoneNumber ? "border-red-400" : "border-soil/15"}`} />
+                    {fieldErrors.phoneNumber && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.phoneNumber}</p>}
                   </div>
                   <div>
                     <label className="block text-[13px] font-medium text-soil mb-1.5">Location</label>
                     <input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
                       placeholder="e.g. Gwagwalada, Abuja"
-                      className="w-full border border-soil/15 rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-pepper transition-colors bg-white" />
+                      className={`w-full border rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-pepper transition-colors bg-white ${fieldErrors.location ? "border-red-400" : "border-soil/15"}`} />
+                    {fieldErrors.location && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.location}</p>}
                   </div>
                   <div>
                     <label className="block text-[13px] font-medium text-soil mb-1.5">Type of Produce</label>
                     <input required value={form.produceType} onChange={(e) => setForm({ ...form, produceType: e.target.value })}
                       placeholder="e.g. Tomatoes, Yam, Catfish"
-                      className="w-full border border-soil/15 rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-pepper transition-colors bg-white" />
+                      className={`w-full border rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-pepper transition-colors bg-white ${fieldErrors.produceType ? "border-red-400" : "border-soil/15"}`} />
+                    {fieldErrors.produceType && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.produceType}</p>}
                   </div>
                   <div>
                     <label className="block text-[13px] font-medium text-soil mb-1.5">Estimated Quantity Available</label>
@@ -138,3 +155,4 @@ export default function FarmersPage() {
     </>
   )
 }
+
