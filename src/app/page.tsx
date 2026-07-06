@@ -81,8 +81,18 @@ function Hero() {
   }
 
   return (
-    <section className="bg-grain border-b border-soil/8">
-      <div className="max-w-5xl mx-auto px-5 sm:px-8 pt-10 pb-8 sm:pt-14 sm:pb-12">
+    <section className="relative bg-grain border-b border-soil/8 overflow-hidden">
+      {/* Hero background image */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
+          alt=""
+          aria-hidden
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-white/82" />
+      </div>
+      <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 pt-10 pb-8 sm:pt-14 sm:pb-12">
 
         {/* Eyebrow */}
         <motion.p
