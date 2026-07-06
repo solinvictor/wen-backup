@@ -262,13 +262,20 @@ export default function ProductsPage() {
                   <button
                     key={cat}
                     onClick={() => scrollToCategory(cat)}
-                    className={`flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-full text-[13px] font-medium transition-all ${
+                    className={`flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-full text-[13px] font-medium transition-all ${
                       activeCategory === cat
                         ? 'bg-soil text-grain shadow-sm'
                         : 'bg-grain-dim text-stone border border-soil/10 hover:border-soil/20'
                     }`}
                   >
-                    <span>{CATEGORY_EMOJI[cat] || '🛒'}</span>
+                    <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 border border-soil/10">
+                      <img
+                        src={CATEGORY_IMAGES[cat] || CATEGORY_IMAGES.other}
+                        alt=""
+                        aria-hidden
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <span>{CATEGORY_LABELS[cat] || cat}</span>
                   </button>
                 ))}
@@ -298,8 +305,15 @@ export default function ProductsPage() {
                     className="scroll-mt-24"
                   >
                     {/* Category header */}
-                    <div className="flex items-center gap-2 mb-5">
-                      <span className="text-2xl">{CATEGORY_EMOJI[category] || '🛒'}</span>
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-9 h-9 rounded-xl overflow-hidden border border-soil/10 shrink-0">
+                        <img
+                          src={CATEGORY_IMAGES[category] || CATEGORY_IMAGES.other}
+                          alt=""
+                          aria-hidden
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <h2 className="font-display text-soil text-xl">{CATEGORY_LABELS[category] || category}</h2>
                       <span className="font-data text-[11px] text-stone/50 ml-1">{items.length} items</span>
                     </div>
