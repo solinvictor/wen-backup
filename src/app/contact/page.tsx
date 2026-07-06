@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { validateName, validatePhone, validateEmail, validateMessage, type FieldError } from '@/lib/validate'
 import { motion } from 'framer-motion'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
@@ -45,10 +46,22 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<FieldError>({})
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    const errs: FieldError = {}
+    const nameErr = validateName(form.name)
+    const phoneErr = form.phone ? validatePhone(form.phone) : null
+    const emailErr = validateEmail(form.email)
+    const messageErr = validateMessage(form.message)
+    if (nameErr) errs.name = nameErr
+    if (phoneErr) errs.phone = phoneErr
+    if (emailErr) errs.email = emailErr
+    if (messageErr) errs.message = messageErr
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/contact', {
@@ -249,8 +262,9 @@ export default function ContactPage() {
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
                         placeholder="Your full name"
-                        className="w-full border border-soil/12 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-pepper focus:ring-2 focus:ring-pepper/10 transition-all bg-grain-dim placeholder:text-stone/35"
+                        className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 transition-all bg-grain-dim placeholder:text-stone/35 ${fieldErrors.name ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-soil/12 focus:border-pepper focus:ring-pepper/10'}`}
                       />
+                      {fieldErrors.name && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.name}</p>}
                     </div>
                     <div>
                       <label className="block text-[12px] font-semibold text-soil uppercase tracking-wide mb-1.5">Phone</label>
@@ -285,8 +299,9 @@ export default function ContactPage() {
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                       placeholder="Tell us what's on your mind..."
-                      className="w-full border border-soil/12 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-pepper focus:ring-2 focus:ring-pepper/10 transition-all resize-none bg-grain-dim placeholder:text-stone/35"
+                      className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 transition-all resize-none bg-grain-dim placeholder:text-stone/35 ${fieldErrors.message ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-soil/12 focus:border-pepper focus:ring-pepper/10'}`}
                     />
+                    {fieldErrors.message && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.message}</p>}
                   </div>
 
                   {error && (
@@ -315,3 +330,4 @@ export default function ContactPage() {
     </>
   )
 }
+
