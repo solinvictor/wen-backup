@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
-import { ArrowRight, MapPin, Plus, Leaf, Users, Truck, ShieldCheck, Star } from 'lucide-react'
+import { ArrowRight, MapPin, Plus, Leaf, Users, Truck, ShieldCheck, Star, Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -96,131 +96,93 @@ function Hero() {
   }
 
   return (
-    <section className="market-board relative overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.pexels.com/photos/1367242/pexels-photo-1367242.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
-          alt=""
-          aria-hidden
-          className="w-full h-full object-cover opacity-20"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-soil/60 via-soil/50 to-soil/80" />
-      </div>
-
-      <div className="relative z-10 max-w-3xl mx-auto px-5 sm:px-8 pt-20 pb-20 sm:pt-28 sm:pb-28 text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="font-data text-[11px] text-turmeric uppercase tracking-[0.22em] mb-5"
-        >
-          Farm to your door
-        </motion.p>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.07 }}
-          className="font-display text-grain leading-[1.06] tracking-tight mb-8"
-          style={{ fontSize: 'clamp(34px, 6vw, 64px)' }}
-        >
-          Fresh produce,<br />
-          <em className="text-turmeric not-italic">straight from the farm.</em>
-        </motion.h1>
-
-        {/* Location input — stacks on mobile, inline on sm+ */}
+    <section className="bg-grain pt-8 pb-12 sm:pt-12 sm:pb-16">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.14 }}
-          className="max-w-lg mx-auto"
+          transition={{ duration: 0.5 }}
+          className="mb-8 sm:mb-10"
         >
-          {/* Mobile: stacked */}
-          <div className="flex flex-col gap-2 sm:hidden">
-            <div className="flex items-center bg-grain rounded-full overflow-hidden shadow-lg border border-soil/10">
-              <div className="flex items-center pl-4 shrink-0">
-                <MapPin size={15} className="text-pepper" />
-              </div>
+          <h1 className="font-display text-4xl sm:text-5xl text-soil mb-3 leading-tight">
+            Fresh produce,<br />
+            <span className="text-pepper">straight from the farm.</span>
+          </h1>
+          <p className="text-stone text-lg max-w-lg">Farm to your door. Fresh, fair, fast.</p>
+        </motion.div>
+
+        {/* Search bar - Instacart style */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="max-w-2xl"
+        >
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 flex items-center bg-grain-dim rounded-lg border-2 border-soil/10 focus-within:border-pepper transition-colors px-4 py-3.5">
+              <MapPin size={18} className="text-stone shrink-0 mr-3" />
               <input
                 type="text"
                 value={location}
                 onChange={e => setLocation(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleGo()}
-                placeholder="Your delivery location"
-                className="flex-1 px-3 py-3.5 text-[14px] text-soil placeholder:text-stone/60 bg-transparent outline-none min-w-0"
+                placeholder="Enter delivery location"
+                className="flex-1 bg-transparent outline-none text-soil placeholder:text-stone/60 text-base"
               />
             </div>
             <button
               onClick={handleGo}
-              className="w-full bg-pepper hover:bg-pepper-deep transition-colors text-grain text-[14px] font-medium py-3.5 rounded-full"
+              className="bg-pepper hover:bg-pepper-deep text-grain font-semibold px-8 py-3.5 rounded-lg transition-colors whitespace-nowrap text-base"
             >
-              Browse produce
+              Browse
             </button>
           </div>
-
-          {/* Desktop: inline pill */}
-          <div className="hidden sm:flex items-center bg-grain rounded-full overflow-hidden shadow-lg border border-soil/10">
-            <div className="flex items-center pl-5 shrink-0">
-              <MapPin size={15} className="text-pepper" />
-            </div>
-            <input
-              type="text"
-              value={location}
-              onChange={e => setLocation(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleGo()}
-              placeholder="Enter your delivery location"
-              className="flex-1 px-3 py-4 text-[14px] text-soil placeholder:text-stone/60 bg-transparent outline-none"
-            />
-            <button
-              onClick={handleGo}
-              className="bg-pepper hover:bg-pepper-deep transition-colors text-grain text-[13.5px] font-medium px-6 py-4 rounded-full m-1 whitespace-nowrap"
-            >
-              Browse produce
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Trust row */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-9"
-        >
-          {[
-            { icon: Leaf,        text: 'Farm fresh, always' },
-            { icon: Users,       text: 'Verified farmers' },
-            { icon: ShieldCheck, text: 'Fair pricing' },
-            { icon: Truck,       text: 'Reliable delivery' },
-          ].map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-1.5">
-              <Icon size={11} className="text-turmeric/70" />
-              <span className="font-data text-[10px] text-grain/45 uppercase tracking-wider">{text}</span>
-            </div>
-          ))}
         </motion.div>
       </div>
     </section>
   )
 }
 
-// ── Category strip ────────────────────────────────────────────────────────
+// ── Trust badges ──────────────────────────────────────────────────────────
+function TrustBadges() {
+  return (
+    <section className="bg-grain-dim border-b border-soil/8 py-5 sm:py-6">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
+        <div className="flex flex-wrap gap-4 sm:gap-6">
+          {[
+            { icon: Leaf,        text: 'Farm fresh, always' },
+            { icon: Users,       text: 'Verified farmers' },
+            { icon: ShieldCheck, text: 'Fair pricing' },
+            { icon: Truck,       text: 'Reliable delivery' },
+          ].map(({ icon: Icon, text }) => (
+            <div key={text} className="flex items-center gap-2">
+              <Icon size={18} className="text-pepper" />
+              <span className="text-sm font-medium text-soil">{text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ── Category carousel ─────────────────────────────────────────────────────
 function CategoryStrip() {
   return (
-    <section className="bg-grain border-b border-soil/8">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-6 sm:py-8">
-        <div className="flex items-center justify-between mb-5">
-          <p className="font-data text-[10.5px] text-stone uppercase tracking-[0.18em]">Shop by category</p>
+    <section className="bg-grain py-8 sm:py-10 border-b border-soil/8">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-display text-2xl text-soil">Shop by category</h2>
           <Link
             href="/products"
-            className="font-data text-[10.5px] text-pepper uppercase tracking-[0.14em] hover:text-pepper-deep transition-colors flex items-center gap-1"
+            className="text-pepper hover:text-pepper-deep text-sm font-semibold flex items-center gap-1 transition-colors"
           >
-            All produce <ArrowRight size={11} />
+            View all <ArrowRight size={16} />
           </Link>
         </div>
 
         <div
-          className="flex gap-2 sm:gap-3 overflow-x-auto pb-2"
+          className="flex gap-3 overflow-x-auto pb-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {CATEGORIES.map((cat, i) => (
@@ -228,74 +190,49 @@ function CategoryStrip() {
               key={cat.key}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: i * 0.06 }}
+              transition={{ duration: 0.3, delay: i * 0.05 }}
               className="shrink-0"
             >
               <Link
                 href={`/products?category=${cat.key}`}
-                className="group relative block rounded-2xl overflow-hidden border border-soil/8 hover:border-pepper/40 hover:shadow-lg transition-all duration-300"
-                style={{ width: 130, height: 90 }}
+                className="group relative block rounded-xl overflow-hidden border border-soil/10 hover:border-pepper/30 hover:shadow-md transition-all duration-300"
+                style={{ width: 140, height: 100 }}
               >
                 <img
                   src={cat.image}
                   alt={cat.label}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-soil/75 via-soil/20 to-transparent" />
-                {/* Label */}
-                <div className="absolute bottom-0 left-0 right-0 px-3 pb-2.5">
-                  <p className="text-grain text-[12.5px] font-semibold leading-tight drop-shadow-sm">
-                    {cat.label}
-                  </p>
+                <div className="absolute inset-0 bg-gradient-to-t from-soil/80 via-soil/30 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
+                  <p className="text-grain text-sm font-bold leading-tight drop-shadow">{cat.label}</p>
                 </div>
               </Link>
             </motion.div>
           ))}
-
-          {/* See all card */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: CATEGORIES.length * 0.06 }}
-            className="shrink-0"
-          >
-            <Link
-              href="/products"
-              className="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-soil/20 hover:border-pepper/40 bg-grain-dim hover:bg-grain transition-all duration-300 gap-2"
-              style={{ width: 130, height: 90 }}
-            >
-              <div className="w-7 h-7 rounded-full bg-soil/5 group-hover:bg-pepper/10 flex items-center justify-center transition-colors">
-                <ArrowRight size={14} className="text-stone group-hover:text-pepper transition-colors" />
-              </div>
-              <span className="text-[12px] font-medium text-stone group-hover:text-soil transition-colors">
-                See all
-              </span>
-            </Link>
-          </motion.div>
         </div>
       </div>
     </section>
   )
 }
 
-// ── Stats strip ───────────────────────────────────────────────────────────
+// ── Stats section ─────────────────────────────────────────────────────────
 function StatsStrip() {
   return (
-    <section className="bg-grain-dim border-b border-soil/8 py-10 sm:py-12">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-soil/10 rounded-2xl overflow-hidden">
+    <section className="bg-grain py-10 sm:py-14 border-b border-soil/8">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {STATS.map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: i * 0.06 }}
-              className="bg-grain-dim px-6 py-7 sm:py-8 text-center"
+              transition={{ duration: 0.35, delay: i * 0.05 }}
+              className="text-center"
             >
-              <p className="font-display text-soil text-3xl sm:text-4xl tracking-tight mb-1">{stat.value}</p>
-              <p className="font-data text-[10.5px] text-stone uppercase tracking-[0.16em]">{stat.label}</p>
+              <p className="font-display text-3xl sm:text-4xl text-soil mb-2 font-bold">{stat.value}</p>
+              <p className="text-sm text-stone font-medium">{stat.label}</p>
             </motion.div>
           ))}
         </div>
@@ -313,26 +250,26 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.35, delay: index * 0.04 }}
+      transition={{ duration: 0.35, delay: index * 0.03 }}
     >
       <Link
         href={`/products?category=${product.category}`}
-        className="group block bg-grain rounded-2xl border border-soil/8 hover:border-pepper/30 hover:shadow-md transition-all duration-300 overflow-hidden"
+        className="group block bg-grain rounded-xl border border-soil/10 hover:border-pepper/30 hover:shadow-md transition-all duration-300 overflow-hidden"
       >
-        <div className="aspect-[4/3] overflow-hidden bg-grain-dim relative">
+        <div className="aspect-square overflow-hidden bg-grain-dim relative">
           <img
             src={img}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
-          <div className="absolute bottom-2.5 right-2.5 w-7 h-7 bg-pepper rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Plus size={13} className="text-grain" strokeWidth={2.5} />
+          <div className="absolute top-3 right-3 w-8 h-8 bg-pepper rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <Plus size={16} className="text-grain" strokeWidth={2.5} />
           </div>
         </div>
-        <div className="px-3.5 py-3">
-          <p className="text-soil text-[13.5px] font-semibold leading-tight truncate">{product.name}</p>
+        <div className="p-4">
+          <p className="text-soil font-bold text-base leading-tight truncate mb-1">{product.name}</p>
           {product.unit && (
-            <p className="font-data text-[10.5px] text-stone/70 mt-1 uppercase tracking-wide">{product.unit}</p>
+            <p className="text-sm text-stone">{product.unit}</p>
           )}
         </div>
       </Link>
@@ -361,33 +298,33 @@ function FeaturedProducts() {
   }, [])
 
   return (
-    <section className="bg-grain py-12 sm:py-16">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8">
-        <div className="flex items-end justify-between mb-7">
+    <section className="bg-grain py-10 sm:py-14 border-b border-soil/8">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
+        <div className="flex items-end justify-between mb-8">
           <div>
-            <p className="font-data text-[10.5px] text-pepper uppercase tracking-[0.2em] mb-1.5">Available now</p>
-            <h2 className="font-display text-soil text-2xl sm:text-3xl tracking-tight">What farmers have today</h2>
+            <p className="text-pepper text-sm font-bold uppercase tracking-wider mb-2">Available now</p>
+            <h2 className="font-display text-2xl sm:text-3xl text-soil font-bold">What farmers have today</h2>
           </div>
           <Link
             href="/products"
-            className="hidden sm:inline-flex items-center gap-1.5 text-[13px] font-medium text-pepper hover:text-pepper-deep transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 text-pepper hover:text-pepper-deep font-semibold transition-colors"
           >
-            See everything <ArrowRight size={13} />
+            See everything <ArrowRight size={16} />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           {products.slice(0, 8).map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}
         </div>
 
-        <div className="mt-7 sm:hidden">
+        <div className="sm:hidden">
           <Link
             href="/products"
-            className="flex items-center justify-center gap-1.5 w-full border border-soil/12 text-[13.5px] font-medium text-soil py-3.5 rounded-full hover:bg-grain-dim transition-colors"
+            className="flex items-center justify-center gap-1.5 w-full border-2 border-soil/20 text-soil font-bold py-3.5 rounded-lg hover:bg-grain-dim transition-colors"
           >
-            See all produce <ArrowRight size={13} />
+            See all produce <ArrowRight size={16} />
           </Link>
         </div>
       </div>
@@ -398,14 +335,14 @@ function FeaturedProducts() {
 // ── How it works ──────────────────────────────────────────────────────────
 function HowItWorks() {
   return (
-    <section className="bg-grain-dim py-14 sm:py-20 border-t border-soil/8">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+    <section className="bg-grain-dim py-14 sm:py-20 border-b border-soil/8">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
         <div className="mb-10 sm:mb-14">
-          <p className="font-data text-[10.5px] text-pepper uppercase tracking-[0.2em] mb-2">How it works</p>
-          <h2 className="font-display text-soil text-3xl sm:text-4xl tracking-tight">Three steps, farm to door</h2>
+          <p className="text-pepper text-sm font-bold uppercase tracking-wider mb-2">How it works</p>
+          <h2 className="font-display text-3xl sm:text-4xl text-soil font-bold">Three steps, farm to door</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-soil/10 rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {HOW.map((step, i) => (
             <motion.div
               key={step.title}
@@ -413,19 +350,19 @@ function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="bg-grain p-7 sm:p-9 flex flex-col gap-5"
+              className="bg-grain rounded-2xl p-6 sm:p-8 border border-soil/10 flex flex-col gap-5"
             >
-              <div className="aspect-[16/9] rounded-xl overflow-hidden">
+              <div className="aspect-[16/9] rounded-lg overflow-hidden">
                 <img src={step.image} alt={step.title} className="w-full h-full object-cover" />
               </div>
               <div>
-                <span className="font-data text-[10px] text-pepper/70 uppercase tracking-[0.2em]">
-                  {String(i + 1).padStart(2, '0')}
+                <span className="text-pepper text-xs font-bold uppercase tracking-wider">
+                  Step {String(i + 1).padStart(2, '0')}
                 </span>
-                <h3 className="font-display text-soil text-xl sm:text-2xl tracking-tight mt-1.5 mb-2.5 leading-snug">
+                <h3 className="font-display text-xl sm:text-2xl text-soil font-bold mt-2 mb-3 leading-snug">
                   {step.title}
                 </h3>
-                <p className="text-stone text-[14px] leading-relaxed">{step.body}</p>
+                <p className="text-stone text-base leading-relaxed">{step.body}</p>
               </div>
             </motion.div>
           ))}
@@ -438,14 +375,14 @@ function HowItWorks() {
 // ── Testimonials ──────────────────────────────────────────────────────────
 function Testimonials() {
   return (
-    <section className="bg-grain border-t border-soil/8 py-14 sm:py-20">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+    <section className="bg-grain py-14 sm:py-20 border-b border-soil/8">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
         <div className="mb-10 sm:mb-14">
-          <p className="font-data text-[10.5px] text-pepper uppercase tracking-[0.2em] mb-2">Real people</p>
-          <h2 className="font-display text-soil text-3xl sm:text-4xl tracking-tight">What they're saying</h2>
+          <p className="text-pepper text-sm font-bold uppercase tracking-wider mb-2">Real people</p>
+          <h2 className="font-display text-3xl sm:text-4xl text-soil font-bold">What they&apos;re saying</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {TESTIMONIALS.map((t, i) => (
             <motion.div
               key={t.name}
@@ -453,20 +390,19 @@ function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="bg-grain-dim rounded-2xl p-7 sm:p-8 border border-soil/8 flex flex-col gap-5"
+              className="bg-grain-dim rounded-xl p-6 sm:p-7 border border-soil/10 flex flex-col gap-4"
             >
-              {/* Stars */}
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, j) => (
-                  <Star key={j} size={12} className="text-pepper fill-pepper" />
+                  <Star key={j} size={14} className="text-pepper fill-pepper" />
                 ))}
               </div>
-              <p className="text-soil text-[14.5px] leading-relaxed flex-1">
-                &ldquo;{t.quote}&rdquo;
+              <p className="text-soil text-base leading-relaxed flex-1">
+                {t.quote}
               </p>
-              <div className="border-t border-soil/8 pt-4">
-                <p className="text-soil text-[13px] font-semibold">{t.name}</p>
-                <p className="font-data text-[10.5px] text-stone uppercase tracking-[0.14em] mt-0.5">{t.role}</p>
+              <div className="pt-2 border-t border-soil/10">
+                <p className="font-bold text-soil text-sm">{t.name}</p>
+                <p className="text-stone text-xs">{t.role}</p>
               </div>
             </motion.div>
           ))}
@@ -476,102 +412,21 @@ function Testimonials() {
   )
 }
 
-// ── Dual CTA ──────────────────────────────────────────────────────────────
-function DualCTA() {
+// ── Main page ─────────────────────────────────────────────────────────────
+export default function Home() {
   return (
-    <section className="bg-grain-dim py-14 sm:py-20 border-t border-soil/8">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-          {/* Farmer */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45 }}
-            className="market-board rounded-2xl p-8 sm:p-10 relative overflow-hidden"
-          >
-            <div className="absolute inset-0 z-0">
-              <img
-                src="https://images.pexels.com/photos/7728332/pexels-photo-7728332.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
-                alt=""
-                aria-hidden
-                className="w-full h-full object-cover opacity-15"
-              />
-            </div>
-            <div className="relative z-10">
-              <p className="font-data text-[10.5px] text-turmeric uppercase tracking-[0.2em] mb-4">For farmers</p>
-              <h3 className="font-display text-grain tracking-tight leading-snug mb-4" style={{ fontSize: 'clamp(22px, 3vw, 30px)' }}>
-                Sell direct.<br />
-                <em className="text-turmeric not-italic">Keep more.</em>
-              </h3>
-              <p className="text-grain/55 text-[14px] leading-relaxed mb-8 max-w-xs">
-                No middlemen. List your produce, we bring you buyers and handle coordination.
-              </p>
-              <Link
-                href="/farmers"
-                className="inline-flex items-center gap-2 bg-pepper hover:bg-pepper-deep transition-colors text-grain text-[13.5px] font-medium px-5 py-3 rounded-full"
-              >
-                Join as a farmer <ArrowRight size={14} />
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Buyer */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45, delay: 0.08 }}
-            className="bg-grain rounded-2xl p-8 sm:p-10 border border-soil/8 relative overflow-hidden"
-          >
-            <div className="absolute inset-0 z-0">
-              <img
-                src="https://images.pexels.com/photos/8476597/pexels-photo-8476597.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
-                alt=""
-                aria-hidden
-                className="w-full h-full object-cover opacity-[0.06]"
-              />
-            </div>
-            <div className="relative z-10">
-              <p className="font-data text-[10.5px] text-pepper uppercase tracking-[0.2em] mb-4">For buyers</p>
-              <h3 className="font-display text-soil tracking-tight leading-snug mb-4" style={{ fontSize: 'clamp(22px, 3vw, 30px)' }}>
-                Fresh produce.<br />
-                <em className="text-pepper not-italic">Fair prices.</em>
-              </h3>
-              <p className="text-stone text-[14px] leading-relaxed mb-8 max-w-xs">
-                Build a list, we match you with a verified farmer and confirm pricing before anything moves.
-              </p>
-              <Link
-                href="/buyers"
-                className="inline-flex items-center gap-2 bg-soil hover:bg-soil/80 transition-colors text-grain text-[13.5px] font-medium px-5 py-3 rounded-full"
-              >
-                Start buying <ArrowRight size={14} />
-              </Link>
-            </div>
-          </motion.div>
-
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ── Page ──────────────────────────────────────────────────────────────────
-export default function HomePage() {
-  return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Nav />
       <main className="flex-1">
         <Hero />
+        <TrustBadges />
         <CategoryStrip />
         <StatsStrip />
         <FeaturedProducts />
         <HowItWorks />
         <Testimonials />
-        <DualCTA />
       </main>
       <Footer />
-    </>
+    </div>
   )
 }

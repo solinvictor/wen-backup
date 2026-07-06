@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url("https://api.fontshare.com/v2/css?f[]=nohemi@400,500,600,700&display=swap");
 
 :root {
   /* Color tokens - WEN brand palette (navy + leaf green + white, from logo) */
@@ -32,7 +31,7 @@ body {
 }
 
 h1, h2, h3, .font-display {
-  font-family: 'Nohemi', var(--font-display), sans-serif;
+  font-family: var(--font-display), 'Nohemi', sans-serif;
   letter-spacing: -0.01em;
 }
 
