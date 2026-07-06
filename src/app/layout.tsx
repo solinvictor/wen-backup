@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Poppins, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const plusJakarta = Plus_Jakarta_Sans({
+const nohemi = localFont({
+  src: [
+    { path: "../../public/fonts/nohemi/Nohemi-Regular-BF6438cc579d934.woff", weight: "400", style: "normal" },
+    { path: "../../public/fonts/nohemi/Nohemi-Medium-BF6438cc57ddecd.woff",  weight: "500", style: "normal" },
+    { path: "../../public/fonts/nohemi/Nohemi-SemiBold-BF6438cc57db2ff.woff",weight: "600", style: "normal" },
+    { path: "../../public/fonts/nohemi/Nohemi-Bold-BF6438cc577b524.woff",    weight: "700", style: "normal" },
+    { path: "../../public/fonts/nohemi/Nohemi-ExtraBold-BF6438cc5761ae2.woff",weight: "800", style: "normal" },
+  ],
   variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -36,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${plusJakarta.variable} ${poppins.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${nohemi.variable} ${poppins.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-grain text-soil">{children}</body>
     </html>
