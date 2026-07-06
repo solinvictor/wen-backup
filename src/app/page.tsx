@@ -96,22 +96,32 @@ function Hero() {
   }
 
   return (
-    <section className="bg-grain pt-8 pb-12 sm:pt-12 sm:pb-16">
-      <div className="max-w-5xl mx-auto px-5 sm:px-8">
+    <section className="relative overflow-hidden min-h-[520px] sm:min-h-[600px] flex items-center">
+      {/* Background image */}
+      <img
+        src="https://images.pexels.com/photos/1300975/pexels-photo-1300975.jpeg?auto=compress&cs=tinysrgb&w=1400&h=800&fit=crop"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      {/* Dark navy overlay so text stays readable */}
+      <div className="absolute inset-0 bg-gradient-to-br from-soil/85 via-soil/70 to-soil/50" />
+
+      <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 py-16 sm:py-20 w-full">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8 sm:mb-10"
         >
-          <h1 className="font-display text-4xl sm:text-5xl text-soil mb-3 leading-tight">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-grain mb-3 leading-tight">
             Fresh produce,<br />
             <span className="text-pepper">straight from the farm.</span>
           </h1>
-          <p className="text-stone text-lg max-w-lg">Farm to your door. Fresh, fair, fast.</p>
+          <p className="text-grain/80 text-lg max-w-lg">Farm to your door. Fresh, fair, fast.</p>
         </motion.div>
 
-        {/* Search bar - Instacart style */}
+        {/* Search bar */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -119,7 +129,7 @@ function Hero() {
           className="max-w-2xl"
         >
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 flex items-center bg-grain-dim rounded-lg border-2 border-soil/10 focus-within:border-pepper transition-colors px-4 py-3.5">
+            <div className="flex-1 flex items-center bg-grain rounded-lg border-2 border-transparent focus-within:border-pepper transition-colors px-4 py-3.5 shadow-lg">
               <MapPin size={18} className="text-stone shrink-0 mr-3" />
               <input
                 type="text"
@@ -132,7 +142,7 @@ function Hero() {
             </div>
             <button
               onClick={handleGo}
-              className="bg-pepper hover:bg-pepper-deep text-grain font-semibold px-8 py-3.5 rounded-lg transition-colors whitespace-nowrap text-base"
+              className="bg-pepper hover:bg-pepper-deep text-grain font-semibold px-8 py-3.5 rounded-lg transition-colors whitespace-nowrap text-base shadow-lg"
             >
               Browse
             </button>
