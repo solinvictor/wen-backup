@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
 import { Plus, Minus, ShoppingBasket, X, Check, Loader2, ArrowLeft, Search } from 'lucide-react'
+import { validateName, validatePhone, validateLocation, type FieldError } from '@/lib/validate'
 
 interface Product {
   id: string
@@ -83,6 +84,7 @@ export default function ProductsPage() {
   const [form, setForm] = useState({ fullName: '', phoneNumber: '', location: '', buyerType: 'household', notes: '' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<FieldError>({})
   const [query, setQuery] = useState('')
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -191,12 +193,17 @@ export default function ProductsPage() {
 
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.fullName.trim() || !form.phoneNumber.trim() || !form.location.trim()) {
-      setError('Please fill in all required fields.')
-      return
-    }
-    setSubmitting(true)
     setError('')
+    const errs: FieldError = {}
+    const nameErr = validateName(form.fullName)
+    const phoneErr = validatePhone(form.phoneNumber)
+    const locationErr = validateLocation(form.location)
+    if (nameErr) errs.fullName = nameErr
+    if (phoneErr) errs.phoneNumber = phoneErr
+    if (locationErr) errs.location = locationErr
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) return
+    setSubmitting(true)
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -468,17 +475,23 @@ export default function ProductsPage() {
                   <div>
                     <label className="text-soil text-[13px] font-medium block mb-1.5">Full name</label>
                     <input value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })}
-                      className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors" />
+                      placeholder="Your full name"
+                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.fullName ? "border-red-400" : "border-soil/10"}`} />
+                    {fieldErrors.fullName && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.fullName}</p>}
                   </div>
                   <div>
                     <label className="text-soil text-[13px] font-medium block mb-1.5">Phone number</label>
                     <input value={form.phoneNumber} onChange={e => setForm({ ...form, phoneNumber: e.target.value })}
-                      className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors" />
+                      placeholder="08012345678"
+                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.phoneNumber ? "border-red-400" : "border-soil/10"}`} />
+                    {fieldErrors.phoneNumber && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.phoneNumber}</p>}
                   </div>
                   <div>
                     <label className="text-soil text-[13px] font-medium block mb-1.5">Delivery location</label>
                     <input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })}
-                      className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors" />
+                      placeholder="e.g. Wuse 2, Abuja"
+                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.location ? "border-red-400" : "border-soil/10"}`} />
+                    {fieldErrors.location && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.location}</p>}
                   </div>
                   <div>
                     <label className="text-soil text-[13px] font-medium block mb-1.5">I&apos;m ordering as a</label>
@@ -531,3 +544,4 @@ export default function ProductsPage() {
     </>
   )
 }
+
