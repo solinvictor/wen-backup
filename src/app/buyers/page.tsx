@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { validateName, validatePhone, validateLocation, type FieldError } from '@/lib/validate'
 import { motion } from 'framer-motion'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
@@ -48,10 +49,20 @@ export default function BuyersPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<FieldError>({})
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    const errs: FieldError = {}
+    const nameErr = validateName(form.fullName)
+    const phoneErr = validatePhone(form.phoneNumber)
+    const locationErr = validateLocation(form.location)
+    if (nameErr) errs.fullName = nameErr
+    if (phoneErr) errs.phoneNumber = phoneErr
+    if (locationErr) errs.location = locationErr
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/buyers', {
@@ -240,19 +251,20 @@ export default function BuyersPage() {
                         value={form.fullName}
                         onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                         placeholder="Your name"
-                        className="w-full border border-soil/12 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-pepper focus:ring-2 focus:ring-pepper/10 transition-all bg-grain-dim placeholder:text-stone/35"
+                        className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 transition-all bg-grain-dim placeholder:text-stone/35 ${fieldErrors.fullName ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-soil/12 focus:border-pepper focus:ring-pepper/10'}`}
                       />
+                      {fieldErrors.fullName && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.fullName}</p>}
                     </div>
                     <div>
                       <label className="block text-[12px] font-semibold text-soil uppercase tracking-wide mb-1.5">Phone Number</label>
                       <input
-                        required
                         type="tel"
                         value={form.phoneNumber}
                         onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
-                        placeholder="+234 800 000 0000"
-                        className="w-full border border-soil/12 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-pepper focus:ring-2 focus:ring-pepper/10 transition-all bg-grain-dim placeholder:text-stone/35"
+                        placeholder="08012345678"
+                        className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 transition-all bg-grain-dim placeholder:text-stone/35 ${fieldErrors.phoneNumber ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-soil/12 focus:border-pepper focus:ring-pepper/10'}`}
                       />
+                      {fieldErrors.phoneNumber && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.phoneNumber}</p>}
                     </div>
                   </div>
 
@@ -263,8 +275,9 @@ export default function BuyersPage() {
                       value={form.location}
                       onChange={(e) => setForm({ ...form, location: e.target.value })}
                       placeholder="e.g. Wuse 2, Abuja"
-                      className="w-full border border-soil/12 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-pepper focus:ring-2 focus:ring-pepper/10 transition-all bg-grain-dim placeholder:text-stone/35"
+                      className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none focus:ring-2 transition-all bg-grain-dim placeholder:text-stone/35 ${fieldErrors.location ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-soil/12 focus:border-pepper focus:ring-pepper/10'}`}
                     />
+                    {fieldErrors.location && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.location}</p>}
                   </div>
 
                   <div>
@@ -311,3 +324,4 @@ export default function BuyersPage() {
     </>
   )
 }
+
