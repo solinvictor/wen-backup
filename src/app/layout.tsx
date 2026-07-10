@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Poppins, JetBrains_Mono } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
+import { LocationProvider } from "@/context/LocationContext";
 import "./globals.css";
 
 const nohemi = localFont({
@@ -46,9 +47,11 @@ export default function RootLayout({
       className={`${nohemi.variable} ${poppins.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-grain text-soil">
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <LocationProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </LocationProvider>
       </body>
     </html>
   );
