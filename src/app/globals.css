@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  /* Color tokens - WEN brand palette (navy + leaf green + white, from logo) */
+  /* Color tokens - WEN brand palette */
   --color-soil: #0F2940;       /* logo navy - primary text + dark sections */
   --color-grain: #FFFFFF;      /* white - base background */
   --color-grain-dim: #F4F6F8;  /* soft cool-white for cards/dividers on white bg */
-  --color-pepper: #8BC34A;     /* logo leaf green - primary accent, CTAs */
-  --color-pepper-deep: #6FA037;
+  --color-pepper: #3D7A2A;     /* muted forest green - primary accent, CTAs */
+  --color-pepper-deep: #2D5E1E; /* deeper green for hover states */
   --color-okra: #0F2940;       /* navy reused as secondary accent (badges, icons) */
-  --color-turmeric: #B7DD8C;   /* light green tint - highlights, soft badges */
+  --color-turmeric: #A8D48A;   /* light green tint - highlights, soft badges */
   --color-stone: #6B7785;      /* muted navy-gray text on white */
 }
 
