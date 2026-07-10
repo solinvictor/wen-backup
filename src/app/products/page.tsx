@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
-import { Plus, Minus, ShoppingBasket, X, Check, Loader2, ArrowLeft, Search } from 'lucide-react'
+import { Plus, Minus, ShoppingCart, X, Check, Loader2, ArrowLeft, Search } from 'lucide-react'
 import { validateName, validatePhone, validateLocation, type FieldError } from '@/lib/validate'
+import { useCart } from '@/context/CartContext'
 
 interface Product {
   id: string
@@ -15,30 +16,16 @@ interface Product {
   is_available: boolean
 }
 
-interface CartLine {
-  id: string
-  name: string
-  category: string
-  unit: string | null
-  quantity: number
-}
-
 const CATEGORY_LABELS: Record<string, string> = {
   vegetables: 'Vegetables',
   grains: 'Grains',
   tubers: 'Tubers',
   poultry: 'Poultry',
   fish: 'Fish',
+  fruits: 'Fruits',
+  dairy: 'Dairy',
+  spices: 'Spices',
   other: 'Other',
-}
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  vegetables: '🥬',
-  grains: '🌾',
-  tubers: '🍠',
-  poultry: '🍗',
-  fish: '🐟',
-  other: '🛒',
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
@@ -47,37 +34,41 @@ const CATEGORY_IMAGES: Record<string, string> = {
   tubers: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
   poultry: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
   fish: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+  fruits: 'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+  dairy: 'https://images.pexels.com/photos/248412/pexels-photo-248412.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+  spices: 'https://images.pexels.com/photos/2802527/pexels-photo-2802527.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
   other: 'https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
 }
 
 const FALLBACK_PRODUCTS: Product[] = [
-  { id: 'f-tomatoes', name: 'Tomatoes', category: 'vegetables', unit: 'per basket', is_available: true },
-  { id: 'f-pepper', name: 'Pepper', category: 'vegetables', unit: 'per basket', is_available: true },
-  { id: 'f-spinach', name: 'Spinach', category: 'vegetables', unit: 'per bunch', is_available: true },
-  { id: 'f-okra', name: 'Okra', category: 'vegetables', unit: 'per basket', is_available: true },
-  { id: 'f-rice', name: 'Rice', category: 'grains', unit: 'per bag', is_available: true },
-  { id: 'f-beans', name: 'Beans', category: 'grains', unit: 'per bag', is_available: true },
-  { id: 'f-maize', name: 'Maize', category: 'grains', unit: 'per bag', is_available: true },
-  { id: 'f-yam', name: 'Yam', category: 'tubers', unit: 'per tuber', is_available: true },
-  { id: 'f-cassava', name: 'Cassava', category: 'tubers', unit: 'per bag', is_available: true },
-  { id: 'f-sweetpotato', name: 'Sweet Potato', category: 'tubers', unit: 'per basket', is_available: true },
-  { id: 'f-chicken', name: 'Chicken', category: 'poultry', unit: 'per bird', is_available: true },
-  { id: 'f-eggs', name: 'Eggs', category: 'poultry', unit: 'per crate', is_available: true },
-  { id: 'f-catfish', name: 'Catfish', category: 'fish', unit: 'per kg', is_available: true },
-  { id: 'f-tilapia', name: 'Tilapia', category: 'fish', unit: 'per kg', is_available: true },
+  { id: 'f-tomatoes',    name: 'Tomatoes',     category: 'vegetables', unit: 'per basket', is_available: true },
+  { id: 'f-pepper',      name: 'Pepper',        category: 'vegetables', unit: 'per basket', is_available: true },
+  { id: 'f-spinach',     name: 'Spinach',       category: 'vegetables', unit: 'per bunch',  is_available: true },
+  { id: 'f-okra',        name: 'Okra',          category: 'vegetables', unit: 'per basket', is_available: true },
+  { id: 'f-rice',        name: 'Rice',          category: 'grains',     unit: 'per bag',    is_available: true },
+  { id: 'f-beans',       name: 'Beans',         category: 'grains',     unit: 'per bag',    is_available: true },
+  { id: 'f-maize',       name: 'Maize',         category: 'grains',     unit: 'per bag',    is_available: true },
+  { id: 'f-yam',         name: 'Yam',           category: 'tubers',     unit: 'per tuber',  is_available: true },
+  { id: 'f-cassava',     name: 'Cassava',       category: 'tubers',     unit: 'per bag',    is_available: true },
+  { id: 'f-sweetpotato', name: 'Sweet Potato',  category: 'tubers',     unit: 'per basket', is_available: true },
+  { id: 'f-chicken',     name: 'Chicken',       category: 'poultry',    unit: 'per bird',   is_available: true },
+  { id: 'f-eggs',        name: 'Eggs',          category: 'poultry',    unit: 'per crate',  is_available: true },
+  { id: 'f-catfish',     name: 'Catfish',       category: 'fish',       unit: 'per kg',     is_available: true },
+  { id: 'f-tilapia',     name: 'Tilapia',       category: 'fish',       unit: 'per kg',     is_available: true },
 ]
 
 const BUYER_TYPES = [
-  { value: 'household', label: 'Household' },
-  { value: 'business', label: 'Business' },
+  { value: 'household',  label: 'Household' },
+  { value: 'business',   label: 'Business' },
   { value: 'restaurant', label: 'Restaurant' },
 ]
 
 export default function ProductsPage() {
+  const { items, cartLines, cartCount, addOne, removeOne, clearCart } = useCart()
+
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
-  const [cart, setCart] = useState<Record<string, CartLine>>({})
   const [sheetOpen, setSheetOpen] = useState(false)
   const [checkoutStep, setCheckoutStep] = useState<'review' | 'details' | 'success'>('review')
   const [activeCategory, setActiveCategory] = useState<string>('')
@@ -127,14 +118,12 @@ export default function ProductsPage() {
 
   const categories = Object.keys(grouped)
 
-  // Set first category as active on load
   useEffect(() => {
     if (categories.length > 0 && !activeCategory) {
       setActiveCategory(categories[0])
     }
   }, [categories, activeCategory])
 
-  // Intersection observer to update active pill as user scrolls
   useEffect(() => {
     if (query.trim()) return
     const observers: IntersectionObserver[] = []
@@ -155,35 +144,6 @@ export default function ProductsPage() {
     setActiveCategory(cat)
     const el = sectionRefs.current[cat]
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
-  const cartLines = Object.values(cart)
-  const cartCount = cartLines.reduce((sum, l) => sum + l.quantity, 0)
-
-  function addOne(p: { id: string; name: string; category: string; unit: string | null }) {
-    setCart(prev => {
-      const existing = prev[p.id]
-      return {
-        ...prev,
-        [p.id]: {
-          id: p.id, name: p.name, category: p.category, unit: p.unit,
-          quantity: (existing?.quantity || 0) + 1,
-        },
-      }
-    })
-  }
-
-  function removeOne(p: { id: string }) {
-    setCart(prev => {
-      const existing = prev[p.id]
-      if (!existing) return prev
-      if (existing.quantity <= 1) {
-        const next = { ...prev }
-        delete next[p.id]
-        return next
-      }
-      return { ...prev, [p.id]: { ...existing, quantity: existing.quantity - 1 } }
-    })
   }
 
   function openCart() {
@@ -223,7 +183,7 @@ export default function ProductsPage() {
         return
       }
       setCheckoutStep('success')
-      setCart({})
+      clearCart()
     } catch {
       setError('Could not submit your request. Please check your connection and try again.')
     } finally {
@@ -236,13 +196,12 @@ export default function ProductsPage() {
       <Nav />
       <main className="flex-1 pb-32">
         {/* Hero */}
-        <section className="bg-grain pt-20 pb-6 sm:pt-28">
+        <section className="bg-grain pt-8 pb-6">
           <div className="max-w-5xl mx-auto px-5 sm:px-8">
             <p className="font-data text-[12px] text-pepper uppercase tracking-[0.2em] mb-3">Fresh from the farm</p>
             <h1 className="font-display text-soil tracking-tight mb-3" style={{ fontSize: 'clamp(28px, 5vw, 44px)' }}>
               What are you shopping for?
             </h1>
-            {/* Search bar — prominent, Instacart-style */}
             <div className="relative mt-5 max-w-lg">
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone/50" />
               <input
@@ -260,7 +219,7 @@ export default function ProductsPage() {
           </div>
         </section>
 
-        {/* Sticky category pill nav — Instacart-style */}
+        {/* Sticky category pill nav */}
         {!loading && categories.length > 0 && (
           <div className="sticky top-0 z-30 bg-grain/95 backdrop-blur border-b border-soil/8">
             <div className="max-w-5xl mx-auto px-5 sm:px-8">
@@ -305,13 +264,12 @@ export default function ProductsPage() {
               </div>
             ) : (
               <div className="space-y-10">
-                {Object.entries(grouped).map(([category, items]) => (
+                {Object.entries(grouped).map(([category, categoryItems]) => (
                   <div
                     key={category}
                     ref={(el) => { sectionRefs.current[category] = el }}
                     className="scroll-mt-24"
                   >
-                    {/* Category header */}
                     <div className="flex items-center gap-3 mb-5">
                       <div className="w-9 h-9 rounded-xl overflow-hidden border border-soil/10 shrink-0">
                         <img
@@ -322,13 +280,12 @@ export default function ProductsPage() {
                         />
                       </div>
                       <h2 className="font-display text-soil text-xl">{CATEGORY_LABELS[category] || category}</h2>
-                      <span className="font-data text-[11px] text-stone/50 ml-1">{items.length} items</span>
+                      <span className="font-data text-[11px] text-stone/50 ml-1">{categoryItems.length} items</span>
                     </div>
 
-                    {/* Cards */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {items.map((item) => {
-                        const inCart = cart[item.id]
+                      {categoryItems.map((item) => {
+                        const inCart = items[item.id]
                         return (
                           <div
                             key={item.id}
@@ -336,19 +293,17 @@ export default function ProductsPage() {
                               inCart ? 'border-pepper shadow-sm' : 'border-soil/8 hover:border-soil/16 hover:shadow-sm'
                             }`}
                           >
-                            {/* Image with overlaid +/counter — Instacart pattern */}
                             <div className="relative aspect-square bg-soil/5">
                               <img
                                 src={CATEGORY_IMAGES[item.category] || CATEGORY_IMAGES.other}
                                 alt={item.name}
                                 className="w-full h-full object-cover"
                               />
-                              {/* Overlay control */}
                               <div className="absolute bottom-2 right-2">
                                 {inCart ? (
                                   <div className="flex items-center gap-1 bg-soil rounded-full px-1.5 py-1 shadow-lg">
                                     <button
-                                      onClick={() => removeOne(item)}
+                                      onClick={() => removeOne(item.id)}
                                       className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
                                       aria-label={`Remove one ${item.name}`}
                                     >
@@ -356,7 +311,7 @@ export default function ProductsPage() {
                                     </button>
                                     <span className="text-grain text-[12px] font-bold font-data w-4 text-center">{inCart.quantity}</span>
                                     <button
-                                      onClick={() => addOne(item)}
+                                      onClick={() => addOne({ id: item.id, name: item.name, category: item.category, unit: item.unit })}
                                       className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
                                       aria-label={`Add another ${item.name}`}
                                     >
@@ -365,7 +320,7 @@ export default function ProductsPage() {
                                   </div>
                                 ) : (
                                   <button
-                                    onClick={() => addOne(item)}
+                                    onClick={() => addOne({ id: item.id, name: item.name, category: item.category, unit: item.unit })}
                                     className="w-8 h-8 rounded-full bg-pepper flex items-center justify-center shadow-lg hover:bg-pepper-deep transition-colors"
                                     aria-label={`Add ${item.name}`}
                                   >
@@ -375,7 +330,6 @@ export default function ProductsPage() {
                               </div>
                             </div>
 
-                            {/* Card body */}
                             <div className="px-3 py-3">
                               <p className="text-soil text-[13px] font-semibold leading-tight">{item.name}</p>
                               {item.unit && (
@@ -405,7 +359,7 @@ export default function ProductsPage() {
             {cartCount}
           </span>
           <span className="text-[14px] font-medium flex items-center gap-2">
-            <ShoppingBasket size={16} />
+            <ShoppingCart size={16} />
             View my list
           </span>
         </button>
@@ -445,11 +399,11 @@ export default function ProductsPage() {
                             {line.unit && <p className="font-data text-[11px] text-stone">{line.unit}</p>}
                           </div>
                           <div className="flex items-center gap-2 bg-grain rounded-full px-1 py-1 border border-soil/10">
-                            <button onClick={() => removeOne(line)} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-grain-dim transition-colors">
+                            <button onClick={() => removeOne(line.id)} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-grain-dim transition-colors">
                               <Minus size={12} className="text-soil" />
                             </button>
                             <span className="text-soil text-[12px] font-data w-4 text-center">{line.quantity}</span>
-                            <button onClick={() => addOne(line)} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-grain-dim transition-colors">
+                            <button onClick={() => addOne({ id: line.id, name: line.name, category: line.category, unit: line.unit })} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-grain-dim transition-colors">
                               <Plus size={12} className="text-soil" />
                             </button>
                           </div>
@@ -476,21 +430,21 @@ export default function ProductsPage() {
                     <label className="text-soil text-[13px] font-medium block mb-1.5">Full name</label>
                     <input value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })}
                       placeholder="Your full name"
-                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.fullName ? "border-red-400" : "border-soil/10"}`} />
+                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.fullName ? 'border-red-400' : 'border-soil/10'}`} />
                     {fieldErrors.fullName && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.fullName}</p>}
                   </div>
                   <div>
                     <label className="text-soil text-[13px] font-medium block mb-1.5">Phone number</label>
                     <input value={form.phoneNumber} onChange={e => setForm({ ...form, phoneNumber: e.target.value })}
                       placeholder="08012345678"
-                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.phoneNumber ? "border-red-400" : "border-soil/10"}`} />
+                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.phoneNumber ? 'border-red-400' : 'border-soil/10'}`} />
                     {fieldErrors.phoneNumber && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.phoneNumber}</p>}
                   </div>
                   <div>
                     <label className="text-soil text-[13px] font-medium block mb-1.5">Delivery location</label>
                     <input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })}
                       placeholder="e.g. Wuse 2, Abuja"
-                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.location ? "border-red-400" : "border-soil/10"}`} />
+                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${fieldErrors.location ? 'border-red-400' : 'border-soil/10'}`} />
                     {fieldErrors.location && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.location}</p>}
                   </div>
                   <div>
@@ -544,4 +498,3 @@ export default function ProductsPage() {
     </>
   )
 }
-
