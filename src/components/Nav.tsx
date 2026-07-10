@@ -50,8 +50,8 @@ function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
         value={query}
         onChange={e => setQuery(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && go()}
-        placeholder="Search products and farmers"
-        className="flex-1 text-[15px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
+        placeholder="Search produce…"
+        className="flex-1 min-w-0 text-[15px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
       />
     </div>
   )
@@ -91,7 +91,7 @@ function TabBar() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`shrink-0 px-5 py-3 text-[13px] font-medium border-b-2 transition-colors whitespace-nowrap ${
+            className={`shrink-0 px-4 sm:px-5 py-3 text-[13px] font-medium border-b-2 transition-colors whitespace-nowrap ${
               active
                 ? 'border-soil text-soil'
                 : 'border-transparent text-stone/70 hover:text-soil'
@@ -172,7 +172,7 @@ export function Nav() {
           <Suspense fallback={
             <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-3 gap-2.5 shadow-sm">
               <Search size={17} className="text-stone/45" />
-              <span className="text-[15px] text-stone/40">Search products and farmers</span>
+              <span className="text-[15px] text-stone/40">Search produce…</span>
             </div>
           }>
             <NavSearchBar size="sm" />
