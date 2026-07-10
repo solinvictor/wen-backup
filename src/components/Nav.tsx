@@ -9,7 +9,7 @@ import { useCart } from '@/context/CartContext'
 // ── Tab config ─────────────────────────────────────────────────────────────
 const TABS = [
   { href: '/',         label: 'Home' },
-  { href: '/products', label: 'Products' },
+  { href: '/store',    label: 'Shop'     },
   { href: '/farmers',  label: 'Farmers' },
   { href: '/buyers',   label: 'Buyers' },
   { href: '/contact',  label: 'Contact' },
@@ -63,7 +63,7 @@ function CartButton() {
 
   return (
     <Link
-      href="/products"
+      href="/store"
       aria-label={`Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}`}
       className="relative flex items-center justify-center w-9 h-9 text-soil hover:bg-soil/6 rounded-full transition-colors"
     >
