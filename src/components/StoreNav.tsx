@@ -24,8 +24,8 @@ const TABS = [
 
 // ── Location pill (shared mobile + desktop) ────────────────────────────────
 function LocationPill({
-  onOpen, size = 'sm', align = 'center',
-}: { onOpen: () => void; size?: 'sm' | 'lg'; align?: 'center' | 'left' }) {
+  onOpen, size = 'sm',
+}: { onOpen: () => void; size?: 'sm' | 'lg' }) {
   const { location } = useLocation()
   const label = location?.label ?? 'Set delivery area'
 
@@ -46,16 +46,19 @@ function LocationPill({
   }
 
   return (
-    <div className={`flex ${align === 'center' ? 'justify-center' : 'justify-start'} pb-2`}>
-      <button
-        onClick={onOpen}
-        className="flex items-center gap-1.5 text-[14px] font-semibold text-soil hover:text-pepper transition-colors"
-      >
-        <MapPin size={14} className="text-pepper" />
-        <span className="truncate max-w-[220px]">{label}</span>
-        <ChevronDown size={14} className="text-soil/50" />
-      </button>
-    </div>
+    <button
+      onClick={onOpen}
+      className="flex items-center gap-1 min-w-0 leading-tight group"
+    >
+      <MapPin size={15} className="text-pepper shrink-0" />
+      <span className="flex flex-col items-start min-w-0">
+        <span className="text-[10px] text-stone/50 font-medium leading-none">Deliver to</span>
+        <span className="flex items-center gap-1 text-[13px] font-semibold text-soil leading-tight">
+          <span className="truncate max-w-[46vw]">{label}</span>
+          <ChevronDown size={13} className="text-soil/45 shrink-0" />
+        </span>
+      </span>
+    </button>
   )
 }
 
@@ -92,25 +95,22 @@ function SearchBar({ size = 'sm' }: { size?: 'sm' | 'lg' }) {
   }
 
   return (
-    <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-3 gap-3 shadow-sm focus-within:border-pepper/50 focus-within:shadow-md transition-all">
+    <div className="flex items-center w-full bg-grain border border-soil/10 rounded-full px-4 py-2.5 gap-3 focus-within:border-pepper/50 focus-within:bg-white focus-within:shadow-sm transition-all">
+      <Search size={17} className="text-stone/45 shrink-0" />
       <input
         type="text"
         value={q}
         onChange={e => setQ(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && go()}
         placeholder="Search products and farmers"
-        className="flex-1 text-[15px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
+        className="flex-1 text-[14px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
       />
-      {q ? (
+      {q && (
         <button
           onClick={() => { setQ(''); router.push('/store') }}
           className="text-stone/40 hover:text-soil transition-colors shrink-0"
         >
-          <X size={16} />
-        </button>
-      ) : (
-        <button onClick={go} className="shrink-0 text-stone/50 hover:text-soil transition-colors">
-          <Search size={18} />
+          <X size={15} />
         </button>
       )}
     </div>
@@ -124,10 +124,14 @@ function CartBtn({ onClick, compact = false }: { onClick: () => void; compact?: 
     <button
       onClick={onClick}
       aria-label={`Cart, ${cartCount} items`}
-      className={`relative flex items-center gap-1.5 text-soil ${compact ? 'hover:bg-soil/6 rounded-full px-3 py-2 transition-colors' : ''}`}
+      className={`relative flex items-center justify-center text-soil rounded-full hover:bg-soil/6 active:bg-soil/10 transition-colors ${compact ? 'w-10 h-10' : 'w-11 h-11'}`}
     >
-      <ShoppingCart size={compact ? 22 : 26} strokeWidth={1.7} />
-      <span className="text-[15px] font-semibold">{cartCount}</span>
+      <ShoppingCart size={compact ? 21 : 23} strokeWidth={1.8} />
+      {cartCount > 0 && (
+        <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-pepper text-white text-[10px] font-bold leading-none">
+          {cartCount > 99 ? '99+' : cartCount}
+        </span>
+      )}
     </button>
   )
 }
@@ -139,7 +143,7 @@ function IconTabBar() {
   const c = searchParams?.get('c') ?? ''
 
   return (
-    <div className="flex overflow-x-auto scrollbar-hide border-t border-soil/8">
+    <div className="flex overflow-x-auto scrollbar-hide gap-1 px-3 py-2.5 snap-x snap-mandatory">
       {TABS.map(({ href, label, Icon }) => {
         const isHome   = label === 'Home'
         const active   = isHome
@@ -149,18 +153,20 @@ function IconTabBar() {
           <Link
             key={href}
             href={href}
-            className={`flex flex-col items-center gap-1.5 shrink-0 px-5 py-3 border-b-2 transition-colors ${
-              active
-                ? 'border-soil text-soil'
-                : 'border-transparent text-stone/55 hover:text-soil'
-            }`}
+            className="flex flex-col items-center gap-1.5 shrink-0 w-16 snap-start"
           >
-            <Icon
-              size={24}
-              strokeWidth={active ? 2.2 : 1.6}
-              className="transition-all"
-            />
-            <span className="text-[12px] font-medium whitespace-nowrap">{label}</span>
+            <span
+              className={`flex items-center justify-center w-12 h-12 rounded-full border transition-all ${
+                active
+                  ? 'bg-pepper/10 border-pepper text-pepper'
+                  : 'bg-grain border-soil/10 text-soil/60'
+              }`}
+            >
+              <Icon size={20} strokeWidth={active ? 2.2 : 1.7} />
+            </span>
+            <span className={`text-[11px] font-medium whitespace-nowrap ${active ? 'text-soil' : 'text-stone/60'}`}>
+              {label}
+            </span>
           </Link>
         )
       })}
@@ -223,51 +229,47 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
           <CartBtn onClick={onCartOpen ?? (() => {})} compact />
         </div>
 
-        {/* ── Mobile / tablet: stacked 4-row nav (below lg) ── */}
+        {/* ── Mobile / tablet: compact 3-row nav (below lg) ── */}
         <div className="lg:hidden">
-          {/* Row 1: hamburger | logo | login | cart */}
-          <div className="flex items-center justify-between px-4 h-14 gap-3">
-            <div className="flex items-center gap-3">
+          {/* Row 1: hamburger + logo/location | cart */}
+          <div className="flex items-center justify-between pl-3 pr-2 h-14 gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="text-soil"
+                className="w-10 h-10 -ml-1 flex items-center justify-center text-soil shrink-0 rounded-full hover:bg-soil/6 active:bg-soil/10 transition-colors"
                 aria-label="Open menu"
               >
-                <Menu size={24} strokeWidth={1.8} />
+                <Menu size={22} strokeWidth={1.8} />
               </button>
-              <Link href="/store" className="font-display text-2xl font-bold tracking-tight text-soil">
-                WEN
-              </Link>
+              <div className="w-px h-6 bg-soil/10 shrink-0" />
+              <LocationPill onOpen={() => setLocationOpen(true)} />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 shrink-0">
               <Link
                 href="/login"
-                className="bg-pepper text-white text-[14px] font-semibold px-5 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
+                className="text-soil text-[13px] font-semibold px-3 py-2 rounded-full hover:bg-soil/6 transition-colors whitespace-nowrap"
               >
                 Log in
               </Link>
-              <CartBtn onClick={onCartOpen ?? (() => {})} />
+              <CartBtn onClick={onCartOpen ?? (() => {})} compact />
             </div>
           </div>
 
-          {/* Row 2: location — centered */}
-          <LocationPill onOpen={() => setLocationOpen(true)} />
-
-          {/* Row 3: search bar */}
-          <div className="px-4 pb-3">
+          {/* Row 2: search bar */}
+          <div className="px-3 pb-2.5">
             <Suspense fallback={
-              <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-3 gap-3 shadow-sm">
-                <span className="flex-1 text-[15px] text-stone/40">Search products and farmers</span>
-                <Search size={18} className="text-stone/50 shrink-0" />
+              <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-2.5 gap-3 shadow-sm">
+                <span className="flex-1 text-[14px] text-stone/40">Search products and farmers</span>
+                <Search size={17} className="text-stone/50 shrink-0" />
               </div>
             }>
               <SearchBar />
             </Suspense>
           </div>
 
-          {/* Row 4: icon tab bar */}
-          <Suspense fallback={<div className="h-[68px] border-t border-soil/8" />}>
+          {/* Row 3: icon tab bar */}
+          <Suspense fallback={<div className="h-[84px]" />}>
             <IconTabBar />
           </Suspense>
         </div>
