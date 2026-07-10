@@ -76,7 +76,7 @@ function Hero() {
   function handleSearch() {
     const dest = query.trim()
       ? `/products?q=${encodeURIComponent(query.trim())}`
-      : '/products'
+      : '/store'
     window.location.href = dest
   }
 
@@ -176,7 +176,7 @@ function CategoryGrid() {
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display text-soil text-lg sm:text-xl tracking-tight">Shop by category</h2>
           <Link
-            href="/products"
+            href="/store"
             className="flex items-center gap-1 text-[13px] font-semibold text-pepper hover:text-pepper-deep transition-colors"
           >
             See all <ChevronRight size={14} />
@@ -192,7 +192,7 @@ function CategoryGrid() {
               transition={{ duration: 0.25, delay: i * 0.04 }}
             >
               <Link
-                href={`/products?category=${cat.key}`}
+                href={`/store?category=${cat.key}`}
                 className="group flex flex-col items-center gap-2"
               >
                 <div className="w-full aspect-square rounded-2xl overflow-hidden bg-grain-dim border border-soil/8 group-hover:border-pepper/30 group-hover:shadow-md transition-all duration-200">
@@ -281,7 +281,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
       transition={{ duration: 0.3, delay: index * 0.04 }}
     >
       <Link
-        href={`/products?category=${product.category}`}
+        href={`/store?category=${product.category}`}
         className="group block bg-white rounded-2xl border border-soil/8 hover:border-pepper/30 hover:shadow-md transition-all duration-200 overflow-hidden"
       >
         <div className="aspect-square overflow-hidden bg-grain-dim">
@@ -337,7 +337,7 @@ function FeaturedProducts() {
             <h2 className="font-display text-soil text-xl sm:text-2xl tracking-tight">What farmers have today</h2>
           </div>
           <Link
-            href="/products"
+            href="/store"
             className="flex items-center gap-1 text-[13px] font-semibold text-pepper hover:text-pepper-deep transition-colors"
           >
             See all <ChevronRight size={14} />
@@ -352,7 +352,7 @@ function FeaturedProducts() {
 
         <div className="mt-6 sm:hidden">
           <Link
-            href="/products"
+            href="/store"
             className="flex items-center justify-center gap-1.5 w-full border-2 border-soil/10 text-[14px] font-semibold text-soil py-3.5 rounded-xl hover:bg-grain-dim transition-colors"
           >
             Browse all produce <ArrowRight size={14} />
