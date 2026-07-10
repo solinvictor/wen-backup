@@ -31,9 +31,9 @@ const BENEFITS = [
 ]
 
 const BUYER_TYPES = [
-  { value: 'household', label: 'Household', emoji: '🏠', desc: 'Fresh groceries for your family' },
-  { value: 'business', label: 'Business', emoji: '🏢', desc: 'Bulk sourcing for your company' },
-  { value: 'restaurant', label: 'Restaurant', emoji: '🍽️', desc: 'Consistent supply for your kitchen' },
+  { value: 'household', label: 'Household', emoji: '🏠', desc: 'For my family' },
+  { value: 'business', label: 'Business', emoji: '🏢', desc: 'Bulk orders' },
+  { value: 'restaurant', label: 'Restaurant', emoji: '🍽️', desc: 'My kitchen' },
 ]
 
 const SOCIAL_PROOF = [
@@ -96,7 +96,7 @@ export default function BuyersPage() {
             />
             <div className="absolute inset-0 bg-white/86" />
           </div>
-          <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+          <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 py-10 sm:py-16 lg:py-20">
             <motion.p
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -110,7 +110,7 @@ export default function BuyersPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.06 }}
               className="font-display text-soil leading-tight tracking-tight mb-4"
-              style={{ fontSize: 'clamp(28px, 5vw, 52px)' }}
+              style={{ fontSize: 'clamp(26px, 5vw, 52px)' }}
             >
               Fresh produce.<br />
               <span className="text-pepper">Fair prices.</span>
@@ -119,7 +119,7 @@ export default function BuyersPage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.12 }}
-              className="text-stone text-[15px] leading-relaxed mb-8 max-w-lg"
+              className="text-stone text-[14px] sm:text-[15px] leading-relaxed mb-7 sm:mb-8 max-w-lg"
             >
               Whether you're feeding a family, running a restaurant, or sourcing for your business — WEN connects you directly to farmers across Nigeria.
             </motion.p>
@@ -129,7 +129,7 @@ export default function BuyersPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-wrap gap-6"
+              className="flex flex-wrap gap-5 sm:gap-6"
             >
               {SOCIAL_PROOF.map((s) => (
                 <div key={s.label}>
@@ -166,8 +166,8 @@ export default function BuyersPage() {
         </section>
 
         {/* Form section */}
-        <section className="bg-grain-dim py-12 sm:py-16">
-          <div className="max-w-5xl mx-auto px-5 sm:px-8 grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14">
+        <section className="bg-grain-dim py-10 sm:py-12 lg:py-16">
+          <div className="max-w-5xl mx-auto px-5 sm:px-8 grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-14">
 
             {/* Left copy */}
             <div className="lg:col-span-2">
@@ -175,12 +175,12 @@ export default function BuyersPage() {
               <h2 className="font-display text-soil tracking-tight mb-4" style={{ fontSize: 'clamp(22px, 3vw, 30px)' }}>
                 Register as a buyer
               </h2>
-              <p className="text-stone text-[14.5px] leading-relaxed mb-8">
+              <p className="text-stone text-[14px] sm:text-[14.5px] leading-relaxed mb-7 sm:mb-8">
                 Tell us what you need. We'll match you with the right farmers and handle everything from sourcing to delivery.
               </p>
 
               {/* How it works */}
-              <div className="space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 {[
                   { step: '01', text: 'Fill in the form below' },
                   { step: '02', text: 'We match you with verified farmers' },
@@ -189,7 +189,7 @@ export default function BuyersPage() {
                   <div key={item.step} className="flex items-center gap-3.5">
                     <span className="font-data text-[11px] font-bold text-pepper/60 w-6 shrink-0">{item.step}</span>
                     <div className="h-px flex-1 bg-soil/10" />
-                    <span className="text-soil/75 text-[13.5px] font-medium text-right max-w-[160px]">{item.text}</span>
+                    <span className="text-soil/75 text-[13px] sm:text-[13.5px] font-medium text-right max-w-[160px]">{item.text}</span>
                   </div>
                 ))}
               </div>
@@ -216,7 +216,7 @@ export default function BuyersPage() {
                   <p className="text-stone text-[14px] max-w-xs mx-auto">We'll be in touch soon to connect you with the right farmers.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="p-7 sm:p-8 space-y-5">
+                <form onSubmit={handleSubmit} className="p-5 sm:p-7 lg:p-8 space-y-5">
 
                   {/* Buyer type selector */}
                   <div>
@@ -227,15 +227,15 @@ export default function BuyersPage() {
                           key={t.value}
                           type="button"
                           onClick={() => setForm({ ...form, buyerType: t.value })}
-                          className={`flex flex-col items-center gap-1.5 text-center py-3.5 px-2 rounded-xl border transition-all ${
+                          className={`flex flex-col items-center gap-1 text-center py-3 px-2 rounded-xl border transition-all ${
                             form.buyerType === t.value
                               ? 'bg-pepper text-white border-pepper shadow-sm'
                               : 'border-soil/12 text-soil/70 hover:border-soil/25 bg-grain-dim'
                           }`}
                         >
-                          <span className="text-lg">{t.emoji}</span>
+                          <span className="text-xl">{t.emoji}</span>
                           <span className="text-[12.5px] font-semibold leading-tight">{t.label}</span>
-                          <span className={`text-[11px] leading-tight ${form.buyerType === t.value ? 'text-white/70' : 'text-stone/50'}`}>
+                          <span className={`text-[11px] leading-tight hidden sm:block ${form.buyerType === t.value ? 'text-white/70' : 'text-stone/50'}`}>
                             {t.desc}
                           </span>
                         </button>
@@ -324,4 +324,3 @@ export default function BuyersPage() {
     </>
   )
 }
-
