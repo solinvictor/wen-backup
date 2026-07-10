@@ -90,18 +90,17 @@ function Hero() {
           aria-hidden
           className="w-full h-full object-cover"
         />
-        {/* layered overlay: deep green base + warm gradient so text is readable but image breathes */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(15,41,64,0.72) 0%, rgba(44,90,32,0.55) 50%, rgba(139,195,74,0.28) 100%)' }} />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 100%)' }} />
       </div>
-      <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 pt-10 pb-8 sm:pt-14 sm:pb-12">
+      <div className="relative z-10 max-w-5xl mx-auto px-5 sm:px-8 pt-9 pb-8 sm:pt-14 sm:pb-12">
 
         {/* Eyebrow */}
         <motion.p
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="text-[12px] font-semibold text-green-300 uppercase tracking-[0.18em] mb-3"
+          className="text-[11px] font-semibold text-green-300 uppercase tracking-[0.18em] mb-3"
         >
           Farm fresh · delivered fast
         </motion.p>
@@ -111,14 +110,14 @@ function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.06 }}
-          className="font-display text-white leading-[1.08] tracking-tight mb-6"
-          style={{ fontSize: 'clamp(32px, 5.5vw, 58px)' }}
+          className="font-display text-white leading-[1.08] tracking-tight mb-5 sm:mb-6"
+          style={{ fontSize: 'clamp(28px, 5.5vw, 58px)' }}
         >
           Fresh produce,<br />
           <span className="text-green-300">straight from the farm.</span>
         </motion.h1>
 
-        {/* Search bar — Instacart-style */}
+        {/* Search bar */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -133,12 +132,12 @@ function Hero() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            placeholder="Search for tomatoes, yam, catfish..."
-            className="flex-1 px-3 py-4 text-[15px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
+            placeholder="Search tomatoes, yam, catfish…"
+            className="flex-1 min-w-0 px-3 py-4 text-[14px] sm:text-[15px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
           />
           <button
             onClick={handleSearch}
-            className="bg-pepper hover:bg-pepper-deep transition-colors text-white text-[14px] font-semibold px-6 py-3 rounded-lg m-1.5 whitespace-nowrap"
+            className="bg-pepper hover:bg-pepper-deep transition-colors text-white text-[13px] sm:text-[14px] font-semibold px-4 sm:px-6 py-3 rounded-lg m-1.5 whitespace-nowrap"
           >
             Find produce
           </button>
@@ -149,17 +148,17 @@ function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.25 }}
-          className="flex flex-wrap gap-3 mt-5"
+          className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-5"
         >
           {[
             { icon: Leaf,        text: 'Farm fresh' },
-            { icon: MapPin,      text: 'Nationwide delivery' },
+            { icon: MapPin,      text: 'Nationwide' },
             { icon: ShieldCheck, text: 'Verified farmers' },
-            { icon: Truck,       text: 'Fast logistics' },
+            { icon: Truck,       text: 'Fast delivery' },
           ].map(({ icon: Icon, text }) => (
             <div key={text} className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1.5">
               <Icon size={12} className="text-green-300" />
-              <span className="text-[12px] font-medium text-white/85">{text}</span>
+              <span className="text-[11px] sm:text-[12px] font-medium text-white/85">{text}</span>
             </div>
           ))}
         </motion.div>
@@ -183,7 +182,8 @@ function CategoryGrid() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 sm:gap-4">
+        {/* 4 cols on mobile (categories are small icons — works well), 8 on sm+ */}
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-4">
           {CATEGORIES.map((cat, i) => (
             <motion.div
               key={cat.key}
@@ -193,16 +193,16 @@ function CategoryGrid() {
             >
               <Link
                 href={`/store?category=${cat.key}`}
-                className="group flex flex-col items-center gap-2"
+                className="group flex flex-col items-center gap-1.5 sm:gap-2"
               >
-                <div className="w-full aspect-square rounded-2xl overflow-hidden bg-grain-dim border border-soil/8 group-hover:border-pepper/30 group-hover:shadow-md transition-all duration-200">
+                <div className="w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-grain-dim border border-soil/8 group-hover:border-pepper/30 group-hover:shadow-md transition-all duration-200">
                   <img
                     src={cat.image}
                     alt={cat.label}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <span className="text-[12px] font-semibold text-soil text-center leading-tight">{cat.label}</span>
+                <span className="text-[10px] sm:text-[12px] font-semibold text-soil text-center leading-tight">{cat.label}</span>
               </Link>
             </motion.div>
           ))}
@@ -220,7 +220,7 @@ function PromoBanner() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
           {/* Farmer CTA */}
-          <Link href="/farmers" className="group relative rounded-2xl overflow-hidden bg-soil flex items-center gap-5 px-6 py-5 hover:bg-soil/90 transition-colors">
+          <Link href="/farmers" className="group relative rounded-2xl overflow-hidden bg-soil flex items-center gap-4 sm:gap-5 px-5 sm:px-6 py-5 hover:bg-soil/90 transition-colors">
             <div className="absolute inset-0">
               <img
                 src="https://images.pexels.com/photos/7728332/pexels-photo-7728332.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop"
@@ -229,9 +229,9 @@ function PromoBanner() {
                 className="w-full h-full object-cover opacity-15"
               />
             </div>
-            <div className="relative z-10 flex-1">
+            <div className="relative z-10 flex-1 min-w-0">
               <p className="text-turmeric text-[11px] font-semibold uppercase tracking-[0.16em] mb-1">For farmers</p>
-              <p className="font-display text-white text-xl leading-snug tracking-tight">Sell direct. Keep more.</p>
+              <p className="font-display text-white text-lg sm:text-xl leading-snug tracking-tight">Sell direct. Keep more.</p>
               <p className="text-white/50 text-[13px] mt-1">No middlemen. List your produce today.</p>
             </div>
             <div className="relative z-10 shrink-0">
@@ -242,7 +242,7 @@ function PromoBanner() {
           </Link>
 
           {/* Buyer CTA */}
-          <Link href="/buyers" className="group relative rounded-2xl overflow-hidden bg-pepper flex items-center gap-5 px-6 py-5 hover:bg-pepper-deep transition-colors">
+          <Link href="/buyers" className="group relative rounded-2xl overflow-hidden bg-pepper flex items-center gap-4 sm:gap-5 px-5 sm:px-6 py-5 hover:bg-pepper-deep transition-colors">
             <div className="absolute inset-0">
               <img
                 src="https://images.pexels.com/photos/8476597/pexels-photo-8476597.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop"
@@ -251,9 +251,9 @@ function PromoBanner() {
                 className="w-full h-full object-cover opacity-10"
               />
             </div>
-            <div className="relative z-10 flex-1">
+            <div className="relative z-10 flex-1 min-w-0">
               <p className="text-white/70 text-[11px] font-semibold uppercase tracking-[0.16em] mb-1">For buyers</p>
-              <p className="font-display text-white text-xl leading-snug tracking-tight">Fresh produce. Fair prices.</p>
+              <p className="font-display text-white text-lg sm:text-xl leading-snug tracking-tight">Fresh produce. Fair prices.</p>
               <p className="text-white/60 text-[13px] mt-1">Build a list, we match you with a farmer.</p>
             </div>
             <div className="relative z-10 shrink-0">
@@ -291,13 +291,13 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
-        <div className="px-3.5 py-3">
-          <p className="text-soil text-[14px] font-semibold leading-tight truncate">{product.name}</p>
+        <div className="px-3 py-3">
+          <p className="text-soil text-[13px] sm:text-[14px] font-semibold leading-tight truncate">{product.name}</p>
           {product.unit && (
-            <p className="text-stone/60 text-[12px] mt-0.5">{product.unit}</p>
+            <p className="text-stone/60 text-[11px] sm:text-[12px] mt-0.5">{product.unit}</p>
           )}
           <div className="flex items-center justify-between mt-2.5">
-            <span className="text-pepper text-[12px] font-semibold">Request price</span>
+            <span className="text-pepper text-[11px] sm:text-[12px] font-semibold">Request price</span>
             <div className="w-7 h-7 rounded-full bg-pepper flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <ArrowRight size={12} className="text-white" />
             </div>
@@ -368,7 +368,7 @@ function Stats() {
   return (
     <section className="bg-soil py-10 sm:py-14">
       <div className="max-w-5xl mx-auto px-5 sm:px-8">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-4 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-4 text-center">
           {STATS.map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -378,7 +378,7 @@ function Stats() {
               transition={{ duration: 0.35, delay: i * 0.06 }}
             >
               <p className="font-display text-white text-3xl sm:text-4xl tracking-tight mb-1">{stat.value}</p>
-              <p className="text-white/45 text-[12px] font-medium uppercase tracking-[0.14em]">{stat.label}</p>
+              <p className="text-white/45 text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.14em]">{stat.label}</p>
             </motion.div>
           ))}
         </div>
@@ -407,17 +407,17 @@ function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.35, delay: i * 0.08 }}
-              className="bg-white rounded-2xl p-6 border border-soil/8 flex flex-col gap-4"
+              className="bg-white rounded-2xl p-5 sm:p-6 border border-soil/8 flex flex-col gap-4"
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, j) => (
                   <Star key={j} size={13} className="text-pepper fill-pepper" />
                 ))}
               </div>
-              <p className="text-soil text-[14px] leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
+              <p className="text-soil text-[13px] sm:text-[14px] leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
               <div className="border-t border-soil/8 pt-4">
                 <p className="text-soil text-[13px] font-semibold">{t.name}</p>
-                <p className="text-stone/60 text-[11.5px] mt-0.5 uppercase tracking-[0.12em] font-medium">{t.role}</p>
+                <p className="text-stone/60 text-[11px] sm:text-[11.5px] mt-0.5 uppercase tracking-[0.12em] font-medium">{t.role}</p>
               </div>
             </motion.div>
           ))}
@@ -444,4 +444,3 @@ export default function HomePage() {
     </>
   )
 }
-
