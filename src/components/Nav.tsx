@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense } from 'react'
 import { Search, Menu, X, MapPin, ChevronDown, ShoppingCart } from 'lucide-react'
+import { useCart } from '@/context/CartContext'
 
 // ── Tab config ─────────────────────────────────────────────────────────────
 const TABS = [
@@ -56,6 +57,26 @@ function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
   )
 }
 
+// ── Cart icon with live badge ───────────────────────────────────────────────
+function CartButton() {
+  const { cartCount } = useCart()
+
+  return (
+    <Link
+      href="/products"
+      aria-label={`Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}`}
+      className="relative flex items-center justify-center w-9 h-9 text-soil hover:bg-soil/6 rounded-full transition-colors"
+    >
+      <ShoppingCart size={22} strokeWidth={1.8} />
+      {cartCount > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-pepper text-white font-data text-[10px] font-bold flex items-center justify-center leading-none px-1">
+          {cartCount > 99 ? '99+' : cartCount}
+        </span>
+      )}
+    </Link>
+  )
+}
+
 // ── Tab bar ────────────────────────────────────────────────────────────────
 function TabBar() {
   const pathname = usePathname()
@@ -95,7 +116,6 @@ export function Nav() {
         {/* Row 1: hamburger | logo | login + cart */}
         <div className="flex items-center px-4 sm:px-6 h-14 gap-3">
 
-          {/* Left: hamburger (mobile only) */}
           <button
             onClick={() => setDrawerOpen(true)}
             className="p-1.5 -ml-1 text-soil sm:hidden shrink-0"
@@ -104,11 +124,9 @@ export function Nav() {
             <Menu size={22} />
           </button>
 
-          {/* Logo — proper spacing so it doesn't crowd the hamburger */}
           <Link
             href="/"
-            className="font-display text-2xl font-bold tracking-tight text-soil shrink-0 sm:mr-6"
-            style={{ marginLeft: '6px' }}
+            className="font-display text-2xl font-bold tracking-tight text-soil shrink-0 ml-1.5 sm:ml-0 sm:mr-6"
           >
             WEN
           </Link>
@@ -125,27 +143,18 @@ export function Nav() {
             </Suspense>
           </div>
 
-          {/* Spacer on mobile so buttons go right */}
+          {/* Spacer on mobile */}
           <div className="flex-1 sm:hidden" />
 
           {/* Right: Log in + cart */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <Link
               href="/login"
               className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
             >
               Log in
             </Link>
-            <Link
-              href="/products"
-              aria-label="Cart"
-              className="relative flex items-center justify-center w-9 h-9 text-soil hover:bg-soil/6 rounded-full transition-colors"
-            >
-              <ShoppingCart size={22} strokeWidth={1.8} />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-pepper text-white font-data text-[10px] font-bold flex items-center justify-center leading-none">
-                0
-              </span>
-            </Link>
+            <CartButton />
           </div>
         </div>
 
@@ -183,7 +192,6 @@ export function Nav() {
           />
           <div className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl">
 
-            {/* Drawer header — WEN branding, not "Menu" */}
             <div className="flex items-center justify-between px-5 h-14 border-b border-soil/10">
               <Link
                 href="/"
