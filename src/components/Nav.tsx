@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense } from 'react'
-import { Search, Menu, X, ShoppingBasket, MapPin, ChevronDown } from 'lucide-react'
+import { Search, Menu, X, MapPin, ChevronDown, ShoppingCart } from 'lucide-react'
 
 // ── Tab config ─────────────────────────────────────────────────────────────
 const TABS = [
@@ -14,7 +14,7 @@ const TABS = [
   { href: '/contact',  label: 'Contact' },
 ]
 
-// ── Search bar (needs Suspense because of useSearchParams) ─────────────────
+// ── Search bar ─────────────────────────────────────────────────────────────
 function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -26,7 +26,6 @@ function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
   }
 
   if (size === 'lg') {
-    // Desktop: inline search in header row
     return (
       <div className="flex items-center flex-1 max-w-2xl bg-white border border-soil/15 rounded-full px-4 py-2.5 gap-2 hover:border-soil/30 focus-within:border-soil/40 focus-within:shadow-sm transition-all">
         <Search size={16} className="text-stone/50 shrink-0" />
@@ -42,7 +41,6 @@ function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
     )
   }
 
-  // Mobile: full-width bar below the top row
   return (
     <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-3 gap-2.5 shadow-sm focus-within:border-soil/35 transition-all">
       <Search size={17} className="text-stone/45 shrink-0" />
@@ -94,28 +92,29 @@ export function Nav() {
     <>
       <header className="sticky top-0 z-50 bg-grain-dim shadow-sm">
 
-        {/* ── Row 1: hamburger | logo | login + cart ── */}
-        <div className="flex items-center justify-between px-4 sm:px-6 h-14 gap-3">
+        {/* Row 1: hamburger | logo | login + cart */}
+        <div className="flex items-center px-4 sm:px-6 h-14 gap-3">
 
-          {/* Left: hamburger (mobile) */}
+          {/* Left: hamburger (mobile only) */}
           <button
             onClick={() => setDrawerOpen(true)}
-            className="p-1.5 -ml-1 text-soil sm:hidden"
+            className="p-1.5 -ml-1 text-soil sm:hidden shrink-0"
             aria-label="Open menu"
           >
             <Menu size={22} />
           </button>
 
-          {/* Logo */}
+          {/* Logo — proper spacing so it doesn't crowd the hamburger */}
           <Link
             href="/"
-            className="font-display text-2xl font-bold tracking-tight text-soil sm:shrink-0"
+            className="font-display text-2xl font-bold tracking-tight text-soil shrink-0 sm:mr-6"
+            style={{ marginLeft: '6px' }}
           >
             WEN
           </Link>
 
-          {/* Desktop: search takes middle */}
-          <div className="hidden sm:flex flex-1 mx-6">
+          {/* Desktop: search fills middle */}
+          <div className="hidden sm:flex flex-1 mx-4">
             <Suspense fallback={
               <div className="flex items-center flex-1 max-w-2xl bg-white border border-soil/15 rounded-full px-4 py-2.5 gap-2">
                 <Search size={16} className="text-stone/50" />
@@ -126,25 +125,31 @@ export function Nav() {
             </Suspense>
           </div>
 
+          {/* Spacer on mobile so buttons go right */}
+          <div className="flex-1 sm:hidden" />
+
           {/* Right: Log in + cart */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             <Link
               href="/login"
               className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
             >
               Log in
             </Link>
-            <button
+            <Link
+              href="/products"
               aria-label="Cart"
-              className="flex items-center gap-1 p-2 text-soil hover:bg-soil/5 rounded-full transition-colors"
+              className="relative flex items-center justify-center w-9 h-9 text-soil hover:bg-soil/6 rounded-full transition-colors"
             >
-              <ShoppingBasket size={20} />
-              <span className="font-data text-[13px] font-semibold">0</span>
-            </button>
+              <ShoppingCart size={22} strokeWidth={1.8} />
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-pepper text-white font-data text-[10px] font-bold flex items-center justify-center leading-none">
+                0
+              </span>
+            </Link>
           </div>
         </div>
 
-        {/* ── Row 2 (mobile): location selector ── */}
+        {/* Row 2 (mobile): location selector */}
         <div className="sm:hidden flex justify-center pb-2 px-4">
           <button className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 hover:text-soil transition-colors">
             <MapPin size={13} className="text-pepper" />
@@ -153,7 +158,7 @@ export function Nav() {
           </button>
         </div>
 
-        {/* ── Row 3 (mobile): search bar ── */}
+        {/* Row 3 (mobile): search bar */}
         <div className="sm:hidden px-4 pb-3">
           <Suspense fallback={
             <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-3 gap-2.5 shadow-sm">
@@ -165,23 +170,32 @@ export function Nav() {
           </Suspense>
         </div>
 
-        {/* ── Row 4: tab bar ── */}
+        {/* Row 4: tab bar */}
         <TabBar />
       </header>
 
-      {/* ── Mobile slide-in drawer ── */}
+      {/* Mobile slide-in drawer */}
       {drawerOpen && (
         <div className="fixed inset-0 z-[60] flex">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-soil/40 backdrop-blur-sm"
             onClick={() => setDrawerOpen(false)}
           />
-          {/* Drawer */}
           <div className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl">
+
+            {/* Drawer header — WEN branding, not "Menu" */}
             <div className="flex items-center justify-between px-5 h-14 border-b border-soil/10">
-              <span className="font-display text-xl font-bold text-soil">Menu</span>
-              <button onClick={() => setDrawerOpen(false)} className="p-1 text-soil/60 hover:text-soil transition-colors">
+              <Link
+                href="/"
+                onClick={() => setDrawerOpen(false)}
+                className="font-display text-2xl font-bold tracking-tight text-soil"
+              >
+                WEN
+              </Link>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="p-1 text-soil/50 hover:text-soil transition-colors"
+              >
                 <X size={20} />
               </button>
             </div>
