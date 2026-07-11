@@ -42,7 +42,7 @@ function SearchBar() {
         value={q}
         onChange={e => setQ(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && go()}
-        placeholder="Search products and farmers"
+        placeholder="Search produce — tomatoes, yam, catfish…"
         className="flex-1 min-w-0 text-[14px] text-soil placeholder:text-stone/45 bg-transparent outline-none"
       />
       {q ? (
