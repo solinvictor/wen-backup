@@ -14,15 +14,21 @@ const CATEGORIES = [
 ]
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Browse fresh produce', body: 'Shop directly from verified local farmers. No middlemen, no markups.' },
-  { step: '02', title: 'Place your order',      body: 'Add items to your cart and check out in seconds. We handle the rest.' },
-  { step: '03', title: 'Get it delivered',      body: 'Fresh from the farm to your doorstep — same day or next morning.' },
+  { step: '01', title: 'We source from farmers', body: 'WEN buys directly from verified local farmers at fair prices — cutting out every middleman in between.' },
+  { step: '02', title: 'Quality checked & packed', body: 'Every product is inspected and packed fresh before it leaves our distribution network.' },
+  { step: '03', title: 'Delivered to your door',  body: 'Order online and get fresh WEN produce delivered same day or next morning.' },
 ]
 
 const STATS = [
-  { value: '200+', label: 'Local farmers' },
+  { value: '200+', label: 'Farmers we work with' },
   { value: '40%',  label: 'Cheaper than markets' },
   { value: '24h',  label: 'Farm to door' },
+]
+
+const WHY_WEN = [
+  { title: 'Fresher produce',    body: 'No cold storage, no long supply chains. Our produce moves from farm to you in under 24 hours.' },
+  { title: 'Consistent quality', body: 'Every item is inspected before it ships. You get what you see, every time.' },
+  { title: 'Fairer for farmers', body: 'We pay farmers directly and fairly — which means better produce for you and better income for them.' },
 ]
 
 export default function LandingPage() {
@@ -33,7 +39,6 @@ export default function LandingPage() {
       <main>
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden bg-soil">
-          {/* subtle radial glow */}
           <div className="absolute inset-0 pointer-events-none"
             style={{ background: 'radial-gradient(ellipse 70% 60% at 65% 50%, rgba(61,122,42,0.18) 0%, transparent 70%)' }}
           />
@@ -43,15 +48,15 @@ export default function LandingPage() {
             {/* Left: copy */}
             <div className="flex-1 text-center sm:text-left">
               <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.25em] mb-5">
-                Farm · Fresh · Direct
+                Sourced direct · Delivered fresh
               </p>
               <h1 className="font-display text-grain leading-[1.05] mb-6"
                 style={{ fontSize: 'clamp(36px, 6vw, 64px)' }}>
-                Fresh from the farm,<br />
-                <span className="text-turmeric">delivered to you.</span>
+                Farm fresh produce,<br />
+                <span className="text-turmeric">sold by WEN.</span>
               </h1>
               <p className="text-grain/85 text-[16px] sm:text-[17px] leading-relaxed mb-8 max-w-md mx-auto sm:mx-0">
-                WEN connects you directly to local farmers in Nigeria — no middlemen, no cold storage, just fresh produce at fair prices.
+                WEN buys directly from local farmers across Nigeria and delivers fresh, quality produce straight to your door — no middlemen, no markups.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">
                 <Link
@@ -62,9 +67,9 @@ export default function LandingPage() {
                 </Link>
                 <Link
                   href="/farmers"
-                  className="inline-flex items-center justify-center gap-2 border border-grain/20 text-grain/80 hover:border-grain/40 hover:text-grain font-medium text-[15px] px-7 py-3.5 rounded-full transition-colors"
+                  className="inline-flex items-center justify-center gap-2 border border-grain/20 text-grain/85 hover:border-grain/40 hover:text-grain font-medium text-[15px] px-7 py-3.5 rounded-full transition-colors"
                 >
-                  Sell on WEN
+                  Supply to WEN
                 </Link>
               </div>
             </div>
@@ -148,21 +153,39 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Farmer CTA ───────────────────────────────────────────────── */}
+        {/* ── Why WEN ──────────────────────────────────────────────────── */}
+        <section className="bg-grain py-14 sm:py-20">
+          <div className="max-w-6xl mx-auto px-5 sm:px-8">
+            <div className="text-center mb-12">
+              <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">Why choose us</p>
+              <h2 className="font-display text-soil text-2xl sm:text-3xl">The WEN difference</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+              {WHY_WEN.map(item => (
+                <div key={item.title} className="bg-grain-dim rounded-2xl p-6">
+                  <h3 className="font-display text-soil text-lg mb-2">{item.title}</h3>
+                  <p className="text-soil/75 text-[14px] leading-relaxed">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Farmer supply CTA ────────────────────────────────────────── */}
         <section className="market-board py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-8">
             <div>
               <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.2em] mb-3">For farmers</p>
-              <h2 className="font-display text-grain text-2xl sm:text-3xl mb-3">Sell directly. Earn more.</h2>
+              <h2 className="font-display text-grain text-2xl sm:text-3xl mb-3">Supply to WEN. Get paid fairly.</h2>
               <p className="text-grain/80 text-[15px] leading-relaxed max-w-md">
-                No agents, no cold storage fees. List your produce on WEN and connect directly with buyers across Nigeria.
+                We buy directly from local farmers at consistent, fair prices. No agents, no delays — just a reliable buyer for your produce.
               </p>
             </div>
             <Link
               href="/farmers"
               className="shrink-0 inline-flex items-center gap-2 bg-pepper hover:bg-pepper-deep text-white font-semibold text-[15px] px-8 py-3.5 rounded-full transition-colors whitespace-nowrap"
             >
-              Become a farmer →
+              Become a supplier →
             </Link>
           </div>
         </section>
