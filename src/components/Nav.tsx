@@ -178,8 +178,7 @@ export function Nav() {
           </Suspense>
         </div>
 
-        {/* Row 4: tab bar */}
-        <TabBar />
+
       </header>
 
       {/* Mobile slide-in drawer */}
@@ -242,3 +241,4 @@ export function Nav() {
     </>
   )
 }
+
