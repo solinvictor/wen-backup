@@ -132,7 +132,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
             <Menu size={24} strokeWidth={1.8} />
           </button>
 
-          <Link href="/store" className="shrink-0">
+          <Link href="/" className="shrink-0">
             <span className="font-display text-[22px] font-bold tracking-tight text-soil">WEN</span>
           </Link>
 
@@ -189,7 +189,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
           <div className="absolute inset-0 bg-soil/40 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
           <div className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl">
             <div className="flex items-center justify-between px-5 h-14 border-b border-soil/10">
-              <Link href="/store" onClick={() => setDrawerOpen(false)} className="font-display text-2xl font-bold text-soil">WEN</Link>
+              <Link href="/" onClick={() => setDrawerOpen(false)} className="font-display text-2xl font-bold text-soil">WEN</Link>
               <button onClick={() => setDrawerOpen(false)} className="p-1 text-soil/50 hover:text-soil">
                 <X size={20} />
               </button>
@@ -228,3 +228,4 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
     </>
   )
 }
+
