@@ -161,6 +161,7 @@ function StoreInner({
 
   useEffect(() => {
     async function load() {
+      const start = Date.now()
       try {
         const supabase = createClient()
         const { data } = await supabase
@@ -172,7 +173,12 @@ function StoreInner({
         else setProducts(FALLBACK_PRODUCTS)
       } catch {
         setProducts(FALLBACK_PRODUCTS)
-      } finally { setLoading(false) }
+      } finally {
+        // Show shimmer for at least 800ms so it doesn't spasm
+        const elapsed = Date.now() - start
+        const remaining = Math.max(0, 800 - elapsed)
+        setTimeout(() => setLoading(false), remaining)
+      }
     }
     load()
   }, [])
