@@ -14,7 +14,6 @@ export function Footer() {
           <div className="flex flex-wrap gap-x-8 gap-y-3 text-[13px]">
             <div className="flex flex-col gap-2">
               <Link href="/farmers" className="hover:text-grain transition-colors">Become a Farmer</Link>
-              <Link href="/buyers" className="hover:text-grain transition-colors">Become a Buyer</Link>
             </div>
             <div className="flex flex-col gap-2">
               <Link href="/products" className="hover:text-grain transition-colors">Products</Link>
