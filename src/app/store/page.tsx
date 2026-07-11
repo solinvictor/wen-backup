@@ -25,11 +25,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   dairy: 'Dairy', spices: 'Spices', other: 'Other',
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  vegetables: '🥬', grains: '🌾', tubers: '🍠',
-  poultry: '🍗', fish: '🐟', fruits: '🍎',
-  dairy: '🥛', spices: '🌶️', other: '🌿',
-}
 
 const CATEGORY_IMAGES: Record<string, string> = {
   vegetables: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
@@ -359,7 +354,6 @@ function StoreInner({
                   >
                     {/* Category header */}
                     <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                      <span className="text-xl">{CATEGORY_EMOJI[category] || '🌿'}</span>
                       <h2 className="font-display text-soil text-[17px] font-semibold">{CATEGORY_LABELS[category] || category}</h2>
                       <span className="text-stone/40 text-[12px] font-data ml-1">{categoryItems.length}</span>
                     </div>
