@@ -38,98 +38,41 @@ export default function LandingPage() {
 
       <main>
         {/* ── Hero ─────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-soil">
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse 70% 60% at 65% 50%, rgba(61,122,42,0.18) 0%, transparent 70%)' }}
+        <section className="relative overflow-hidden min-h-[560px] sm:min-h-[640px] flex items-center">
+          {/* Full-bleed farm produce background */}
+          <img
+            src="https://images.pexels.com/photos/1300972/pexels-photo-1300972.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
           />
+          {/* Heavy dark overlay — legibility first */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(15,41,64,0.88) 0%, rgba(15,41,64,0.72) 60%, rgba(15,41,64,0.55) 100%)' }} />
 
-          <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-24 flex flex-col sm:flex-row items-center gap-10 sm:gap-16">
-
-            {/* Left: copy */}
-            <div className="flex-1 text-center sm:text-left">
-              <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.25em] mb-5">
-                Sourced direct · Delivered fresh
-              </p>
-              <h1 className="font-display text-grain leading-[1.05] mb-6"
-                style={{ fontSize: 'clamp(36px, 6vw, 64px)' }}>
-                Farm fresh produce,<br />
-                <span className="text-turmeric">sold by WEN.</span>
-              </h1>
-              <p className="text-grain/85 text-[16px] sm:text-[17px] leading-relaxed mb-8 max-w-md mx-auto sm:mx-0">
-                WEN buys directly from local farmers across Nigeria and delivers fresh, quality produce straight to your door — no middlemen, no markups.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">
-                <Link
-                  href="/store"
-                  className="inline-flex items-center justify-center gap-2 bg-pepper hover:bg-pepper-deep text-white font-semibold text-[15px] px-7 py-3.5 rounded-full transition-colors"
-                >
-                  Shop now
-                </Link>
-                <Link
-                  href="/farmers"
-                  className="inline-flex items-center justify-center gap-2 border border-grain/20 text-grain/85 hover:border-grain/40 hover:text-grain font-medium text-[15px] px-7 py-3.5 rounded-full transition-colors"
-                >
-                  Supply to WEN
-                </Link>
-              </div>
-            </div>
-
-            {/* Right: produce photo collage */}
-            <div className="flex-shrink-0 w-full sm:w-[420px]">
-              <div className="grid grid-cols-2 gap-2.5">
-                {[
-                  'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-                  'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-                  'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-                  'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-                ].map((src, i) => (
-                  <div key={i} className={`overflow-hidden rounded-2xl ${i === 0 ? 'col-span-2 aspect-[2/1]' : 'aspect-square'}`}>
-                    <img src={src} alt="" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Stats bar ────────────────────────────────────────────────── */}
-        <section className="bg-pepper">
-          <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8 grid grid-cols-3 gap-4 text-center">
-            {STATS.map(s => (
-              <div key={s.label}>
-                <p className="font-display text-white text-2xl sm:text-3xl font-bold">{s.value}</p>
-                <p className="text-white/90 text-[12px] sm:text-[13px] mt-0.5">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Categories ───────────────────────────────────────────────── */}
-        <section className="bg-grain py-14 sm:py-20">
-          <div className="max-w-6xl mx-auto px-5 sm:px-8">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">Browse by category</p>
-                <h2 className="font-display text-soil text-2xl sm:text-3xl">What are you shopping for?</h2>
-              </div>
-              <Link href="/store" className="text-[13px] font-semibold text-pepper hover:text-pepper-deep transition-colors hidden sm:block">
-                View all →
+          <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-24 w-full">
+            <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.25em] mb-5">
+              Sourced direct · Delivered fresh
+            </p>
+            <h1 className="font-display text-grain leading-[1.05] mb-6" style={{ fontSize: 'clamp(36px, 6vw, 64px)' }}>
+              Farm fresh produce,<br />
+              <span className="text-turmeric">sold by WEN.</span>
+            </h1>
+            <p className="text-grain/85 text-[16px] sm:text-[17px] leading-relaxed mb-8 max-w-lg">
+              WEN buys directly from local farmers across Nigeria and delivers fresh, quality produce straight to your door.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/store"
+                className="inline-flex items-center justify-center gap-2 bg-pepper hover:bg-pepper-deep text-white font-semibold text-[15px] px-7 py-3.5 rounded-full transition-colors"
+              >
+                Shop now
               </Link>
-            </div>
-
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 sm:gap-4">
-              {CATEGORIES.map(cat => (
-                <Link
-                  key={cat.slug}
-                  href={`/store?category=${cat.slug}`}
-                  className="group flex flex-col items-center gap-2"
-                >
-                  <div className="w-full aspect-square rounded-2xl overflow-hidden ring-1 ring-soil/8 group-hover:ring-pepper/40 group-hover:shadow-md transition-all">
-                    <img src={cat.img} alt={cat.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  </div>
-                  <span className="text-[11px] sm:text-[12px] font-medium text-soil/85 group-hover:text-soil text-center transition-colors">{cat.label}</span>
-                </Link>
-              ))}
+              <Link
+                href="/farmers"
+                className="inline-flex items-center justify-center gap-2 border border-grain/25 text-grain/85 hover:border-grain/50 hover:text-grain font-medium text-[15px] px-7 py-3.5 rounded-full transition-colors"
+              >
+                Supply to WEN
+              </Link>
             </div>
           </div>
         </section>
@@ -195,3 +138,4 @@ export default function LandingPage() {
     </>
   )
 }
+
