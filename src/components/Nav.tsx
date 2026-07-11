@@ -3,15 +3,15 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense } from 'react'
-import { Search, Menu, X, MapPin, ChevronDown, ShoppingCart } from 'lucide-react'
+import { Search, Menu, X, MapPin, ChevronDown, ShoppingCart, Home, Store, Sprout, MessageCircle } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 
 // ── Tab config ─────────────────────────────────────────────────────────────
 const TABS = [
-  { href: '/',         label: 'Home' },
-  { href: '/store',    label: 'Shop'     },
-  { href: '/farmers',  label: 'Farmers' },
-  { href: '/contact',  label: 'Contact' },
+  { href: '/',         label: 'Home',    Icon: Home         },
+  { href: '/store',    label: 'Shop',    Icon: Store        },
+  { href: '/farmers',  label: 'Farmers', Icon: Sprout       },
+  { href: '/contact',  label: 'Contact', Icon: MessageCircle },
 ]
 
 // ── Search bar ─────────────────────────────────────────────────────────────
@@ -212,8 +212,9 @@ export function Nav() {
                   key={tab.href}
                   href={tab.href}
                   onClick={() => setDrawerOpen(false)}
-                  className="text-[15px] text-soil/80 hover:text-soil py-3 border-b border-soil/6 transition-colors font-medium"
+                  className="flex items-center gap-3.5 text-[15px] text-soil/80 hover:text-soil py-3.5 border-b border-soil/6 transition-colors font-medium"
                 >
+                  <tab.Icon size={18} className="text-pepper shrink-0" strokeWidth={1.8} />
                   {tab.label}
                 </Link>
               ))}
