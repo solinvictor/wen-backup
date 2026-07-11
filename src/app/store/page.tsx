@@ -384,13 +384,11 @@ function StoreInner({
       {cartCount > 0 && !sheetOpen && (
         <button
           onClick={openCart}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-soil text-white rounded-full pl-4 pr-6 py-3.5 flex items-center gap-3 shadow-xl hover:bg-soil/90 active:scale-95 transition-all"
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-soil text-white rounded-full px-5 py-3 flex items-center gap-2.5 shadow-xl active:scale-95 transition-all whitespace-nowrap"
         >
-          <span className="w-6 h-6 rounded-full bg-pepper text-white text-[12px] font-bold font-data flex items-center justify-center">{cartCount}</span>
-          <span className="text-[14px] font-semibold flex items-center gap-2">
-            <ShoppingCart size={16} />
-            View my list
-          </span>
+          <span className="w-5 h-5 rounded-full bg-pepper text-white text-[11px] font-bold font-data flex items-center justify-center shrink-0">{cartCount}</span>
+          <ShoppingCart size={15} className="shrink-0" />
+          <span className="text-[13px] font-semibold">View my list</span>
         </button>
       )}
 
