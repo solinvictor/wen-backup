@@ -33,7 +33,7 @@ body {
 }
 
 body {
-  font-family: var(--font-body), 'Poppins', sans-serif;
+  font-family: var(--font-display), 'Nohemi', sans-serif;
 }
 
 h1, h2, h3, .font-display {
