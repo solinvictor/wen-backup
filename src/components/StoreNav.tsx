@@ -207,7 +207,6 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
           <nav className="flex items-center gap-1 shrink-0">
             {[
               { href: '/farmers', label: 'Farmers' },
-              { href: '/buyers',  label: 'Buyers'  },
             ].map(link => (
               <Link
                 key={link.href}
@@ -295,8 +294,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
                 { href: '/',        label: 'Home'    },
                 { href: '/store',   label: 'Shop'    },
                 { href: '/farmers', label: 'Farmers' },
-                { href: '/buyers',  label: 'Buyers'  },
-                { href: '/about',   label: 'About'   },
+                  { href: '/about',   label: 'About'   },
                 { href: '/contact', label: 'Contact' },
               ].map(({ href, label }) => (
                 <Link
