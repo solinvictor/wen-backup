@@ -6,6 +6,7 @@ import { useState, Suspense } from 'react'
 import {
   Search, MapPin, ChevronDown, ShoppingCart, X, Menu,
   Home, Wheat, Carrot, Egg, Fish, Leaf, Drumstick,
+  Store, Sprout, Info, MessageCircle,
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
@@ -195,17 +196,18 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
             </div>
             <nav className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-1">
               {[
-                { href: '/store',   label: 'Shop'    },
-                { href: '/farmers', label: 'Farmers' },
-                { href: '/about',   label: 'About'   },
-                { href: '/contact', label: 'Contact' },
-              ].map(({ href, label }) => (
+                { href: '/store',   label: 'Shop',    Icon: Store         },
+                { href: '/farmers', label: 'Farmers', Icon: Sprout        },
+                { href: '/about',   label: 'About',   Icon: Info          },
+                { href: '/contact', label: 'Contact', Icon: MessageCircle },
+              ].map(({ href, label, Icon }) => (
                 <Link
                   key={href}
                   href={href}
                   onClick={() => setDrawerOpen(false)}
-                  className="text-[15px] text-soil/80 hover:text-soil py-3 border-b border-soil/6 font-medium transition-colors"
+                  className="flex items-center gap-3.5 text-[15px] text-soil/75 hover:text-soil py-3.5 border-b border-soil/6 font-medium transition-colors group"
                 >
+                  <Icon size={20} strokeWidth={1.6} className="text-soil/40 group-hover:text-pepper transition-colors shrink-0" />
                   {label}
                 </Link>
               ))}
