@@ -50,7 +50,7 @@ export default function LandingPage() {
                 Fresh from the farm,<br />
                 <span className="text-turmeric">delivered to you.</span>
               </h1>
-              <p className="text-grain/60 text-[16px] sm:text-[17px] leading-relaxed mb-8 max-w-md mx-auto sm:mx-0">
+              <p className="text-grain/85 text-[16px] sm:text-[17px] leading-relaxed mb-8 max-w-md mx-auto sm:mx-0">
                 WEN connects you directly to local farmers in Nigeria — no middlemen, no cold storage, just fresh produce at fair prices.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">
@@ -93,7 +93,7 @@ export default function LandingPage() {
             {STATS.map(s => (
               <div key={s.label}>
                 <p className="font-display text-white text-2xl sm:text-3xl font-bold">{s.value}</p>
-                <p className="text-white/70 text-[12px] sm:text-[13px] mt-0.5">{s.label}</p>
+                <p className="text-white/90 text-[12px] sm:text-[13px] mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
@@ -122,7 +122,7 @@ export default function LandingPage() {
                   <div className="w-full aspect-square rounded-2xl overflow-hidden ring-1 ring-soil/8 group-hover:ring-pepper/40 group-hover:shadow-md transition-all">
                     <img src={cat.img} alt={cat.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>
-                  <span className="text-[11px] sm:text-[12px] font-medium text-soil/70 group-hover:text-soil text-center transition-colors">{cat.label}</span>
+                  <span className="text-[11px] sm:text-[12px] font-medium text-soil/85 group-hover:text-soil text-center transition-colors">{cat.label}</span>
                 </Link>
               ))}
             </div>
@@ -139,9 +139,9 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
               {HOW_IT_WORKS.map(item => (
                 <div key={item.step} className="text-center sm:text-left">
-                  <p className="font-data text-[11px] text-pepper/50 mb-3">{item.step}</p>
+                  <p className="font-data text-[11px] text-pepper/70 mb-3">{item.step}</p>
                   <h3 className="font-display text-soil text-lg mb-2">{item.title}</h3>
-                  <p className="text-stone text-[14px] leading-relaxed">{item.body}</p>
+                  <p className="text-soil/75 text-[14px] leading-relaxed">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -154,7 +154,7 @@ export default function LandingPage() {
             <div>
               <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.2em] mb-3">For farmers</p>
               <h2 className="font-display text-grain text-2xl sm:text-3xl mb-3">Sell directly. Earn more.</h2>
-              <p className="text-grain/55 text-[15px] leading-relaxed max-w-md">
+              <p className="text-grain/80 text-[15px] leading-relaxed max-w-md">
                 No agents, no cold storage fees. List your produce on WEN and connect directly with buyers across Nigeria.
               </p>
             </div>
