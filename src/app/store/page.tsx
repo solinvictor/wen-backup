@@ -267,8 +267,8 @@ function StoreInner({
             {loading ? (
               Array.from({ length: 7 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 px-3 py-3 rounded-xl">
-                  <div className="w-9 h-9 rounded-full bg-soil/8 animate-pulse shrink-0" />
-                  <div className="h-3 w-20 bg-soil/8 rounded-full animate-pulse" />
+                  <div className="w-9 h-9 rounded-full shrink-0 shimmer" />
+                  <div className="h-3 w-20 rounded-full shimmer" />
                 </div>
               ))
             ) : (
@@ -320,20 +320,23 @@ function StoreInner({
           {/* Product sections */}
           <div className="px-3 sm:px-6 py-5 pb-36">
             {loading ? (
-              // Skeleton grid
               <div className="space-y-8 sm:space-y-10">
-                {Array.from({ length: 2 }).map((_, si) => (
+                {Array.from({ length: 3 }).map((_, si) => (
                   <div key={si}>
-                    <div className="h-5 w-28 bg-soil/8 rounded-full animate-pulse mb-5" />
+                    {/* Category heading skeleton */}
+                    <div className="h-4 w-32 rounded-md shimmer mb-5" />
                     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
                       {Array.from({ length: 4 }).map((_, i) => (
                         <div key={i} className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
+                          {/* Image area */}
                           <div className="bg-grain-dim p-2 sm:p-3 pb-0">
-                            <div className="aspect-square rounded-xl bg-soil/6 animate-pulse" />
+                            <div className="aspect-square rounded-xl shimmer" />
                           </div>
-                          <div className="p-3 space-y-2">
-                            <div className="h-3 w-3/4 bg-soil/8 rounded-full animate-pulse" />
-                            <div className="h-3 w-1/2 bg-soil/8 rounded-full animate-pulse" />
+                          {/* Text lines */}
+                          <div className="p-3 space-y-2.5">
+                            <div className="h-3 w-3/4 rounded-md shimmer" />
+                            <div className="h-3 w-1/2 rounded-md shimmer" />
+                            <div className="h-7 w-full rounded-lg shimmer mt-1" />
                           </div>
                         </div>
                       ))}
@@ -545,3 +548,4 @@ export default function StorePage() {
     </div>
   )
 }
+
