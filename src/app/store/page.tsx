@@ -54,7 +54,7 @@ const FALLBACK_PRODUCTS: Product[] = [
   { id: 'f-yam',         name: 'Yam',         category: 'tubers',     unit: 'per tuber',  price: 1200,  image_url: null, is_available: true },
   { id: 'f-cassava',     name: 'Cassava',     category: 'tubers',     unit: 'per bag',    price: 8000,  image_url: null, is_available: true },
   { id: 'f-sweetpotato', name: 'Sweet Potato',category: 'tubers',     unit: 'per basket', price: 5000,  image_url: null, is_available: true },
-  { id: 'f-chicken',     name: 'Chicken',     category: 'poultry',    unit: 'per bird',   price: 6500,  image_url: null, is_available: true },
+  { id: 'f-chicken',     name: 'Chicken',     category: 'poultry',    unit: 'per kg',     price: 2800,  image_url: null, is_available: true },
   { id: 'f-eggs',        name: 'Eggs',        category: 'poultry',    unit: 'per crate',  price: 4200,  image_url: null, is_available: true },
   { id: 'f-catfish',     name: 'Catfish',     category: 'fish',       unit: 'per kg',     price: 2800,  image_url: null, is_available: true },
   { id: 'f-tilapia',     name: 'Tilapia',     category: 'fish',       unit: 'per kg',     price: 2200,  image_url: null, is_available: true },
@@ -87,16 +87,16 @@ function ProductCard({ item, inCart, onAdd, onRemove }: {
       inCart ? 'border-pepper/40 shadow-sm ring-1 ring-pepper/10' : 'border-soil/8 hover:shadow-md hover:border-soil/15'
     }`}>
       {/* Image — padded, not full bleed */}
-      <div className="bg-grain-dim p-3 pb-0">
+      <div className="bg-grain-dim p-2 sm:p-3 pb-0">
         <div className="aspect-square rounded-xl overflow-hidden">
           <img src={img} alt={item.name} className="w-full h-full object-cover" />
         </div>
       </div>
 
       {/* Info + add button */}
-      <div className="px-3 pt-2.5 pb-3 flex flex-col gap-2 flex-1">
+      <div className="px-2.5 sm:px-3 pt-2 pb-2.5 sm:pt-2.5 sm:pb-3 flex flex-col gap-1.5 sm:gap-2 flex-1">
         <div className="flex-1">
-          <p className="text-soil text-[13px] font-semibold leading-tight">{item.name}</p>
+          <p className="text-soil text-[12px] sm:text-[13px] font-semibold leading-tight">{item.name}</p>
           {item.unit && (
             <p className="text-stone/55 text-[11px] mt-0.5 font-data">{item.unit}</p>
           )}
@@ -104,7 +104,7 @@ function ProductCard({ item, inCart, onAdd, onRemove }: {
 
         {/* Price + add button row */}
         <div className="flex items-center justify-between">
-          <p className="text-soil text-[14px] font-bold font-display">
+          <p className="text-soil text-[13px] sm:text-[14px] font-bold font-display">
             {formatPrice(item.price)}
           </p>
 
@@ -254,9 +254,6 @@ function StoreInner({
     } finally { setSubmitting(false) }
   }
 
-  // sticky offset: nav is 4 rows ≈ 172px on mobile
-  const PILL_TOP = 'top-[172px]'
-
   return (
     <>
       <div className="max-w-7xl mx-auto flex min-h-0 flex-1">
@@ -307,27 +304,7 @@ function StoreInner({
         {/* Right product area */}
         <main className="flex-1 min-w-0">
 
-          {/* Mobile category pill scroll */}
-          {!loading && categories.length > 0 && (
-            <div className={`lg:hidden sticky ${PILL_TOP} z-20 bg-white/95 backdrop-blur border-b border-soil/8`}>
-              <div className="flex gap-2 overflow-x-auto py-2.5 px-4 scrollbar-hide">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => scrollToCategory(cat)}
-                    className={`flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all ${
-                      activeCategory === cat
-                        ? 'bg-soil text-white shadow-sm'
-                        : 'bg-grain-dim text-stone border border-soil/10'
-                    }`}
-                  >
-                    <span>{CATEGORY_EMOJI[cat] || '🌿'}</span>
-                    <span>{CATEGORY_LABELS[cat] || cat}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+
 
           {/* Search / filter notice */}
           {(query || categoryFilter) && (
@@ -341,17 +318,17 @@ function StoreInner({
           )}
 
           {/* Product sections */}
-          <div className="px-4 sm:px-6 py-5 pb-36">
+          <div className="px-3 sm:px-6 py-5 pb-36">
             {loading ? (
               // Skeleton grid
-              <div className="space-y-10">
+              <div className="space-y-8 sm:space-y-10">
                 {Array.from({ length: 2 }).map((_, si) => (
                   <div key={si}>
                     <div className="h-5 w-28 bg-soil/8 rounded-full animate-pulse mb-5" />
-                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
                       {Array.from({ length: 4 }).map((_, i) => (
                         <div key={i} className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
-                          <div className="bg-grain-dim p-3 pb-0">
+                          <div className="bg-grain-dim p-2 sm:p-3 pb-0">
                             <div className="aspect-square rounded-xl bg-soil/6 animate-pulse" />
                           </div>
                           <div className="p-3 space-y-2">
@@ -370,21 +347,21 @@ function StoreInner({
                 <a href="/store" className="mt-3 inline-block text-pepper text-[14px] font-medium">Browse all</a>
               </div>
             ) : (
-              <div className="space-y-10">
+              <div className="space-y-8 sm:space-y-10">
                 {Object.entries(grouped).map(([category, categoryItems]) => (
                   <div
                     key={category}
                     ref={(el) => { sectionRefs.current[category] = el }}
-                    className="scroll-mt-52 lg:scroll-mt-24"
+                    className="scroll-mt-44 lg:scroll-mt-24"
                   >
                     {/* Category header */}
-                    <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
                       <span className="text-xl">{CATEGORY_EMOJI[category] || '🌿'}</span>
                       <h2 className="font-display text-soil text-[17px] font-semibold">{CATEGORY_LABELS[category] || category}</h2>
                       <span className="text-stone/40 text-[12px] font-data ml-1">{categoryItems.length}</span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
                       {categoryItems.map((item) => (
                         <ProductCard
                           key={item.id}
