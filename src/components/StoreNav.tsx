@@ -36,14 +36,14 @@ function SearchBar() {
   }
 
   return (
-    <div className="flex items-center w-full bg-white border border-soil/12 rounded-full px-4 py-2.5 gap-3 focus-within:border-pepper/60 focus-within:shadow-sm transition-all">
+    <div className="flex items-center w-full bg-white border border-soil/12 rounded-full px-4 py-2 gap-3 focus-within:border-pepper/60 focus-within:shadow-sm transition-all">
       <input
         type="text"
         value={q}
         onChange={e => setQ(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && go()}
         placeholder="Search products and farmers"
-        className="flex-1 min-w-0 text-[15px] text-soil placeholder:text-stone/45 bg-transparent outline-none"
+        className="flex-1 min-w-0 text-[14px] text-soil placeholder:text-stone/45 bg-transparent outline-none"
       />
       {q ? (
         <button onClick={() => { setQ(''); router.push('/store') }} className="text-stone/40 hover:text-soil transition-colors shrink-0">
@@ -94,14 +94,14 @@ function IconTabBar() {
           <Link
             key={href}
             href={href}
-            className={`flex flex-col items-center gap-1 shrink-0 px-4 pt-3 pb-2.5 border-b-2 transition-colors ${
+            className={`flex flex-col items-center gap-0.5 shrink-0 px-3 pt-2 pb-2 border-b-2 transition-colors ${
               active
                 ? 'border-soil text-soil'
                 : 'border-transparent text-stone/55 hover:text-soil'
             }`}
           >
-            <Icon size={22} strokeWidth={active ? 2 : 1.6} />
-            <span className={`text-[11px] font-medium whitespace-nowrap ${active ? 'text-soil' : ''}`}>
+            <Icon size={20} strokeWidth={active ? 2 : 1.6} />
+            <span className={`text-[10px] font-medium whitespace-nowrap ${active ? 'text-soil' : ''}`}>
               {label}
             </span>
           </Link>
@@ -123,7 +123,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
       <header className="sticky top-0 z-50 bg-white shadow-sm">
 
         {/* ── Row 1: hamburger | logo | login pill | cart ── */}
-        <div className="flex items-center justify-between px-4 h-14 gap-3">
+        <div className="flex items-center justify-between px-4 h-12 gap-3">
           <button
             onClick={() => setDrawerOpen(true)}
             className="text-soil shrink-0 p-1 -ml-1"
@@ -148,7 +148,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
         </div>
 
         {/* ── Row 2: location — full width, centered ── */}
-        <div className="flex justify-center px-4 pb-2.5">
+        <div className="flex justify-center px-4 pb-2">
           <button
             onClick={() => setLocationOpen(true)}
             className="flex items-center gap-1.5 group"
@@ -162,7 +162,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
         </div>
 
         {/* ── Row 3: search bar — full width, icon RIGHT ── */}
-        <div className="px-4 pb-3">
+        <div className="px-4 pb-2">
           <Suspense fallback={
             <div className="flex items-center w-full bg-white border border-soil/12 rounded-full px-4 py-2.5 gap-3">
               <span className="flex-1 text-[15px] text-stone/45">Search products and farmers</span>
