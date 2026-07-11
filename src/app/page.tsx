@@ -18,14 +18,14 @@ const CATEGORIES = [
 ]
 
 const FALLBACK_PRODUCTS = [
-  { id: '1', name: 'Fresh Tomatoes',   category: 'vegetables', unit: 'per basket', img: 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '2', name: 'Yam',              category: 'tubers',     unit: 'per tuber',  img: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '3', name: 'Catfish',          category: 'fish',       unit: 'per kg',     img: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '4', name: 'Basmati Rice',     category: 'grains',     unit: 'per bag',    img: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '5', name: 'Broiler Chicken',  category: 'poultry',    unit: 'per bird',   img: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '6', name: 'Ugu Leaves',       category: 'vegetables', unit: 'per bunch',  img: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '7', name: 'Sweet Potatoes',   category: 'tubers',     unit: 'per bag',    img: 'https://images.pexels.com/photos/89247/pexels-photo-89247.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '8', name: 'Tilapia',          category: 'fish',       unit: 'per kg',     img: 'https://images.pexels.com/photos/1556688/pexels-photo-1556688.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '1', name: 'Fresh Tomatoes',  category: 'vegetables', unit: 'per basket', img: 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '2', name: 'Yam',             category: 'tubers',     unit: 'per tuber',  img: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '3', name: 'Catfish',         category: 'fish',       unit: 'per kg',     img: 'https://images.pexels.com/photos/1556688/pexels-photo-1556688.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '4', name: 'Basmati Rice',    category: 'grains',     unit: 'per bag',    img: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '5', name: 'Broiler Chicken', category: 'poultry',    unit: 'per kg',     img: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '6', name: 'Ugu Leaves',      category: 'vegetables', unit: 'per bunch',  img: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '7', name: 'Sweet Potatoes',  category: 'tubers',     unit: 'per bag',    img: 'https://images.pexels.com/photos/89247/pexels-photo-89247.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '8', name: 'Tilapia',         category: 'fish',       unit: 'per kg',     img: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
 ]
 
 const HOW_IT_WORKS = [
@@ -219,6 +219,7 @@ export default function LandingPage() {
     </>
   )
 }
+
 
 
 
