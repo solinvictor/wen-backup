@@ -14,9 +14,9 @@ const CATEGORIES = [
 ]
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'We source from farmers', body: 'WEN buys directly from verified local farmers at fair prices — cutting out every middleman in between.' },
-  { step: '02', title: 'Quality checked & packed', body: 'Every product is inspected and packed fresh before it leaves our distribution network.' },
-  { step: '03', title: 'Delivered to your door',  body: 'Order online and get fresh WEN produce delivered same day or next morning.' },
+  { step: '01', title: 'Farmers supply to WEN', body: 'Local farmers list their available stock. WEN reviews, contacts them, and purchases directly at fair prices.' },
+  { step: '02', title: 'We inspect & pack it', body: 'Every product is quality-checked and packed fresh before it enters our delivery network.' },
+  { step: '03', title: 'You order, we deliver',  body: 'Shop from WEN\'s store and get fresh produce delivered to your door — same day or next morning.' },
 ]
 
 const STATS = [
@@ -54,11 +54,11 @@ export default function LandingPage() {
               Sourced direct · Delivered fresh
             </p>
             <h1 className="font-display text-grain leading-[1.05] mb-6" style={{ fontSize: 'clamp(36px, 6vw, 64px)' }}>
-              Farm fresh produce,<br />
-              <span className="text-turmeric">sold by WEN.</span>
+              Your fresh produce store,<br />
+              <span className="text-turmeric">sourced from local farms.</span>
             </h1>
             <p className="text-grain/85 text-[16px] sm:text-[17px] leading-relaxed mb-8 max-w-lg">
-              WEN buys directly from local farmers across Nigeria and delivers fresh, quality produce straight to your door.
+              WEN sources fresh produce directly from Nigerian farmers and sells it to you at fair prices — delivered straight to your door.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
@@ -121,7 +121,7 @@ export default function LandingPage() {
               <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.2em] mb-3">For farmers</p>
               <h2 className="font-display text-grain text-2xl sm:text-3xl mb-3">Supply to WEN. Get paid fairly.</h2>
               <p className="text-grain/80 text-[15px] leading-relaxed max-w-md">
-                We buy directly from local farmers at consistent, fair prices. No agents, no delays — just a reliable buyer for your produce.
+                List your available stock and WEN will contact you directly to purchase. No agents, no market stress — just a reliable buyer for your produce.
               </p>
             </div>
             <Link
@@ -138,4 +138,5 @@ export default function LandingPage() {
     </>
   )
 }
+
 
