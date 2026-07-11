@@ -392,123 +392,128 @@ function StoreInner({
         </button>
       )}
 
-      {/* Cart sheet */}
+      {/* Cart sheet — bottom sheet on mobile, right panel on desktop */}
       {sheetOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end">
-          <div className="absolute inset-0 bg-soil/30 backdrop-blur-sm" onClick={() => setSheetOpen(false)} />
-          <div className="relative w-full sm:w-[420px] bg-white sm:h-full rounded-t-3xl sm:rounded-none max-h-[90vh] sm:max-h-full overflow-y-auto shadow-2xl sm:border-l sm:border-soil/10">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSheetOpen(false)} />
+          <div className="relative w-full sm:w-[400px] bg-white sm:h-full flex flex-col rounded-t-3xl sm:rounded-none shadow-2xl sm:border-l border-soil/10" style={{ maxHeight: '92dvh' }}>
 
-            {/* Sheet header */}
-            <div className="sticky top-0 bg-white border-b border-soil/8 px-5 py-4 flex items-center justify-between">
+            {/* Drag handle — mobile only */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
+              <div className="w-10 h-1 rounded-full bg-soil/15" />
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-soil/8 shrink-0">
               {checkoutStep === 'details' ? (
-                <button onClick={() => setCheckoutStep('review')} className="text-soil flex items-center gap-1.5 text-[14px] font-medium">
+                <button onClick={() => setCheckoutStep('review')} className="flex items-center gap-1.5 text-[14px] font-medium text-soil">
                   <ArrowLeft size={16} /> Back
                 </button>
               ) : (
-                <h3 className="font-display text-soil text-lg">
-                  {checkoutStep === 'success' ? 'Order placed ✓' : `My list (${cartCount})`}
-                </h3>
+                <p className="font-display text-soil text-[17px]">
+                  {checkoutStep === 'success' ? 'Order placed' : 'My list'}
+                </p>
               )}
-              <button onClick={() => setSheetOpen(false)} className="text-stone/50 hover:text-soil transition-colors p-1">
+              <button onClick={() => setSheetOpen(false)} className="p-1.5 text-soil/35 hover:text-soil transition-colors -mr-1">
                 <X size={20} />
               </button>
             </div>
 
-            <div className="p-5">
+            {/* Scrollable body */}
+            <div className="flex-1 overflow-y-auto">
+
+              {/* ── Review step ── */}
               {checkoutStep === 'review' && (
-                <>
-                  {cartLines.length === 0 ? (
-                    <p className="text-stone text-[14px] py-10 text-center">Your list is empty.</p>
-                  ) : (
-                    <div className="space-y-2 mb-6">
-                      {cartLines.map(line => (
-                        <div key={line.id} className="flex items-center justify-between gap-3 bg-grain-dim rounded-2xl px-4 py-3">
-                          <div className="min-w-0">
-                            <p className="text-soil text-[14px] font-semibold truncate">{line.name}</p>
-                            {line.unit && <p className="font-data text-[11px] text-stone/55">{line.unit}</p>}
-                          </div>
-                          <div className="flex items-center gap-1.5 bg-pepper rounded-full px-1.5 py-1 shrink-0">
-                            <button onClick={() => removeOne(line.id)} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
-                              <Minus size={11} className="text-white" />
-                            </button>
-                            <span className="text-white text-[12px] font-bold font-data w-4 text-center">{line.quantity}</span>
-                            <button onClick={() => addOne({ id: line.id, name: line.name, category: line.category, unit: line.unit })} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
-                              <Plus size={11} className="text-white" />
-                            </button>
-                          </div>
+                <div className="flex flex-col h-full">
+                  <div className="flex-1 px-4 py-4 space-y-2">
+                    {cartLines.length === 0 ? (
+                      <p className="text-stone/60 text-[14px] text-center py-12">Your list is empty.</p>
+                    ) : cartLines.map(line => (
+                      <div key={line.id} className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-grain-dim">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-soil text-[14px] font-semibold leading-tight truncate">{line.name}</p>
+                          {line.unit && <p className="text-stone/50 text-[11px] font-data mt-0.5">{line.unit}</p>}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                  <button
-                    onClick={() => setCheckoutStep('details')}
-                    disabled={cartLines.length === 0}
-                    className="w-full bg-pepper text-white text-[14px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep transition-colors disabled:opacity-40"
-                  >
-                    Continue — {cartCount} {cartCount === 1 ? 'item' : 'items'}
-                  </button>
-                </>
+                        <div className="flex items-center gap-1.5 bg-pepper rounded-full px-2 py-1 shrink-0">
+                          <button onClick={() => removeOne(line.id)} className="w-5 h-5 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors">
+                            <Minus size={11} className="text-white" />
+                          </button>
+                          <span className="text-white text-[12px] font-bold font-data w-4 text-center">{line.quantity}</span>
+                          <button onClick={() => addOne({ id: line.id, name: line.name, category: line.category, unit: line.unit })} className="w-5 h-5 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors">
+                            <Plus size={11} className="text-white" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Sticky checkout footer */}
+                  <div className="px-4 pb-6 pt-3 border-t border-soil/8 shrink-0">
+                    <button
+                      onClick={() => setCheckoutStep('details')}
+                      disabled={cartLines.length === 0}
+                      className="w-full bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep active:scale-[0.98] transition-all disabled:opacity-40"
+                    >
+                      Checkout
+                    </button>
+                  </div>
+                </div>
               )}
 
+              {/* ── Details step ── */}
               {checkoutStep === 'details' && (
-                <form onSubmit={handleCheckout} className="space-y-4">
-                  <p className="text-stone/65 text-[13px]">Enter your details and we'll confirm your order.</p>
-                  {[
-                    { key: 'fullName',    label: 'Full name',        placeholder: 'Your full name'     },
-                    { key: 'phoneNumber', label: 'Phone number',     placeholder: '08012345678'        },
-                    { key: 'location',    label: 'Delivery address', placeholder: 'e.g. Wuse 2, Abuja' },
-                  ].map(({ key, label, placeholder }) => (
-                    <div key={key}>
-                      <label className="text-soil text-[12px] font-semibold uppercase tracking-wide block mb-1.5">{label}</label>
-                      <input
-                        value={(form as Record<string, string>)[key]}
-                        onChange={e => setForm({ ...form, [key]: e.target.value })}
-                        placeholder={placeholder}
-                        className={`w-full bg-grain-dim border rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors ${(fieldErrors as Record<string, string>)[key] ? 'border-red-400' : 'border-soil/10'}`}
-                      />
-                      {(fieldErrors as Record<string, string>)[key] && (
-                        <p className="text-[12px] text-red-500 mt-1">{(fieldErrors as Record<string, string>)[key]}</p>
-                      )}
-                    </div>
-                  ))}
-                  <div>
-                    <label className="text-soil text-[12px] font-semibold uppercase tracking-wide block mb-2">I'm ordering as a</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {BUYER_TYPES.map(t => (
-                        <button key={t.value} type="button" onClick={() => setForm({ ...form, buyerType: t.value })}
-                          className={`text-[12px] font-semibold py-2.5 rounded-xl border transition-colors ${
-                            form.buyerType === t.value ? 'bg-soil text-white border-soil' : 'bg-grain-dim text-stone border-soil/10'
-                          }`}>{t.label}
-                        </button>
-                      ))}
-                    </div>
+                <form onSubmit={handleCheckout} className="flex flex-col h-full">
+                  <div className="flex-1 px-4 py-4 space-y-4">
+                    {[
+                      { key: 'fullName',    label: 'Full name',        placeholder: 'Your full name',     type: 'text' },
+                      { key: 'phoneNumber', label: 'Phone number',     placeholder: '08012345678',        type: 'tel'  },
+                      { key: 'location',    label: 'Delivery address', placeholder: 'e.g. Wuse 2, Abuja', type: 'text' },
+                    ].map(({ key, label, placeholder, type }) => (
+                      <div key={key}>
+                        <label className="text-soil/70 text-[13px] font-medium block mb-1.5">{label}</label>
+                        <input
+                          type={type}
+                          value={(form as Record<string, string>)[key]}
+                          onChange={e => setForm({ ...form, [key]: e.target.value })}
+                          placeholder={placeholder}
+                          className={`w-full bg-grain-dim border rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all ${(fieldErrors as Record<string, string>)[key] ? 'border-red-400' : 'border-soil/10'}`}
+                        />
+                        {(fieldErrors as Record<string, string>)[key] && (
+                          <p className="text-[12px] text-red-500 mt-1">{(fieldErrors as Record<string, string>)[key]}</p>
+                        )}
+                      </div>
+                    ))}
+                    {error && <p className="text-[13px] text-red-500 bg-red-50 rounded-xl px-4 py-3">{error}</p>}
                   </div>
-                  <div>
-                    <label className="text-soil text-[12px] font-semibold uppercase tracking-wide block mb-1.5">Notes <span className="normal-case font-normal text-stone/40">(optional)</span></label>
-                    <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2}
-                      className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3 text-[14px] text-soil outline-none focus:border-pepper transition-colors resize-none" />
+
+                  <div className="px-4 pb-6 pt-3 border-t border-soil/8 shrink-0">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {submitting && <Loader2 size={16} className="animate-spin" />}
+                      {submitting ? 'Placing order…' : 'Place order'}
+                    </button>
                   </div>
-                  {error && <p className="text-[13px] text-red-500 bg-red-50 rounded-xl px-4 py-2.5">{error}</p>}
-                  <button type="submit" disabled={submitting}
-                    className="w-full bg-pepper text-white text-[14px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-                    {submitting && <Loader2 size={16} className="animate-spin" />}
-                    {submitting ? 'Placing order…' : 'Place order'}
-                  </button>
                 </form>
               )}
 
+              {/* ── Success step ── */}
               {checkoutStep === 'success' && (
-                <div className="text-center py-10">
-                  <div className="w-14 h-14 rounded-full bg-pepper/12 flex items-center justify-center mx-auto mb-4">
-                    <Check size={26} className="text-pepper" />
+                <div className="flex flex-col items-center justify-center text-center px-6 py-16 gap-4">
+                  <div className="w-16 h-16 rounded-full bg-pepper/10 flex items-center justify-center">
+                    <Check size={28} className="text-pepper" />
                   </div>
-                  <p className="font-display text-soil text-xl mb-2">Order received</p>
-                  <p className="text-stone text-[13px] max-w-xs mx-auto mb-6 leading-relaxed">
-                    We'll reach out on {form.phoneNumber} to confirm delivery details.
-                  </p>
+                  <div>
+                    <p className="font-display text-soil text-xl mb-1.5">Order received!</p>
+                    <p className="text-stone/60 text-[13px] leading-relaxed max-w-[240px] mx-auto">
+                      We'll call {form.phoneNumber} to confirm your delivery.
+                    </p>
+                  </div>
                   <button
                     onClick={() => { setSheetOpen(false); setCheckoutStep('review') }}
-                    className="text-pepper font-semibold text-[14px]"
+                    className="mt-2 bg-pepper text-white text-[14px] font-semibold px-8 py-3 rounded-full hover:bg-pepper-deep transition-colors"
                   >
                     Done
                   </button>
