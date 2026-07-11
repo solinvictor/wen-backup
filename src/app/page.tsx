@@ -28,10 +28,10 @@ const FALLBACK_PRODUCTS = [
   { id: '8', name: 'Tilapia',          category: 'fish',       unit: 'per kg',     img: 'https://images.pexels.com/photos/1556688/pexels-photo-1556688.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
 ]
 
-
+const HOW_IT_WORKS = [
   { step: '01', title: 'Farmers supply to WEN', body: 'Local farmers list their available stock. WEN reviews, contacts them, and purchases directly at fair prices.' },
   { step: '02', title: 'We inspect & pack it', body: 'Every product is quality-checked and packed fresh before it enters our delivery network.' },
-  { step: '03', title: 'You order, we deliver',  body: 'Shop from WEN\'s store and get fresh produce delivered to your door — same day or next morning.' },
+  { step: '03', title: 'You order, we deliver', body: "Shop from WEN's store and get fresh produce delivered to your door, same day or next morning." },
 ]
 
 const STATS = [
@@ -219,6 +219,7 @@ export default function LandingPage() {
     </>
   )
 }
+
 
 
 
