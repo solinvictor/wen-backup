@@ -7,11 +7,11 @@ import { Footer } from '@/components/Footer'
 import { Check, Loader2 } from 'lucide-react'
 
 const BENEFITS = [
-  'Access to more buyers',
-  'Fair and transparent pricing',
-  'Reduced dependency on middlemen',
-  'Faster sales cycles',
-  'Support from the WEN team',
+  'WEN contacts you directly — no middlemen involved',
+  'Get paid at fair, consistent prices',
+  'No market stress or price haggling',
+  'Faster sales — we buy what you list',
+  'Ongoing relationship with the WEN team',
 ]
 
 export default function FarmersPage() {
@@ -73,12 +73,12 @@ export default function FarmersPage() {
             <div className="max-w-5xl mx-auto px-5 sm:px-8 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
 
               <div>
-                <p className="font-data text-[12px] text-turmeric uppercase tracking-[0.2em] mb-4 sm:mb-5">Become a Farmer</p>
+                <p className="font-data text-[12px] text-turmeric uppercase tracking-[0.2em] mb-4 sm:mb-5">Supply to WEN</p>
                 <h1 className="font-display text-grain tracking-tight mb-4 sm:mb-5" style={{ fontSize: 'clamp(26px, 4.5vw, 42px)' }}>
-                  Join the WEN Farmer Network
+                  List your produce.<br />WEN buys directly.
                 </h1>
                 <p className="text-grain/70 text-[14px] sm:text-[15px] leading-relaxed mb-7 sm:mb-9 max-w-md">
-                  Sell your produce directly to verified buyers and get better market access.
+                  Tell us what you have available. Our team reviews your listing, reaches out, and purchases from you at fair prices — no agents, no stress.
                 </p>
                 <ul className="space-y-3">
                   {BENEFITS.map((b) => (
@@ -157,3 +157,4 @@ export default function FarmersPage() {
     </>
   )
 }
+
