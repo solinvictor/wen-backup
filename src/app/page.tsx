@@ -1,6 +1,10 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
+import { ArrowRight } from 'lucide-react'
 
 const CATEGORIES = [
   { label: 'Vegetables', slug: 'vegetables', img: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
@@ -13,7 +17,18 @@ const CATEGORIES = [
   { label: 'Spices',     slug: 'spices',     img: 'https://images.pexels.com/photos/2802527/pexels-photo-2802527.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
 ]
 
-const HOW_IT_WORKS = [
+const FALLBACK_PRODUCTS = [
+  { id: '1', name: 'Fresh Tomatoes',   category: 'vegetables', unit: 'per basket', img: 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '2', name: 'Yam',              category: 'tubers',     unit: 'per tuber',  img: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '3', name: 'Catfish',          category: 'fish',       unit: 'per kg',     img: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '4', name: 'Basmati Rice',     category: 'grains',     unit: 'per bag',    img: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '5', name: 'Broiler Chicken',  category: 'poultry',    unit: 'per bird',   img: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '6', name: 'Ugu Leaves',       category: 'vegetables', unit: 'per bunch',  img: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '7', name: 'Sweet Potatoes',   category: 'tubers',     unit: 'per bag',    img: 'https://images.pexels.com/photos/89247/pexels-photo-89247.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '8', name: 'Tilapia',          category: 'fish',       unit: 'per kg',     img: 'https://images.pexels.com/photos/1556688/pexels-photo-1556688.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+]
+
+
   { step: '01', title: 'Farmers supply to WEN', body: 'Local farmers list their available stock. WEN reviews, contacts them, and purchases directly at fair prices.' },
   { step: '02', title: 'We inspect & pack it', body: 'Every product is quality-checked and packed fresh before it enters our delivery network.' },
   { step: '03', title: 'You order, we deliver',  body: 'Shop from WEN\'s store and get fresh produce delivered to your door — same day or next morning.' },
@@ -30,6 +45,69 @@ const WHY_WEN = [
   { title: 'Consistent quality', body: 'Every item is inspected before it ships. You get what you see, every time.' },
   { title: 'Fairer for farmers', body: 'We pay farmers directly and fairly — which means better produce for you and better income for them.' },
 ]
+
+function FeaturedProducts() {
+  const [products, setProducts] = useState(FALLBACK_PRODUCTS)
+
+  useEffect(() => {
+    try {
+      const { createClient } = require('@/lib/supabase/client')
+      const supabase = createClient()
+      supabase
+        .from('products')
+        .select('id, name, category, unit, image_url')
+        .eq('is_available', true)
+        .limit(8)
+        .then(({ data }: { data: typeof FALLBACK_PRODUCTS | null }) => {
+          if (data && data.length > 0) setProducts(data)
+        })
+    } catch {}
+  }, [])
+
+  return (
+    <section className="bg-grain py-14 sm:py-20">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">Fresh today</p>
+            <h2 className="font-display text-soil text-2xl sm:text-3xl">What WEN has in stock</h2>
+          </div>
+          <Link href="/store" className="hidden sm:inline-flex items-center gap-1 text-[13px] font-semibold text-pepper hover:text-pepper-deep transition-colors">
+            Shop all <ArrowRight size={14} />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          {products.map(p => (
+            <Link
+              key={p.id}
+              href={`/store?category=${p.category}`}
+              className="group block bg-white rounded-2xl overflow-hidden border border-soil/8 hover:border-pepper/30 hover:shadow-md transition-all duration-300"
+            >
+              <div className="aspect-square overflow-hidden bg-grain-dim">
+                <img
+                  src={p.img || (p as any).image_url || FALLBACK_PRODUCTS[0].img}
+                  alt={p.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-3 sm:p-4">
+                <p className="font-display text-soil font-bold text-[14px] sm:text-[15px] leading-tight truncate">{p.name}</p>
+                {p.unit && <p className="text-stone text-[12px] mt-0.5">{p.unit}</p>}
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        <div className="sm:hidden">
+          <Link href="/store" className="flex items-center justify-center gap-1.5 w-full border-2 border-soil/15 text-soil font-bold py-3.5 rounded-xl hover:bg-grain-dim transition-colors text-[14px]">
+            See everything <ArrowRight size={15} />
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
 
 export default function LandingPage() {
   return (
@@ -76,6 +154,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* ── Featured products ─────────────────────────────────────── */}
+        <FeaturedProducts />
 
         {/* ── How it works ─────────────────────────────────────────────── */}
         <section className="bg-grain-dim py-14 sm:py-20">
@@ -138,5 +219,6 @@ export default function LandingPage() {
     </>
   )
 }
+
 
 
