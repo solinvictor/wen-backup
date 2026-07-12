@@ -277,6 +277,10 @@ function StoreInner({ sheetOpen, setSheetOpen }: {
     async function load() {
       const start = Date.now()
       try {
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          setProducts(FALLBACK_PRODUCTS)
+          return
+        }
         const supabase = createClient()
         const { data } = await supabase
           .from('products')
