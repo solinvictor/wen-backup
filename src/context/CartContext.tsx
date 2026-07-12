@@ -8,6 +8,8 @@ export interface CartLine {
   name: string
   category: string
   unit: string | null
+  price: number | null      // ₦ price per unit
+  imageUrl: string | null   // for thumbnails in cart/checkout
   quantity: number
 }
 
@@ -19,6 +21,7 @@ type CartAction =
   | { type: 'ADD'; product: Omit<CartLine, 'quantity'> }
   | { type: 'REMOVE'; id: string }
   | { type: 'SET_QTY'; id: string; quantity: number }
+  | { type: 'DELETE'; id: string }
   | { type: 'CLEAR' }
   | { type: 'HYDRATE'; items: Record<string, CartLine> }
 
@@ -26,8 +29,10 @@ interface CartContextValue {
   items: Record<string, CartLine>
   cartLines: CartLine[]
   cartCount: number
+  cartTotal: number          // sum of price × qty for priced items
   addOne: (product: Omit<CartLine, 'quantity'>) => void
   removeOne: (id: string) => void
+  deleteLine: (id: string) => void
   setQty: (id: string, quantity: number) => void
   clearCart: () => void
 }
@@ -62,6 +67,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         },
       }
     }
+    case 'DELETE': {
+      const next = { ...state.items }
+      delete next[action.id]
+      return { items: next }
+    }
     case 'SET_QTY': {
       if (action.quantity <= 0) {
         const next = { ...state.items }
@@ -91,7 +101,6 @@ const STORAGE_KEY = 'wen_cart_v1'
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: {} })
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
@@ -101,18 +110,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           dispatch({ type: 'HYDRATE', items: parsed })
         }
       }
-    } catch {
-      // corrupted storage — start fresh
-    }
+    } catch { /* corrupted — start fresh */ }
   }, [])
 
-  // Persist to localStorage on every change
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
-    } catch {
-      // storage full or blocked
-    }
+    } catch { /* storage full */ }
   }, [state.items])
 
   const addOne = useCallback((product: Omit<CartLine, 'quantity'>) => {
@@ -121,6 +125,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeOne = useCallback((id: string) => {
     dispatch({ type: 'REMOVE', id })
+  }, [])
+
+  const deleteLine = useCallback((id: string) => {
+    dispatch({ type: 'DELETE', id })
   }, [])
 
   const setQty = useCallback((id: string, quantity: number) => {
@@ -133,14 +141,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const cartLines = Object.values(state.items)
   const cartCount = cartLines.reduce((sum, l) => sum + l.quantity, 0)
+  const cartTotal = cartLines.reduce((sum, l) => sum + (l.price ?? 0) * l.quantity, 0)
 
   return (
     <CartContext.Provider value={{
       items: state.items,
       cartLines,
       cartCount,
+      cartTotal,
       addOne,
       removeOne,
+      deleteLine,
       setQty,
       clearCart,
     }}>
@@ -149,7 +160,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-// ── Hook ───────────────────────────────────────────────────────────────────
 export function useCart() {
   const ctx = useContext(CartContext)
   if (!ctx) throw new Error('useCart must be used inside <CartProvider>')
