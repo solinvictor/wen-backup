@@ -3,18 +3,21 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense } from 'react'
-import { Search, Menu, X, MapPin, ChevronDown, ShoppingCart } from 'lucide-react'
+import {
+  Search, Menu, X, MapPin, ChevronDown, ShoppingCart,
+  Home, ShoppingBag, Sprout, Users, Phone
+} from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
 import { LocationPicker } from '@/components/LocationPicker'
 
-// ── Tab config ─────────────────────────────────────────────────────────────
+// ── Tab + drawer config ────────────────────────────────────────────────────
 const TABS = [
-  { href: '/',         label: 'Home' },
-  { href: '/products', label: 'Products' },
-  { href: '/farmers',  label: 'Farmers' },
-  { href: '/buyers',   label: 'Buyers' },
-  { href: '/contact',  label: 'Contact' },
+  { href: '/',         label: 'Home',     icon: Home },
+  { href: '/products', label: 'Products', icon: ShoppingBag },
+  { href: '/farmers',  label: 'Farmers',  icon: Sprout },
+  { href: '/buyers',   label: 'Buyers',   icon: Users },
+  { href: '/contact',  label: 'Contact',  icon: Phone },
 ]
 
 // ── Search bar ─────────────────────────────────────────────────────────────
@@ -97,9 +100,11 @@ function LocationPill({ onClick }: { onClick: () => void }) {
   )
 }
 
-// ── Tab bar ────────────────────────────────────────────────────────────────
+// ── Tab bar — hidden on homepage ───────────────────────────────────────────
 function TabBar() {
   const pathname = usePathname()
+  if (pathname === '/') return null
+
   return (
     <div className="flex overflow-x-auto scrollbar-hide border-t border-soil/8">
       {TABS.map(tab => {
@@ -124,6 +129,7 @@ function TabBar() {
 export function Nav() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
     <>
@@ -171,12 +177,12 @@ export function Nav() {
           </div>
         </div>
 
-        {/* Row 2 (mobile): location pill — tappable */}
+        {/* Row 2 (mobile): location pill */}
         <div className="sm:hidden flex justify-center pb-2 px-4">
           <LocationPill onClick={() => setPickerOpen(true)} />
         </div>
 
-        {/* Row 2 (desktop): location pill left of search — optional, shown inline */}
+        {/* Row 2 (desktop): location pill */}
         <div className="hidden sm:flex items-center px-6 pb-2 gap-3">
           <LocationPill onClick={() => setPickerOpen(true)} />
         </div>
@@ -193,7 +199,7 @@ export function Nav() {
           </Suspense>
         </div>
 
-        {/* Tab bar */}
+        {/* Tab bar — hidden on homepage */}
         <TabBar />
       </header>
 
@@ -202,6 +208,8 @@ export function Nav() {
         <div className="fixed inset-0 z-[60] flex">
           <div className="absolute inset-0 bg-soil/40 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
           <div className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl">
+
+            {/* Drawer header */}
             <div className="flex items-center justify-between px-5 h-14 border-b border-soil/10">
               <Link
                 href="/"
@@ -215,24 +223,35 @@ export function Nav() {
               </button>
             </div>
 
-            {/* Location in drawer too */}
-            <div className="px-5 py-3 border-b border-soil/8">
+            {/* Location in drawer */}
+            <div className="px-5 py-3.5 border-b border-soil/8">
               <LocationPill onClick={() => { setDrawerOpen(false); setPickerOpen(true) }} />
             </div>
 
-            <nav className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-1">
-              {TABS.map(tab => (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  onClick={() => setDrawerOpen(false)}
-                  className="text-[15px] text-soil/80 hover:text-soil py-3 border-b border-soil/6 transition-colors font-medium"
-                >
-                  {tab.label}
-                </Link>
-              ))}
+            {/* Nav links with icons */}
+            <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
+              {TABS.map(tab => {
+                const Icon = tab.icon
+                const active = tab.href === '/' ? pathname === '/' : pathname?.startsWith(tab.href)
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    onClick={() => setDrawerOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
+                      active
+                        ? 'bg-soil/6 text-soil font-semibold'
+                        : 'text-soil/70 hover:bg-soil/4 hover:text-soil font-medium'
+                    }`}
+                  >
+                    <Icon size={18} className={active ? 'text-pepper' : 'text-stone/60'} strokeWidth={1.8} />
+                    <span className="text-[15px]">{tab.label}</span>
+                  </Link>
+                )
+              })}
             </nav>
 
+            {/* Auth buttons */}
             <div className="px-5 py-6 border-t border-soil/10 flex flex-col gap-3">
               <Link
                 href="/signup"
@@ -253,7 +272,7 @@ export function Nav() {
         </div>
       )}
 
-      {/* Location picker modal */}
+      {/* Location picker */}
       {pickerOpen && <LocationPicker onClose={() => setPickerOpen(false)} />}
     </>
   )
