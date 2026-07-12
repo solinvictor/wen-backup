@@ -1,21 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
-import { ChevronLeft, ShoppingBag, Loader2, CheckCircle2, Truck, Phone, MapPin, User, FileText } from 'lucide-react'
+import {
+  ChevronLeft, ShoppingBag, Loader2, CheckCircle2, Truck,
+  Phone, MapPin, User, FileText, Zap, Clock, Navigation, X,
+} from 'lucide-react'
 
 const CATEGORY_IMAGES: Record<string, string> = {
   vegetables: 'https://images.pexels.com/photos/29479888/pexels-photo-29479888.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-  grains: 'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-  tubers: 'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-  poultry: 'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-  fish: 'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-  fruits: 'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-  dairy: 'https://images.pexels.com/photos/248412/pexels-photo-248412.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-  spices: 'https://images.pexels.com/photos/2802527/pexels-photo-2802527.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-  other: 'https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  grains:     'https://images.pexels.com/photos/18328392/pexels-photo-18328392.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  tubers:     'https://images.pexels.com/photos/34143558/pexels-photo-34143558.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  poultry:    'https://images.pexels.com/photos/12969328/pexels-photo-12969328.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  fish:       'https://images.pexels.com/photos/32243187/pexels-photo-32243187.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  fruits:     'https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  dairy:      'https://images.pexels.com/photos/248412/pexels-photo-248412.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  spices:     'https://images.pexels.com/photos/2802527/pexels-photo-2802527.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  other:      'https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
 }
 
 function fmt(n: number | null) {
@@ -27,6 +30,31 @@ function genRef() {
   return 'WEN-' + Math.random().toString(36).substring(2, 8).toUpperCase()
 }
 
+// ── Delivery options ───────────────────────────────────────────────────────
+const DELIVERY_OPTIONS = [
+  {
+    id: 'standard' as const,
+    label: 'Standard delivery',
+    duration: '3 days',
+    fee: 1500,
+    Icon: Clock,
+    badge: 'Most popular',
+    badgeColor: 'bg-soil/8 text-soil/60',
+    desc: 'Fresh from farm, delivered within 3 days',
+  },
+  {
+    id: 'express' as const,
+    label: 'Express delivery',
+    duration: '24 hours',
+    fee: 3500,
+    Icon: Zap,
+    badge: 'Fastest',
+    badgeColor: 'bg-amber-50 text-amber-700',
+    desc: 'Priority harvest & same-day dispatch',
+  },
+]
+
+type DeliveryId = 'standard' | 'express'
 type Step = 'details' | 'success'
 
 interface FormData {
@@ -38,35 +66,198 @@ interface FormData {
 }
 
 const BUYER_TYPES = [
-  { value: 'household',  label: 'Household'  },
-  { value: 'business',   label: 'Business'   },
-  { value: 'restaurant', label: 'Restaurant' },
+  { value: 'household',   label: 'Household'  },
+  { value: 'business',    label: 'Business'   },
+  { value: 'restaurant',  label: 'Restaurant' },
 ] as const
 
+// ── Address autocomplete field ─────────────────────────────────────────────
+interface Suggestion { display_name: string; lat: string; lon: string }
+
+function AddressField({
+  value,
+  onChange,
+  error,
+}: {
+  value: string
+  onChange: (v: string) => void
+  error?: string
+}) {
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [open, setOpen]               = useState(false)
+  const [gpsLoading, setGpsLoading]   = useState(false)
+  const [gpsError, setGpsError]       = useState('')
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wrapperRef  = useRef<HTMLDivElement>(null)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Debounced Nominatim search
+  const search = useCallback((q: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (q.trim().length < 3) { setSuggestions([]); setOpen(false); return }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const url =
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ', Nigeria')}&format=json&addressdetails=0&limit=5&countrycodes=ng`
+        const res  = await fetch(url, { headers: { 'Accept-Language': 'en' } })
+        const data: Suggestion[] = await res.json()
+        setSuggestions(data)
+        setOpen(data.length > 0)
+      } catch { /* silent */ }
+    }, 350)
+  }, [])
+
+  function handleChange(v: string) {
+    onChange(v)
+    search(v)
+    setGpsError('')
+  }
+
+  function pick(s: Suggestion) {
+    // Trim to the human-readable parts, drop the long country suffix
+    const parts = s.display_name.split(',').slice(0, 4).join(',').trim()
+    onChange(parts)
+    setSuggestions([])
+    setOpen(false)
+  }
+
+  // GPS → reverse geocode via Nominatim
+  async function useGPS() {
+    if (!navigator.geolocation) {
+      setGpsError('GPS not supported on this device')
+      return
+    }
+    setGpsLoading(true)
+    setGpsError('')
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude: lat, longitude: lon } = pos.coords
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+          const res  = await fetch(url, { headers: { 'Accept-Language': 'en' } })
+          const data = await res.json()
+          if (data?.display_name) {
+            const parts = data.display_name.split(',').slice(0, 4).join(',').trim()
+            onChange(parts)
+            setSuggestions([])
+            setOpen(false)
+          } else {
+            setGpsError('Could not read your location. Type your address instead.')
+          }
+        } catch {
+          setGpsError('Location lookup failed. Type your address instead.')
+        } finally {
+          setGpsLoading(false)
+        }
+      },
+      (err) => {
+        setGpsLoading(false)
+        if (err.code === 1) setGpsError('Location access denied. Type your address instead.')
+        else setGpsError('Could not get your location. Type your address instead.')
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    )
+  }
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+        <MapPin size={13} />
+        Delivery address
+      </label>
+
+      {/* Input + GPS button */}
+      <div className={`flex items-center bg-grain-dim border rounded-xl overflow-hidden transition-all focus-within:border-pepper focus-within:bg-white ${error ? 'border-red-400' : 'border-soil/10'}`}>
+        <input
+          value={value}
+          onChange={e => handleChange(e.target.value)}
+          onFocus={() => suggestions.length > 0 && setOpen(true)}
+          placeholder="Start typing your address…"
+          autoComplete="off"
+          className="flex-1 px-4 py-3.5 text-[15px] text-soil bg-transparent outline-none placeholder:text-stone/40"
+        />
+        {value && (
+          <button
+            type="button"
+            onClick={() => { onChange(''); setSuggestions([]); setOpen(false) }}
+            className="px-2 text-stone/30 hover:text-soil transition-colors"
+          >
+            <X size={15} />
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={useGPS}
+          disabled={gpsLoading}
+          title="Use my current location"
+          className="flex items-center gap-1.5 px-3 py-3.5 border-l border-soil/10 text-pepper hover:bg-pepper/5 transition-colors disabled:opacity-50 shrink-0"
+        >
+          {gpsLoading
+            ? <Loader2 size={15} className="animate-spin" />
+            : <Navigation size={15} />
+          }
+          <span className="text-[12px] font-semibold hidden sm:block">Use GPS</span>
+        </button>
+      </div>
+
+      {/* GPS error */}
+      {gpsError && <p className="text-[12px] text-amber-600 mt-1">{gpsError}</p>}
+      {error    && <p className="text-[12px] text-red-500 mt-1">{error}</p>}
+
+      {/* Suggestions dropdown */}
+      {open && suggestions.length > 0 && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-soil/10 rounded-xl shadow-lg overflow-hidden">
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              onMouseDown={() => pick(s)}
+              className="w-full flex items-start gap-2.5 px-4 py-3 hover:bg-grain-dim transition-colors text-left border-b border-soil/6 last:border-0"
+            >
+              <MapPin size={13} className="text-pepper shrink-0 mt-0.5" />
+              <span className="text-[13px] text-soil leading-snug line-clamp-2">
+                {s.display_name.split(',').slice(0, 5).join(', ')}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Main checkout ──────────────────────────────────────────────────────────
 export default function CheckoutPage() {
   const router = useRouter()
   const { cartLines, cartCount, cartTotal, clearCart } = useCart()
-  const [step, setStep] = useState<Step>('details')
+  const [step, setStep]           = useState<Step>('details')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [orderRef, setOrderRef] = useState('')
-  const [form, setForm] = useState<FormData>({
-    fullName: '',
-    phone: '',
-    address: '',
-    notes: '',
-    buyerType: 'household',
+  const [error, setError]         = useState('')
+  const [orderRef, setOrderRef]   = useState('')
+  const [delivery, setDelivery]   = useState<DeliveryId>('standard')
+  const [form, setForm]           = useState<FormData>({
+    fullName: '', phone: '', address: '', notes: '', buyerType: 'household',
   })
   const [errors, setErrors] = useState<Partial<FormData>>({})
 
-  // Redirect to store if cart is empty and not on success
   useEffect(() => {
-    if (cartCount === 0 && step !== 'success') {
-      router.replace('/store')
-    }
+    if (cartCount === 0 && step !== 'success') router.replace('/store')
   }, [cartCount, step, router])
 
-  const hasPrices = cartLines.some(l => l.price)
+  const hasPrices   = cartLines.some(l => l.price)
+  const deliveryOpt = DELIVERY_OPTIONS.find(o => o.id === delivery)!
+  const deliveryFee = deliveryOpt.fee
+  const grandTotal  = hasPrices ? (cartTotal ?? 0) + deliveryFee : null
 
   function validate(): boolean {
     const e: Partial<FormData> = {}
@@ -86,24 +277,22 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullName: form.fullName,
+          fullName:    form.fullName,
           phoneNumber: form.phone,
-          location: form.address,
-          buyerType: form.buyerType,
-          notes: form.notes,
+          location:    form.address,
+          buyerType:   form.buyerType,
+          notes:       form.notes,
+          deliveryType: delivery,
+          deliveryFee,
           items: cartLines.map(l => ({
-            name: l.name,
-            category: l.category,
-            unit: l.unit,
-            quantity: l.quantity,
-            price: l.price,
+            name: l.name, category: l.category, unit: l.unit,
+            quantity: l.quantity, price: l.price,
           })),
         }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Something went wrong. Try again.'); return }
-      const ref = genRef()
-      setOrderRef(ref)
+      setOrderRef(genRef())
       clearCart()
       setStep('success')
     } catch {
@@ -113,40 +302,35 @@ export default function CheckoutPage() {
     }
   }
 
-  // ── Success screen ─────────────────────────────────────────────────────
+  // ── Success ──────────────────────────────────────────────────────────────
   if (step === 'success') {
+    const deliveryText = delivery === 'express'
+      ? 'Your order will be dispatched within hours and arrive within 24 hours.'
+      : 'Your order will be harvested fresh and delivered within 3 days.'
     return (
       <div className="min-h-screen bg-grain-dim flex flex-col">
-        {/* Minimal header */}
         <header className="bg-white border-b border-soil/8 px-5 h-14 flex items-center">
           <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
         </header>
-
         <main className="flex-1 flex items-center justify-center px-5 py-12">
           <div className="w-full max-w-md text-center">
-            {/* Icon */}
             <div className="w-20 h-20 rounded-full bg-pepper/10 flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={36} className="text-pepper" strokeWidth={1.8} />
             </div>
-
             <h1 className="font-display text-soil text-2xl font-bold mb-2">Order received!</h1>
             <p className="text-stone/60 text-[14px] leading-relaxed mb-1">
-              We&apos;ll call <span className="font-semibold text-soil">{form.phone}</span> to confirm your delivery details and pricing.
+              We&apos;ll call <span className="font-semibold text-soil">{form.phone}</span> to confirm.
             </p>
-
-            {/* Order ref */}
             <div className="inline-flex items-center gap-2 bg-white border border-soil/10 rounded-full px-4 py-2 mt-4 mb-8">
               <span className="text-stone/50 text-[12px]">Order ref</span>
               <span className="font-data text-soil text-[13px] font-bold tracking-wider">{orderRef}</span>
             </div>
-
-            {/* What happens next */}
             <div className="bg-white rounded-2xl border border-soil/8 p-5 text-left mb-8 space-y-4">
               <p className="text-soil text-[13px] font-semibold mb-3">What happens next</p>
               {[
-                { icon: Phone,  text: 'We call you within 2 hours to confirm your order' },
-                { icon: Truck,  text: 'Farmer prepares fresh produce for your delivery' },
-                { icon: MapPin, text: 'Delivered to your door, same day or next morning' },
+                { icon: Phone, text: 'We call you within 2 hours to confirm your order' },
+                { icon: Truck, text: deliveryText },
+                { icon: MapPin, text: `Delivered to: ${form.address}` },
               ].map(({ icon: Icon, text }, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-pepper/8 flex items-center justify-center shrink-0 mt-0.5">
@@ -156,7 +340,6 @@ export default function CheckoutPage() {
                 </div>
               ))}
             </div>
-
             <Link
               href="/store"
               className="w-full inline-flex items-center justify-center gap-2 bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep transition-colors"
@@ -170,10 +353,9 @@ export default function CheckoutPage() {
     )
   }
 
-  // ── Checkout form ──────────────────────────────────────────────────────
+  // ── Form ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-grain-dim flex flex-col">
-      {/* Header */}
       <header className="bg-white border-b border-soil/8 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
           <button onClick={() => router.back()} className="p-1.5 -ml-1 text-soil/60 hover:text-soil transition-colors">
@@ -191,14 +373,72 @@ export default function CheckoutPage() {
           {/* ── Left: form ── */}
           <div className="w-full lg:flex-1 space-y-5">
 
-            {/* Delivery details card */}
+            {/* Delivery speed picker */}
             <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
               <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                 <Truck size={16} className="text-pepper" />
-                <h2 className="font-display text-soil text-[16px] font-semibold">Delivery details</h2>
+                <h2 className="font-display text-soil text-[16px] font-semibold">Delivery speed</h2>
               </div>
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {DELIVERY_OPTIONS.map(opt => {
+                  const active = delivery === opt.id
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setDelivery(opt.id)}
+                      className={`relative flex flex-col gap-1.5 text-left p-4 rounded-xl border-2 transition-all ${
+                        active
+                          ? 'border-pepper bg-pepper/4 shadow-sm'
+                          : 'border-soil/10 bg-grain-dim hover:border-soil/25'
+                      }`}
+                    >
+                      {/* Badge */}
+                      <span className={`self-start text-[10px] font-bold px-2 py-0.5 rounded-full mb-0.5 ${opt.badgeColor}`}>
+                        {opt.badge}
+                      </span>
+                      {/* Icon + label row */}
+                      <div className="flex items-center gap-2">
+                        <opt.Icon
+                          size={18}
+                          className={active ? 'text-pepper' : 'text-stone/50'}
+                          strokeWidth={active ? 2.2 : 1.8}
+                        />
+                        <span className={`text-[15px] font-semibold ${active ? 'text-soil' : 'text-soil/70'}`}>
+                          {opt.label}
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-stone/55 leading-snug">{opt.desc}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className={`font-data text-[13px] font-bold ${active ? 'text-pepper-deep' : 'text-soil/60'}`}>
+                          + {fmt(opt.fee)}
+                        </span>
+                        <span className={`text-[12px] font-medium px-2.5 py-0.5 rounded-full ${
+                          active ? 'bg-pepper text-white' : 'bg-soil/8 text-soil/50'
+                        }`}>
+                          {opt.duration}
+                        </span>
+                      </div>
+                      {/* Selected ring dot */}
+                      {active && (
+                        <div className="absolute top-3 right-3 w-4 h-4 rounded-full bg-pepper flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
 
+            {/* Delivery details card */}
+            <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
+              <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
+                <MapPin size={16} className="text-pepper" />
+                <h2 className="font-display text-soil text-[16px] font-semibold">Your details</h2>
+              </div>
               <div className="px-5 py-5 space-y-4">
+
                 {/* Full name */}
                 <div>
                   <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
@@ -230,20 +470,12 @@ export default function CheckoutPage() {
                   {errors.phone && <p className="text-[12px] text-red-500 mt-1">{errors.phone}</p>}
                 </div>
 
-                {/* Address */}
-                <div>
-                  <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
-                    <MapPin size={13} />
-                    Delivery address
-                  </label>
-                  <input
-                    value={form.address}
-                    onChange={e => setForm({ ...form, address: e.target.value })}
-                    placeholder="e.g. 14 High Level Road, Makurdi"
-                    className={`w-full bg-grain-dim border rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all ${errors.address ? 'border-red-400' : 'border-soil/10'}`}
-                  />
-                  {errors.address && <p className="text-[12px] text-red-500 mt-1">{errors.address}</p>}
-                </div>
+                {/* Address with GPS + autocomplete */}
+                <AddressField
+                  value={form.address}
+                  onChange={v => setForm({ ...form, address: v })}
+                  error={errors.address}
+                />
 
                 {/* Buyer type */}
                 <div>
@@ -275,7 +507,7 @@ export default function CheckoutPage() {
                   <textarea
                     value={form.notes}
                     onChange={e => setForm({ ...form, notes: e.target.value })}
-                    placeholder="Any special instructions for your order…"
+                    placeholder="Any special instructions…"
                     rows={3}
                     className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all resize-none"
                   />
@@ -290,8 +522,8 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* ── Right: order summary (desktop) ── */}
-          <div className="w-full lg:w-80 shrink-0 space-y-4">
+          {/* ── Right: order summary ── */}
+          <div className="w-full lg:w-80 shrink-0">
             <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden sticky top-24">
               <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                 <ShoppingBag size={16} className="text-pepper" />
@@ -299,7 +531,8 @@ export default function CheckoutPage() {
                 <span className="ml-auto font-data text-[12px] text-stone/40">{cartCount} items</span>
               </div>
 
-              <div className="px-4 py-3 space-y-2 max-h-72 overflow-y-auto">
+              {/* Line items */}
+              <div className="px-4 py-3 space-y-2 max-h-64 overflow-y-auto">
                 {cartLines.map(line => {
                   const img = line.imageUrl || CATEGORY_IMAGES[line.category] || CATEGORY_IMAGES.other
                   return (
@@ -319,22 +552,33 @@ export default function CheckoutPage() {
                 })}
               </div>
 
-              {hasPrices && (
-                <div className="px-5 py-4 border-t border-soil/8 space-y-2">
+              {/* Totals */}
+              <div className="px-5 py-4 border-t border-soil/8 space-y-2">
+                {hasPrices && (
                   <div className="flex justify-between text-[13px] text-stone/60">
                     <span>Subtotal</span>
                     <span>{fmt(cartTotal)}</span>
                   </div>
-                  <div className="flex justify-between text-[13px] text-stone/60">
-                    <span>Delivery</span>
-                    <span className="text-pepper-deep font-medium">Confirmed on call</span>
-                  </div>
-                  <div className="flex justify-between font-display text-soil text-[16px] font-bold pt-1 border-t border-soil/8">
-                    <span>Estimated total</span>
-                    <span>{fmt(cartTotal)}</span>
-                  </div>
+                )}
+                {/* Delivery row — always shown, updates live */}
+                <div className="flex justify-between text-[13px] text-stone/60">
+                  <span className="flex items-center gap-1.5">
+                    {deliveryOpt.id === 'express'
+                      ? <Zap size={12} className="text-amber-500" />
+                      : <Clock size={12} className="text-soil/40" />
+                    }
+                    Delivery ({deliveryOpt.duration})
+                  </span>
+                  <span className={deliveryOpt.id === 'express' ? 'text-amber-600 font-semibold' : ''}>
+                    {fmt(deliveryFee)}
+                  </span>
                 </div>
-              )}
+                <div className="flex justify-between font-display text-soil text-[16px] font-bold pt-2 border-t border-soil/8">
+                  <span>Total</span>
+                  <span>{grandTotal ? fmt(grandTotal) : hasPrices ? fmt(deliveryFee) : '—'}</span>
+                </div>
+                <p className="text-[11px] text-stone/40">Final price confirmed before delivery</p>
+              </div>
 
               {/* CTA */}
               <div className="px-5 pb-5">
@@ -346,15 +590,12 @@ export default function CheckoutPage() {
                   {submitting && <Loader2 size={16} className="animate-spin" />}
                   {submitting ? 'Placing order…' : 'Place order'}
                 </button>
-                <p className="text-center text-stone/40 text-[11px] mt-3">
-                  Final price confirmed before delivery
-                </p>
               </div>
             </div>
           </div>
+
         </div>
       </main>
-
     </div>
   )
 }
