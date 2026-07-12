@@ -14,9 +14,9 @@ import { LocationPicker } from '@/components/LocationPicker'
 // ── Tab + drawer config ────────────────────────────────────────────────────
 const TABS = [
   { href: '/',         label: 'Home',     icon: Home },
-  { href: '/products', label: 'Products', icon: ShoppingBag },
+  { href: '/store', label: 'Shop', icon: ShoppingBag },
   { href: '/farmers',  label: 'Farmers',  icon: Sprout },
-  { href: '/buyers',   label: 'Buyers',   icon: Users },
+  
   { href: '/contact',  label: 'Contact',  icon: Phone },
 ]
 
@@ -28,7 +28,7 @@ function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
 
   function go() {
     const q = query.trim()
-    router.push(q ? `/products?q=${encodeURIComponent(q)}` : '/products')
+    router.push(q ? `/store?q=${encodeURIComponent(q)}` : '/store')
   }
 
   if (size === 'lg') {
@@ -67,7 +67,7 @@ function CartButton() {
   const { cartCount } = useCart()
   return (
     <Link
-      href="/products"
+      href="/store"
       aria-label={`Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}`}
       className="relative flex items-center justify-center w-9 h-9 text-soil hover:bg-soil/6 rounded-full transition-colors"
     >
@@ -277,3 +277,4 @@ export function Nav() {
     </>
   )
 }
+
