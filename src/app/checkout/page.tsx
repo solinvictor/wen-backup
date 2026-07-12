@@ -185,7 +185,7 @@ export default function CheckoutPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 pb-32">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 pb-10">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
 
           {/* ── Left: form ── */}
@@ -355,23 +355,6 @@ export default function CheckoutPage() {
         </div>
       </main>
 
-      {/* Mobile sticky checkout footer */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-soil/8 px-4 py-4 space-y-1">
-        {hasPrices && (
-          <div className="flex justify-between items-center mb-2 px-1">
-            <span className="text-[13px] text-stone/60">Total</span>
-            <span className="font-display text-soil font-bold text-[16px]">{fmt(cartTotal)}</span>
-          </div>
-        )}
-        <button
-          onClick={handleSubmit}
-          disabled={submitting}
-          className="w-full bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-        >
-          {submitting && <Loader2 size={16} className="animate-spin" />}
-          {submitting ? 'Placing order…' : 'Place order'}
-        </button>
-      </div>
     </div>
   )
 }
