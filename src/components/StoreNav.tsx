@@ -6,7 +6,7 @@ import { useState, Suspense, useEffect } from 'react'
 import {
   Search, MapPin, ChevronDown, ShoppingCart, X, Menu, LogOut, User,
   Home, Wheat, Carrot, Egg, Fish, Leaf, Drumstick,
-  Store, Sprout, Info, MessageCircle,
+  Store, Sprout, Info, MessageCircle, Package,
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
@@ -53,7 +53,7 @@ function SearchBar() {
   )
 }
 
-// ── Cart button ────────────────────────────────────────────────────────────
+// ── Cart button ─────────────────────────────────────────────────────────────
 function CartBtn({ onClick }: { onClick: () => void }) {
   const { cartCount } = useCart()
   return (
@@ -72,7 +72,7 @@ function CartBtn({ onClick }: { onClick: () => void }) {
   )
 }
 
-// ── Icon tab bar ───────────────────────────────────────────────────────────
+// ── Icon tab bar ────────────────────────────────────────────────────────────
 function IconTabBar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -80,7 +80,6 @@ function IconTabBar() {
 
   return (
     <div className="border-t border-soil/8">
-      {/* Constrained + centered */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex overflow-x-auto scrollbar-hide">
         {TABS.map(({ href, label, Icon }) => {
           const isHome = label === 'Home'
@@ -116,57 +115,17 @@ function IconTabBar() {
   )
 }
 
-
-// ── Auth area (right side of Row 1) ───────────────────────────────────────
-function AuthArea({ onCartOpen }: { onCartOpen?: () => void }) {
-  const [user, setUser]         = useState<{ email: string; name: string } | null>(null)
+// ── Auth area ───────────────────────────────────────────────────────────────
+function AuthArea({
+  onCartOpen,
+  user,
+  onLogout,
+}: {
+  onCartOpen?: () => void
+  user: { email: string; name: string } | null
+  onLogout: () => void
+}) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [ready, setReady]       = useState(false)
-  const router                  = useRouter()
-
-  useEffect(() => {
-    // Lazy — only attempt Supabase if env vars are present
-    const url     = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    if (!url || !anonKey) { setReady(true); return }
-
-    let sub: { unsubscribe: () => void } | null = null
-    try {
-      const { createClient } = require('@/lib/supabase/client') as typeof import('@/lib/supabase/client')
-      const supabase = createClient()
-      supabase.auth.getUser().then(({ data }: { data: { user: { email?: string; user_metadata?: { full_name?: string } } | null } }) => {
-        if (data.user) {
-          const name = data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Account'
-          setUser({ email: data.user.email ?? '', name })
-        }
-        setReady(true)
-      })
-      const { data } = supabase.auth.onAuthStateChange((_event: string, session: { user: { email?: string; user_metadata?: { full_name?: string } } } | null) => {
-        if (session?.user) {
-          const name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Account'
-          setUser({ email: session.user.email ?? '', name })
-        } else {
-          setUser(null)
-        }
-      })
-      sub = data.subscription
-    } catch {
-      setReady(true)
-    }
-    return () => sub?.unsubscribe()
-  }, [])
-
-  async function logout() {
-    try {
-      const { createClient } = require('@/lib/supabase/client') as typeof import('@/lib/supabase/client')
-      const supabase = createClient()
-      await supabase.auth.signOut()
-    } catch { /* no-op */ }
-    setUser(null)
-    setMenuOpen(false)
-    router.push('/')
-    router.refresh()
-  }
 
   return (
     <div className="flex items-center gap-2.5 shrink-0">
@@ -176,7 +135,6 @@ function AuthArea({ onCartOpen }: { onCartOpen?: () => void }) {
             onClick={() => setMenuOpen(v => !v)}
             className="flex items-center gap-2 bg-grain-dim border border-soil/12 rounded-full pl-3 pr-2 py-1.5 hover:border-soil/25 transition-all"
           >
-            {/* Avatar circle */}
             <div className="w-6 h-6 rounded-full bg-pepper flex items-center justify-center text-white text-[11px] font-bold">
               {user.name.charAt(0).toUpperCase()}
             </div>
@@ -199,11 +157,19 @@ function AuthArea({ onCartOpen }: { onCartOpen?: () => void }) {
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2.5 px-4 py-3 text-[13px] text-soil/75 hover:bg-grain-dim hover:text-soil transition-colors"
                 >
-                  <User size={14} className="text-stone/50" />
+                  <Package size={14} className="text-stone/50" />
                   My orders
                 </Link>
+                <Link
+                  href="/account?tab=profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-3 text-[13px] text-soil/75 hover:bg-grain-dim hover:text-soil transition-colors"
+                >
+                  <User size={14} className="text-stone/50" />
+                  Edit profile
+                </Link>
                 <button
-                  onClick={logout}
+                  onClick={() => { setMenuOpen(false); onLogout() }}
                   className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-red-500 hover:bg-red-50 transition-colors border-t border-soil/8"
                 >
                   <LogOut size={14} />
@@ -228,19 +194,59 @@ function AuthArea({ onCartOpen }: { onCartOpen?: () => void }) {
 
 // ── Main StoreNav ──────────────────────────────────────────────────────────
 export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen]     = useState(false)
   const [locationOpen, setLocationOpen] = useState(false)
-  const { location } = useLocation()
-  const locationLabel = location?.label ?? 'Set delivery area'
+  const [user, setUser]                 = useState<{ email: string; name: string } | null>(null)
+  const router                          = useRouter()
+  const { location }                    = useLocation()
+  const locationLabel                   = location?.label ?? 'Set delivery area'
+
+  // ── Load auth session ─────────────────────────────────────────────────────
+  useEffect(() => {
+    const url     = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !anonKey) return
+
+    let sub: { unsubscribe: () => void } | null = null
+    try {
+      const { createClient } = require('@/lib/supabase/client') as typeof import('@/lib/supabase/client')
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }: { data: { user: { email?: string; user_metadata?: { full_name?: string } } | null } }) => {
+        if (data.user) {
+          const name = data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Account'
+          setUser({ email: data.user.email ?? '', name })
+        }
+      })
+      const { data } = supabase.auth.onAuthStateChange((_event: string, session: { user: { email?: string; user_metadata?: { full_name?: string } } } | null) => {
+        if (session?.user) {
+          const name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Account'
+          setUser({ email: session.user.email ?? '', name })
+        } else {
+          setUser(null)
+        }
+      })
+      sub = data.subscription
+    } catch { /* no env vars or client error */ }
+    return () => sub?.unsubscribe()
+  }, [])
+
+  async function handleLogout() {
+    try {
+      const { createClient } = require('@/lib/supabase/client') as typeof import('@/lib/supabase/client')
+      const supabase = createClient()
+      await supabase.auth.signOut()
+    } catch { /* no-op */ }
+    setUser(null)
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <>
       <header className="sticky top-0 z-50 bg-white shadow-sm">
-
-        {/* Constrained wrapper for ALL rows */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
 
-          {/* Row 1: hamburger | WEN (centered) | login + cart */}
+          {/* Row 1: hamburger | WEN | auth + cart */}
           <div className="flex items-center h-14 gap-3">
             <button
               onClick={() => setDrawerOpen(true)}
@@ -249,23 +255,17 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
             >
               <Menu size={22} strokeWidth={2} />
             </button>
-
-            {/* Logo centered via flex-1 trick on both sides */}
             <div className="flex-1 flex justify-center">
               <Link href="/" className="font-display text-[22px] font-bold tracking-tight text-soil">
                 WEN
               </Link>
             </div>
-
-            <AuthArea onCartOpen={onCartOpen} />
+            <AuthArea onCartOpen={onCartOpen} user={user} onLogout={handleLogout} />
           </div>
 
-          {/* Row 2: location centered */}
+          {/* Row 2: location */}
           <div className="flex justify-center pb-2">
-            <button
-              onClick={() => setLocationOpen(true)}
-              className="flex items-center gap-1.5 group"
-            >
+            <button onClick={() => setLocationOpen(true)} className="flex items-center gap-1.5 group">
               <MapPin size={14} className="text-pepper shrink-0" />
               <span className="text-[14px] font-semibold text-soil group-hover:text-pepper transition-colors truncate max-w-[60vw]">
                 {locationLabel}
@@ -287,13 +287,12 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
           </div>
         </div>
 
-        {/* Row 4: icon tabs — full width but content constrained inside */}
+        {/* Row 4: icon tabs */}
         <Suspense fallback={<div className="h-[56px] border-t border-soil/8" />}>
           <IconTabBar />
         </Suspense>
       </header>
 
-      {/* Location picker */}
       {locationOpen && <LocationPicker onClose={() => setLocationOpen(false)} />}
 
       {/* Mobile drawer */}
@@ -311,7 +310,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
               </button>
             </div>
 
-            {/* Location in drawer */}
+            {/* Location */}
             <div className="px-5 py-3.5 border-b border-soil/8">
               <button
                 onClick={() => { setDrawerOpen(false); setLocationOpen(true) }}
@@ -323,6 +322,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
               </button>
             </div>
 
+            {/* Nav links */}
             <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
               {[
                 { href: '/store',   label: 'Shop',    Icon: Store         },
@@ -340,23 +340,63 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
                   <span className="text-[15px]">{label}</span>
                 </Link>
               ))}
+
+              {/* Auth links inside drawer — shown when logged in */}
+              {user && (
+                <>
+                  <div className="h-px bg-soil/8 mx-3 my-1" />
+                  <Link
+                    href="/account"
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl text-soil/75 hover:bg-soil/4 hover:text-soil font-medium transition-colors group"
+                  >
+                    <Package size={18} strokeWidth={2} className="text-stone/50 group-hover:text-pepper transition-colors shrink-0" />
+                    <span className="text-[15px]">My orders</span>
+                  </Link>
+                </>
+              )}
             </nav>
 
-            <div className="px-5 py-6 border-t border-soil/10 flex flex-col gap-3">
-              <Link
-                href="/signup"
-                onClick={() => setDrawerOpen(false)}
-                className="w-full text-center text-[14px] font-semibold bg-soil text-white py-3 rounded-full"
-              >
-                Sign up
-              </Link>
-              <Link
-                href="/login"
-                onClick={() => setDrawerOpen(false)}
-                className="w-full text-center text-[14px] font-semibold border border-soil/20 text-soil py-3 rounded-full"
-              >
-                Log in
-              </Link>
+            {/* Drawer footer — auth-aware */}
+            <div className="px-5 py-6 border-t border-soil/10">
+              {user ? (
+                <div className="flex flex-col gap-3">
+                  {/* User pill */}
+                  <div className="flex items-center gap-3 px-3 py-2.5 bg-grain-dim rounded-xl">
+                    <div className="w-8 h-8 rounded-full bg-pepper flex items-center justify-center text-white text-[12px] font-bold shrink-0">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-soil truncate">{user.name}</p>
+                      <p className="text-[11px] text-stone/45 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { setDrawerOpen(false); handleLogout() }}
+                    className="w-full flex items-center justify-center gap-2 text-[14px] font-semibold border border-red-200 text-red-500 py-3 rounded-full hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut size={15} />
+                    Log out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <Link
+                    href="/signup"
+                    onClick={() => setDrawerOpen(false)}
+                    className="w-full text-center text-[14px] font-semibold bg-soil text-white py-3 rounded-full"
+                  >
+                    Sign up
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setDrawerOpen(false)}
+                    className="w-full text-center text-[14px] font-semibold border border-soil/20 text-soil py-3 rounded-full"
+                  >
+                    Log in
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>

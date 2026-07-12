@@ -1,23 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 interface CartItem {
   name: string
   category: string
   unit: string | null
   quantity: number
+  price?: number | null
+}
+
+function genRef() {
+  return 'WEN-' + Math.random().toString(36).substring(2, 8).toUpperCase()
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { fullName, phoneNumber, location, buyerType, items, notes } = body as {
+    const { fullName, phoneNumber, location, buyerType, items, notes, deliveryType, deliveryFee } = body as {
       fullName?: string
       phoneNumber?: string
       location?: string
       buyerType?: string
       items?: CartItem[]
       notes?: string
+      deliveryType?: 'standard' | 'express'
+      deliveryFee?: number
     }
 
     if (!fullName?.trim() || !phoneNumber?.trim() || !location?.trim() || !buyerType?.trim()) {
@@ -27,13 +35,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Your list is empty — add at least one product.' }, { status: 400 })
     }
 
+    // Try to get the logged-in user — gracefully skip if env vars missing or no session
+    let userId: string | null = null
+    try {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      if (url && key) {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        userId = user?.id ?? null
+      }
+    } catch { /* no session — guest checkout, userId stays null */ }
+
     const supabase = createAdminClient()
 
-    // No public auth/session exists yet, so we can't reliably match this
-    // person to an existing buyer row — every order submission creates a
-    // fresh buyer record, same as the standalone buyer registration form
-    // does today. Matches the existing pattern rather than inventing dedup
-    // logic that isn't backed by real identity.
     const productsInterested = items.map(i => i.name).join(', ')
     const { data: buyer, error: buyerError } = await supabase
       .from('buyers')
@@ -43,6 +58,7 @@ export async function POST(req: NextRequest) {
         location: location.trim(),
         buyer_type: buyerType,
         products_interested: productsInterested,
+        ...(userId ? { user_id: userId } : {}),
       })
       .select('id')
       .single()
@@ -52,17 +68,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
     }
 
-    // orders.product_summary is free text (no line-item table exists yet) —
-    // compose a readable summary from the cart so admins reviewing orders
-    // see exactly what was requested, same as if a buyer had typed it in.
     const productSummary = items
       .map(i => `${i.name}${i.quantity > 1 ? ` x${i.quantity}` : ''}${i.unit ? ` (${i.unit})` : ''}`)
       .join(', ')
+
+    const orderRef = genRef()
 
     const { error: orderError } = await supabase.from('orders').insert({
       buyer_id: buyer.id,
       product_summary: productSummary,
       notes: notes?.trim() || null,
+      delivery_type: deliveryType ?? null,
+      delivery_fee: deliveryFee ?? null,
+      order_ref: orderRef,
     })
 
     if (orderError) {
@@ -70,7 +88,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, orderRef })
   } catch (err) {
     console.error('[orders] unexpected error:', err)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })

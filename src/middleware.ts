@@ -2,50 +2,56 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Guard: skip entirely if env vars missing
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !supabaseKey) return NextResponse.next()
+
   let response = NextResponse.next({ request })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          )
-        },
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() { return request.cookies.getAll() },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        response = NextResponse.next({ request })
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        )
       },
-    }
-  )
+    },
+  })
 
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    return response
+  }
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin') &&
-    request.nextUrl.pathname !== '/admin/login'
+  const path = request.nextUrl.pathname
 
-  if (isAdminRoute && !user) {
-    const loginUrl = new URL('/admin/login', request.url)
+  // ── /account — redirect to login with ?next= if not authenticated ──────────
+  if (path.startsWith('/account') && !user) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('next', path)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Being logged in isn't enough — must also have role = 'admin' in profiles.
-  // Without this check, ANY authenticated user (e.g. a farmer or buyer who
-  // somehow got an account) could reach /admin/* routes.
+  // ── /admin/* — require authenticated admin role ────────────────────────────
+  const isAdminRoute = path.startsWith('/admin') && path !== '/admin/login'
+  if (isAdminRoute && !user) {
+    return NextResponse.redirect(new URL('/admin/login', request.url))
+  }
   if (isAdminRoute && user) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
-
     if (profile?.role !== 'admin') {
-      const loginUrl = new URL('/admin/login', request.url)
-      return NextResponse.redirect(loginUrl)
+      return NextResponse.redirect(new URL('/admin/login', request.url))
     }
   }
 
@@ -53,6 +59,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/account/:path*', '/account'],
 }
-

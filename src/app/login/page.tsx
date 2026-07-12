@@ -1,13 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
 
-export default function LoginPage() {
-  const router = useRouter()
+function LoginForm() {
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const nextPath     = searchParams?.get('next') ?? '/store'
+
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [showPwd, setShowPwd]   = useState(false)
@@ -25,14 +29,12 @@ export default function LoginPage() {
       setLoading(false)
       return
     }
-    router.push('/store')
+    router.push(nextPath)
     router.refresh()
   }
 
   return (
     <div className="min-h-screen bg-grain-dim flex flex-col items-center justify-center px-5 py-12">
-
-      {/* Logo */}
       <Link href="/" className="font-display text-3xl font-bold text-soil mb-10">
         WEN
       </Link>
@@ -42,8 +44,6 @@ export default function LoginPage() {
         <p className="text-stone/60 text-[14px] mb-8">Log in to track your orders and reorder easily.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
-          {/* Email */}
           <div>
             <label className="block text-[13px] font-medium text-soil/70 mb-1.5">Email address</label>
             <input
@@ -57,7 +57,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-[13px] font-medium text-soil/70">Password</label>
@@ -109,5 +108,17 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-grain-dim flex items-center justify-center">
+        <Loader2 size={24} className="animate-spin text-stone/40" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
