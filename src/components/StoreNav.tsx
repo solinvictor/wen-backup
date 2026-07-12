@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import {
-  Search, MapPin, ChevronDown, ShoppingCart, X, Menu,
+  Search, MapPin, ChevronDown, ShoppingCart, X, Menu, LogOut, User,
   Home, Wheat, Carrot, Egg, Fish, Leaf, Drumstick,
   Store, Sprout, Info, MessageCircle,
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
+import { createClient } from '@/lib/supabase/client'
 import { useLocation } from '@/context/LocationContext'
 import { LocationPicker } from '@/components/LocationPicker'
 
@@ -116,6 +117,103 @@ function IconTabBar() {
   )
 }
 
+
+// ── Auth area (right side of Row 1) ───────────────────────────────────────
+function AuthArea({ onCartOpen }: { onCartOpen?: () => void }) {
+  const [user, setUser]           = useState<{ email: string; name: string } | null>(null)
+  const [menuOpen, setMenuOpen]   = useState(false)
+  const router                    = useRouter()
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        const name = data.user.user_metadata?.full_name
+          || data.user.email?.split('@')[0]
+          || 'Account'
+        setUser({ email: data.user.email ?? '', name })
+      }
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const name = session.user.user_metadata?.full_name
+          || session.user.email?.split('@')[0]
+          || 'Account'
+        setUser({ email: session.user.email ?? '', name })
+      } else {
+        setUser(null)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function logout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setUser(null)
+    setMenuOpen(false)
+    router.push('/')
+    router.refresh()
+  }
+
+  return (
+    <div className="flex items-center gap-2.5 shrink-0">
+      {user ? (
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(v => !v)}
+            className="flex items-center gap-2 bg-grain-dim border border-soil/12 rounded-full pl-3 pr-2 py-1.5 hover:border-soil/25 transition-all"
+          >
+            {/* Avatar circle */}
+            <div className="w-6 h-6 rounded-full bg-pepper flex items-center justify-center text-white text-[11px] font-bold">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <span className="text-[13px] font-medium text-soil max-w-[80px] truncate hidden sm:block">
+              {user.name.split(' ')[0]}
+            </span>
+            <ChevronDown size={13} className="text-soil/40" />
+          </button>
+
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 top-full mt-2 z-50 w-48 bg-white border border-soil/10 rounded-2xl shadow-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-soil/8">
+                  <p className="text-[13px] font-semibold text-soil truncate">{user.name}</p>
+                  <p className="text-[11px] text-stone/50 truncate">{user.email}</p>
+                </div>
+                <Link
+                  href="/account"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-3 text-[13px] text-soil/75 hover:bg-grain-dim hover:text-soil transition-colors"
+                >
+                  <User size={14} className="text-stone/50" />
+                  My orders
+                </Link>
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] text-red-500 hover:bg-red-50 transition-colors border-t border-soil/8"
+                >
+                  <LogOut size={14} />
+                  Log out
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <Link
+          href="/login"
+          className="bg-pepper text-white text-[13px] font-semibold px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
+        >
+          Log in
+        </Link>
+      )}
+      <CartBtn onClick={onCartOpen ?? (() => {})} />
+    </div>
+  )
+}
+
 // ── Main StoreNav ──────────────────────────────────────────────────────────
 export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -147,15 +245,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
               </Link>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
-              <Link
-                href="/login"
-                className="bg-pepper text-white text-[13px] font-semibold px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
-              >
-                Log in
-              </Link>
-              <CartBtn onClick={onCartOpen ?? (() => {})} />
-            </div>
+            <AuthArea onCartOpen={onCartOpen} />
           </div>
 
           {/* Row 2: location centered */}
