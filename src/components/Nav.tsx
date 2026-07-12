@@ -3,15 +3,18 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense } from 'react'
-import { Search, Menu, X, MapPin, ChevronDown, ShoppingCart, Home, Store, Sprout, MessageCircle } from 'lucide-react'
+import { Search, Menu, X, MapPin, ChevronDown, ShoppingCart } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
+import { useLocation } from '@/context/LocationContext'
+import { LocationPicker } from '@/components/LocationPicker'
 
 // ── Tab config ─────────────────────────────────────────────────────────────
 const TABS = [
-  { href: '/',         label: 'Home',    Icon: Home         },
-  { href: '/store',    label: 'Shop',    Icon: Store        },
-  { href: '/farmers',  label: 'Farmers', Icon: Sprout       },
-  { href: '/contact',  label: 'Contact', Icon: MessageCircle },
+  { href: '/',         label: 'Home' },
+  { href: '/products', label: 'Products' },
+  { href: '/farmers',  label: 'Farmers' },
+  { href: '/buyers',   label: 'Buyers' },
+  { href: '/contact',  label: 'Contact' },
 ]
 
 // ── Search bar ─────────────────────────────────────────────────────────────
@@ -49,20 +52,19 @@ function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
         value={query}
         onChange={e => setQuery(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && go()}
-        placeholder="Search produce…"
-        className="flex-1 min-w-0 text-[15px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
+        placeholder="Search products and farmers"
+        className="flex-1 text-[15px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
       />
     </div>
   )
 }
 
-// ── Cart icon with live badge ───────────────────────────────────────────────
+// ── Cart badge ─────────────────────────────────────────────────────────────
 function CartButton() {
   const { cartCount } = useCart()
-
   return (
     <Link
-      href="/store"
+      href="/products"
       aria-label={`Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}`}
       className="relative flex items-center justify-center w-9 h-9 text-soil hover:bg-soil/6 rounded-full transition-colors"
     >
@@ -76,24 +78,38 @@ function CartButton() {
   )
 }
 
+// ── Location pill ──────────────────────────────────────────────────────────
+function LocationPill({ onClick }: { onClick: () => void }) {
+  const { location } = useLocation()
+  const label = location?.label ?? 'Set location'
+  const isSet = !!location
+
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-1.5 text-[13px] font-medium transition-colors hover:text-soil"
+      style={{ color: isSet ? 'var(--color-soil)' : 'var(--color-stone)' }}
+    >
+      <MapPin size={13} className={isSet ? 'text-pepper' : 'text-stone/50'} />
+      <span className="max-w-[160px] truncate">{label}</span>
+      <ChevronDown size={13} className="text-soil/35 shrink-0" />
+    </button>
+  )
+}
+
 // ── Tab bar ────────────────────────────────────────────────────────────────
 function TabBar() {
   const pathname = usePathname()
-
   return (
     <div className="flex overflow-x-auto scrollbar-hide border-t border-soil/8">
       {TABS.map(tab => {
-        const active = tab.href === '/'
-          ? pathname === '/'
-          : pathname?.startsWith(tab.href)
+        const active = tab.href === '/' ? pathname === '/' : pathname?.startsWith(tab.href)
         return (
           <Link
             key={tab.href}
             href={tab.href}
-            className={`shrink-0 px-4 sm:px-5 py-3 text-[13px] font-medium border-b-2 transition-colors whitespace-nowrap ${
-              active
-                ? 'border-soil text-soil'
-                : 'border-transparent text-stone/70 hover:text-soil'
+            className={`shrink-0 px-5 py-3 text-[13px] font-medium border-b-2 transition-colors whitespace-nowrap ${
+              active ? 'border-soil text-soil' : 'border-transparent text-stone/70 hover:text-soil'
             }`}
           >
             {tab.label}
@@ -107,6 +123,7 @@ function TabBar() {
 // ── Main Nav ───────────────────────────────────────────────────────────────
 export function Nav() {
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   return (
     <>
@@ -114,7 +131,6 @@ export function Nav() {
 
         {/* Row 1: hamburger | logo | login + cart */}
         <div className="flex items-center px-4 sm:px-6 h-14 gap-3">
-
           <button
             onClick={() => setDrawerOpen(true)}
             className="p-1.5 -ml-1 text-soil sm:hidden shrink-0"
@@ -142,10 +158,8 @@ export function Nav() {
             </Suspense>
           </div>
 
-          {/* Spacer on mobile */}
           <div className="flex-1 sm:hidden" />
 
-          {/* Right: Log in + cart */}
           <div className="flex items-center gap-1 shrink-0">
             <Link
               href="/login"
@@ -157,13 +171,14 @@ export function Nav() {
           </div>
         </div>
 
-        {/* Row 2 (mobile): location selector */}
+        {/* Row 2 (mobile): location pill — tappable */}
         <div className="sm:hidden flex justify-center pb-2 px-4">
-          <button className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 hover:text-soil transition-colors">
-            <MapPin size={13} className="text-pepper" />
-            <span>Makurdi, Benue</span>
-            <ChevronDown size={13} className="text-soil/40" />
-          </button>
+          <LocationPill onClick={() => setPickerOpen(true)} />
+        </div>
+
+        {/* Row 2 (desktop): location pill left of search — optional, shown inline */}
+        <div className="hidden sm:flex items-center px-6 pb-2 gap-3">
+          <LocationPill onClick={() => setPickerOpen(true)} />
         </div>
 
         {/* Row 3 (mobile): search bar */}
@@ -171,25 +186,22 @@ export function Nav() {
           <Suspense fallback={
             <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-3 gap-2.5 shadow-sm">
               <Search size={17} className="text-stone/45" />
-              <span className="text-[15px] text-stone/40">Search produce…</span>
+              <span className="text-[15px] text-stone/40">Search products and farmers</span>
             </div>
           }>
             <NavSearchBar size="sm" />
           </Suspense>
         </div>
 
-
+        {/* Tab bar */}
+        <TabBar />
       </header>
 
-      {/* Mobile slide-in drawer */}
+      {/* Mobile drawer */}
       {drawerOpen && (
         <div className="fixed inset-0 z-[60] flex">
-          <div
-            className="absolute inset-0 bg-soil/40 backdrop-blur-sm"
-            onClick={() => setDrawerOpen(false)}
-          />
+          <div className="absolute inset-0 bg-soil/40 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
           <div className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl">
-
             <div className="flex items-center justify-between px-5 h-14 border-b border-soil/10">
               <Link
                 href="/"
@@ -198,23 +210,24 @@ export function Nav() {
               >
                 WEN
               </Link>
-              <button
-                onClick={() => setDrawerOpen(false)}
-                className="p-1 text-soil/50 hover:text-soil transition-colors"
-              >
+              <button onClick={() => setDrawerOpen(false)} className="p-1 text-soil/50 hover:text-soil transition-colors">
                 <X size={20} />
               </button>
             </div>
 
-            <nav className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-1">
+            {/* Location in drawer too */}
+            <div className="px-5 py-3 border-b border-soil/8">
+              <LocationPill onClick={() => { setDrawerOpen(false); setPickerOpen(true) }} />
+            </div>
+
+            <nav className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-1">
               {TABS.map(tab => (
                 <Link
                   key={tab.href}
                   href={tab.href}
                   onClick={() => setDrawerOpen(false)}
-                  className="flex items-center gap-3.5 text-[15px] text-soil/80 hover:text-soil py-3.5 border-b border-soil/6 transition-colors font-medium"
+                  className="text-[15px] text-soil/80 hover:text-soil py-3 border-b border-soil/6 transition-colors font-medium"
                 >
-                  <tab.Icon size={18} className="text-pepper shrink-0" strokeWidth={1.8} />
                   {tab.label}
                 </Link>
               ))}
@@ -239,7 +252,9 @@ export function Nav() {
           </div>
         </div>
       )}
+
+      {/* Location picker modal */}
+      {pickerOpen && <LocationPicker onClose={() => setPickerOpen(false)} />}
     </>
   )
 }
-
