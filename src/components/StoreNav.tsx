@@ -9,7 +9,6 @@ import {
   Store, Sprout, Info, MessageCircle,
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
-import { createClient } from '@/lib/supabase/client'
 import { useLocation } from '@/context/LocationContext'
 import { LocationPicker } from '@/components/LocationPicker'
 
@@ -120,36 +119,49 @@ function IconTabBar() {
 
 // ── Auth area (right side of Row 1) ───────────────────────────────────────
 function AuthArea({ onCartOpen }: { onCartOpen?: () => void }) {
-  const [user, setUser]           = useState<{ email: string; name: string } | null>(null)
-  const [menuOpen, setMenuOpen]   = useState(false)
-  const router                    = useRouter()
+  const [user, setUser]         = useState<{ email: string; name: string } | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [ready, setReady]       = useState(false)
+  const router                  = useRouter()
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        const name = data.user.user_metadata?.full_name
-          || data.user.email?.split('@')[0]
-          || 'Account'
-        setUser({ email: data.user.email ?? '', name })
-      }
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        const name = session.user.user_metadata?.full_name
-          || session.user.email?.split('@')[0]
-          || 'Account'
-        setUser({ email: session.user.email ?? '', name })
-      } else {
-        setUser(null)
-      }
-    })
-    return () => subscription.unsubscribe()
+    // Lazy — only attempt Supabase if env vars are present
+    const url     = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !anonKey) { setReady(true); return }
+
+    let sub: { unsubscribe: () => void } | null = null
+    try {
+      const { createClient } = require('@/lib/supabase/client') as typeof import('@/lib/supabase/client')
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }: { data: { user: { email?: string; user_metadata?: { full_name?: string } } | null } }) => {
+        if (data.user) {
+          const name = data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Account'
+          setUser({ email: data.user.email ?? '', name })
+        }
+        setReady(true)
+      })
+      const { data } = supabase.auth.onAuthStateChange((_event: string, session: { user: { email?: string; user_metadata?: { full_name?: string } } } | null) => {
+        if (session?.user) {
+          const name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Account'
+          setUser({ email: session.user.email ?? '', name })
+        } else {
+          setUser(null)
+        }
+      })
+      sub = data.subscription
+    } catch {
+      setReady(true)
+    }
+    return () => sub?.unsubscribe()
   }, [])
 
   async function logout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    try {
+      const { createClient } = require('@/lib/supabase/client') as typeof import('@/lib/supabase/client')
+      const supabase = createClient()
+      await supabase.auth.signOut()
+    } catch { /* no-op */ }
     setUser(null)
     setMenuOpen(false)
     router.push('/')
