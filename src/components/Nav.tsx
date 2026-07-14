@@ -2,25 +2,22 @@
 
 import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import {
   Search, Menu, X, MapPin, ChevronDown, ShoppingCart,
-  Home, ShoppingBag, Sprout, Users, Phone
+  Home, ShoppingBag, Sprout, Phone
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
 import { LocationPicker } from '@/components/LocationPicker'
 
-// ── Tab + drawer config ────────────────────────────────────────────────────
 const TABS = [
-  { href: '/',         label: 'Home',     icon: Home },
-  { href: '/store', label: 'Shop', icon: ShoppingBag },
-  { href: '/farmers',  label: 'Farmers',  icon: Sprout },
-  
-  { href: '/contact',  label: 'Contact',  icon: Phone },
+  { href: '/',        label: 'Home',    icon: Home },
+  { href: '/store',   label: 'Shop',    icon: ShoppingBag },
+  { href: '/farmers', label: 'Farmers', icon: Sprout },
+  { href: '/contact', label: 'Contact', icon: Phone },
 ]
 
-// ── Search bar ─────────────────────────────────────────────────────────────
 function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -62,9 +59,27 @@ function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
   )
 }
 
-// ── Cart badge ─────────────────────────────────────────────────────────────
+// Auth-aware cart — only shown when user is logged in
 function CartButton() {
   const { cartCount } = useCart()
+  const [authed, setAuthed] = useState(false)
+
+  useEffect(() => {
+    try {
+      const { createClient } = require('@/lib/supabase/client')
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }: any) => {
+        setAuthed(!!data?.user)
+      })
+      const { data } = supabase.auth.onAuthStateChange((_: any, session: any) => {
+        setAuthed(!!session?.user)
+      })
+      return () => data.subscription.unsubscribe()
+    } catch {}
+  }, [])
+
+  if (!authed) return null
+
   return (
     <Link
       href="/store"
@@ -81,7 +96,6 @@ function CartButton() {
   )
 }
 
-// ── Location pill ──────────────────────────────────────────────────────────
 function LocationPill({ onClick }: { onClick: () => void }) {
   const { location } = useLocation()
   const label = location?.label ?? 'Set location'
@@ -100,7 +114,6 @@ function LocationPill({ onClick }: { onClick: () => void }) {
   )
 }
 
-// ── Tab bar — hidden on homepage ───────────────────────────────────────────
 function TabBar() {
   const pathname = usePathname()
   if (pathname === '/') return null
@@ -125,17 +138,29 @@ function TabBar() {
   )
 }
 
-// ── Main Nav ───────────────────────────────────────────────────────────────
 export function Nav() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [authed, setAuthed] = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => {
+    try {
+      const { createClient } = require('@/lib/supabase/client')
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }: any) => setAuthed(!!data?.user))
+      const { data } = supabase.auth.onAuthStateChange((_: any, session: any) => {
+        setAuthed(!!session?.user)
+      })
+      return () => data.subscription.unsubscribe()
+    } catch {}
+  }, [])
 
   return (
     <>
       <header className="sticky top-0 z-50 bg-grain-dim shadow-sm">
 
-        {/* Row 1: hamburger | logo | login + cart */}
+        {/* Row 1 */}
         <div className="flex items-center px-4 sm:px-6 h-14 gap-3">
           <button
             onClick={() => setDrawerOpen(true)}
@@ -145,14 +170,10 @@ export function Nav() {
             <Menu size={22} />
           </button>
 
-          <Link
-            href="/"
-            className="font-display text-2xl font-bold tracking-tight text-soil shrink-0 ml-1.5 sm:ml-0 sm:mr-6"
-          >
+          <Link href="/" className="font-display text-2xl font-bold tracking-tight text-soil shrink-0 ml-1.5 sm:ml-0 sm:mr-6">
             WEN
           </Link>
 
-          {/* Desktop: search fills middle */}
           <div className="hidden sm:flex flex-1 mx-4">
             <Suspense fallback={
               <div className="flex items-center flex-1 max-w-2xl bg-white border border-soil/15 rounded-full px-4 py-2.5 gap-2">
@@ -166,14 +187,26 @@ export function Nav() {
 
           <div className="flex-1 sm:hidden" />
 
-          <div className="flex items-center gap-1 shrink-0">
-            <Link
-              href="/login"
-              className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
-            >
-              Log in
-            </Link>
-            <CartButton />
+          {/* Auth-aware right side */}
+          <div className="flex items-center gap-2 shrink-0">
+            {authed ? (
+              <CartButton />
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-[13px] font-semibold text-soil/70 hover:text-soil transition-colors whitespace-nowrap hidden sm:block"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -199,7 +232,6 @@ export function Nav() {
           </Suspense>
         </div>
 
-        {/* Tab bar — hidden on homepage */}
         <TabBar />
       </header>
 
@@ -209,13 +241,8 @@ export function Nav() {
           <div className="absolute inset-0 bg-soil/40 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
           <div className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl">
 
-            {/* Drawer header */}
             <div className="flex items-center justify-between px-5 h-14 border-b border-soil/10">
-              <Link
-                href="/"
-                onClick={() => setDrawerOpen(false)}
-                className="font-display text-2xl font-bold tracking-tight text-soil"
-              >
+              <Link href="/" onClick={() => setDrawerOpen(false)} className="font-display text-2xl font-bold tracking-tight text-soil">
                 WEN
               </Link>
               <button onClick={() => setDrawerOpen(false)} className="p-1 text-soil/50 hover:text-soil transition-colors">
@@ -223,12 +250,10 @@ export function Nav() {
               </button>
             </div>
 
-            {/* Location in drawer */}
             <div className="px-5 py-3.5 border-b border-soil/8">
               <LocationPill onClick={() => { setDrawerOpen(false); setPickerOpen(true) }} />
             </div>
 
-            {/* Nav links with icons */}
             <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
               {TABS.map(tab => {
                 const Icon = tab.icon
@@ -239,9 +264,7 @@ export function Nav() {
                     href={tab.href}
                     onClick={() => setDrawerOpen(false)}
                     className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
-                      active
-                        ? 'bg-soil/6 text-soil font-semibold'
-                        : 'text-soil/70 hover:bg-soil/4 hover:text-soil font-medium'
+                      active ? 'bg-soil/6 text-soil font-semibold' : 'text-soil/70 hover:bg-soil/4 hover:text-soil font-medium'
                     }`}
                   >
                     <Icon size={18} className={active ? 'text-pepper' : 'text-stone/60'} strokeWidth={1.8} />
@@ -251,30 +274,30 @@ export function Nav() {
               })}
             </nav>
 
-            {/* Auth buttons */}
             <div className="px-5 py-6 border-t border-soil/10 flex flex-col gap-3">
-              <Link
-                href="/signup"
-                onClick={() => setDrawerOpen(false)}
-                className="w-full text-center text-[14px] font-semibold bg-soil text-white py-3 rounded-full hover:bg-soil/85 transition-colors"
-              >
-                Sign up
-              </Link>
-              <Link
-                href="/login"
-                onClick={() => setDrawerOpen(false)}
-                className="w-full text-center text-[14px] font-semibold border border-soil/20 text-soil py-3 rounded-full hover:bg-grain-dim transition-colors"
-              >
-                Log in
-              </Link>
+              {authed ? (
+                <Link href="/store" onClick={() => setDrawerOpen(false)}
+                  className="w-full text-center text-[14px] font-semibold bg-pepper text-white py-3 rounded-full">
+                  Go to shop
+                </Link>
+              ) : (
+                <>
+                  <Link href="/signup" onClick={() => setDrawerOpen(false)}
+                    className="w-full text-center text-[14px] font-semibold bg-soil text-white py-3 rounded-full hover:bg-soil/85 transition-colors">
+                    Sign up
+                  </Link>
+                  <Link href="/login" onClick={() => setDrawerOpen(false)}
+                    className="w-full text-center text-[14px] font-semibold border border-soil/20 text-soil py-3 rounded-full hover:bg-grain-dim transition-colors">
+                    Log in
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Location picker */}
       {pickerOpen && <LocationPicker onClose={() => setPickerOpen(false)} />}
     </>
   )
 }
-
