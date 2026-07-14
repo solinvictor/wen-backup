@@ -2,7 +2,6 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Guard: skip entirely if env vars missing
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!supabaseUrl || !supabaseKey) return NextResponse.next()
@@ -32,14 +31,15 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
-  // ── /account — redirect to login with ?next= if not authenticated ──────────
-  if (path.startsWith('/account') && !user) {
+  // ── /checkout + /account — require login ─────────────────────────────────
+  const needsAuth = path.startsWith('/checkout') || path.startsWith('/account')
+  if (needsAuth && !user) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', path)
     return NextResponse.redirect(loginUrl)
   }
 
-  // ── /admin/* — require authenticated admin role ────────────────────────────
+  // ── /admin/* — require admin role ─────────────────────────────────────────
   const isAdminRoute = path.startsWith('/admin') && path !== '/admin/login'
   if (isAdminRoute && !user) {
     return NextResponse.redirect(new URL('/admin/login', request.url))
@@ -59,5 +59,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/account/:path*', '/account'],
+  matcher: ['/admin/:path*', '/account/:path*', '/account', '/checkout'],
 }
