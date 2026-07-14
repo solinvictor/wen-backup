@@ -1,180 +1,317 @@
 'use client'
 
-import { MapPin, Phone, Package, Navigation, ExternalLink, Hash, Clock, Zap } from 'lucide-react'
-
-interface Buyer {
-  full_name: string
-  phone_number: string
-  location: string
-}
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import {
+  MapPin, Phone, Package, Clock, CheckCircle2,
+  Navigation, Loader2, ExternalLink, Hash, ChevronRight
+} from 'lucide-react'
 
 interface Order {
   id: string
   order_ref: string | null
   product_summary: string
-  status: string
-  delivery_type: 'standard' | 'express' | null
+  delivery_type: string | null
   delivery_fee: number | null
+  status: string
   notes: string | null
+  created_at: string
   w3w_address: string | null
   w3w_lat: number | null
   w3w_lng: number | null
-  created_at: string
-  buyers: Buyer | Buyer[] | null
+  buyers: {
+    full_name: string
+    phone_number: string
+    location: string
+  }
 }
 
-export default function RiderView({ order }: { order: Order }) {
-  const buyer = Array.isArray(order.buyers) ? order.buyers[0] : order.buyers
-  const hasW3W = !!order.w3w_address
-  const hasCoords = order.w3w_lat != null && order.w3w_lng != null
+const STATUS_FLOW = ['pending', 'matched', 'in_progress', 'delivered'] as const
+type OrderStatus = typeof STATUS_FLOW[number]
 
-  const w3wLink    = hasW3W    ? `https://what3words.com/${order.w3w_address}` : null
-  const googleLink = hasCoords
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending',
+  matched: 'Matched',
+  in_progress: 'On the way',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-amber-100 text-amber-700',
+  matched: 'bg-blue-100 text-blue-700',
+  in_progress: 'bg-orange-100 text-orange-700',
+  delivered: 'bg-green-100 text-green-700',
+  cancelled: 'bg-red-100 text-red-700',
+}
+
+function fmt(n: number | null) {
+  if (!n) return '—'
+  return '₦' + n.toLocaleString('en-NG')
+}
+
+export default function RiderView({ orderId }: { orderId: string }) {
+  const [order, setOrder] = useState<Order | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [updating, setUpdating] = useState(false)
+  const [updated, setUpdated] = useState(false)
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, buyers(full_name, phone_number, location)')
+        .eq('id', orderId)
+        .single()
+
+      if (error || !data) {
+        setError('Order not found or you don\'t have access.')
+      } else {
+        setOrder(data as Order)
+      }
+      setLoading(false)
+    }
+    load()
+  }, [orderId])
+
+  async function markNextStatus() {
+    if (!order) return
+    const currentIndex = STATUS_FLOW.indexOf(order.status as OrderStatus)
+    if (currentIndex === -1 || currentIndex >= STATUS_FLOW.length - 1) return
+
+    const nextStatus = STATUS_FLOW[currentIndex + 1]
+    setUpdating(true)
+
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: nextStatus })
+      .eq('id', order.id)
+
+    if (!error) {
+      setOrder({ ...order, status: nextStatus })
+      if (nextStatus === 'delivered') setUpdated(true)
+    }
+    setUpdating(false)
+  }
+
+  const nextStatus = order
+    ? STATUS_FLOW[STATUS_FLOW.indexOf(order.status as OrderStatus) + 1]
+    : null
+
+  const nextStatusLabel: Record<string, string> = {
+    matched: 'Mark as Matched',
+    in_progress: 'Start Delivery',
+    delivered: 'Mark as Delivered',
+  }
+
+  // ── Loading ──────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-grain-dim flex items-center justify-center">
+        <Loader2 size={28} className="animate-spin text-pepper" />
+      </div>
+    )
+  }
+
+  // ── Error ────────────────────────────────────────────────────────────────
+  if (error || !order) {
+    return (
+      <div className="min-h-screen bg-grain-dim flex items-center justify-center px-6">
+        <div className="text-center">
+          <p className="text-soil font-semibold mb-2">Order not found</p>
+          <p className="text-stone/50 text-sm">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const buyer = order.buyers
+  const hasW3W = !!order.w3w_address
+  const w3wUrl = hasW3W ? `https://what3words.com/${order.w3w_address}` : null
+  const googleMapsUrl = order.w3w_lat && order.w3w_lng
     ? `https://www.google.com/maps/dir/?api=1&destination=${order.w3w_lat},${order.w3w_lng}`
     : null
-  const wazeLink   = hasCoords
-    ? `https://waze.com/ul?ll=${order.w3w_lat},${order.w3w_lng}&navigate=yes`
-    : null
-  const phoneLink  = buyer?.phone_number ? `tel:${buyer.phone_number}` : null
 
-  const date = new Date(order.created_at).toLocaleDateString('en-NG', {
-    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
-  })
+  const isDelivered = order.status === 'delivered'
+  const isCancelled = order.status === 'cancelled'
 
   return (
     <div className="min-h-screen bg-grain-dim">
 
       {/* Header */}
-      <header className="bg-soil px-5 pt-12 pb-6">
-        <p className="text-white/50 text-[12px] font-semibold uppercase tracking-widest mb-1">Delivery order</p>
-        <p className="font-data text-white text-[22px] font-bold tracking-wider">
-          {order.order_ref ?? order.id.slice(0, 8).toUpperCase()}
-        </p>
-        <div className="flex items-center gap-2 mt-3">
-          {order.delivery_type === 'express'
-            ? <span className="flex items-center gap-1.5 bg-white/15 text-white text-[12px] font-semibold px-3 py-1 rounded-full"><Zap size={11} /> Express · 24h</span>
-            : <span className="flex items-center gap-1.5 bg-white/10 text-white/70 text-[12px] font-semibold px-3 py-1 rounded-full"><Clock size={11} /> Standard · 3 days</span>
-          }
-          <span className="text-white/40 text-[12px]">{date}</span>
-        </div>
+      <header className="bg-white border-b border-soil/8 sticky top-0 z-40 px-5 h-14 flex items-center justify-between">
+        <span className="font-display text-soil text-[17px] font-semibold">WEN Rider</span>
+        {order.order_ref && (
+          <span className="font-data text-[12px] text-stone/40 font-bold tracking-wider">
+            {order.order_ref}
+          </span>
+        )}
       </header>
 
-      <div className="px-4 py-5 space-y-4 max-w-lg mx-auto">
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
 
-        {/* Location card — primary action */}
-        <div className="bg-white rounded-2xl border border-soil/10 overflow-hidden">
-          <div className="px-5 py-4 border-b border-soil/8 flex items-center gap-2.5">
+        {/* Status badge */}
+        <div className="flex items-center justify-between">
+          <span className={`text-[12px] font-bold px-3 py-1.5 rounded-full ${STATUS_COLORS[order.status] || 'bg-stone/10 text-stone'}`}>
+            {STATUS_LABELS[order.status] || order.status}
+          </span>
+          <span className="text-[12px] text-stone/40">
+            {new Date(order.created_at).toLocaleDateString('en-NG', {
+              day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+            })}
+          </span>
+        </div>
+
+        {/* Delivery location */}
+        <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
             <MapPin size={16} className="text-pepper" />
-            <h2 className="font-display text-soil font-semibold text-[15px]">Delivery location</h2>
+            <h2 className="font-display text-soil text-[15px] font-semibold">Delivery location</h2>
           </div>
           <div className="px-5 py-4 space-y-4">
 
-            {/* what3words block */}
+            {/* What3Words */}
             {hasW3W ? (
-              <div className="bg-pepper/6 border border-pepper/20 rounded-xl px-4 py-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <Hash size={13} className="text-pepper shrink-0" />
-                  <p className="text-[12px] font-semibold text-pepper-deep uppercase tracking-wider">what3words</p>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 bg-pepper/6 border border-pepper/20 rounded-xl px-4 py-3">
+                  <Hash size={16} className="text-pepper mt-0.5 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] text-stone/50 mb-0.5">what3words address</p>
+                    <p className="text-[15px] font-bold text-soil font-data">
+                      ///{order.w3w_address}
+                    </p>
+                    <p className="text-[11px] text-stone/40 mt-1">
+                      Precise 3m² delivery point
+                    </p>
+                  </div>
                 </div>
-                <p className="font-data text-soil text-[18px] font-bold">///{order.w3w_address}</p>
-                <p className="text-[12px] text-stone/50 mt-1">Precise 3m delivery pin</p>
+
+                {/* Navigation buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  {w3wUrl && (
+                    <a
+                      href={w3wUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 bg-pepper text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-pepper-deep transition-colors"
+                    >
+                      <Navigation size={14} />
+                      Open in W3W
+                    </a>
+                  )}
+                  {googleMapsUrl && (
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 bg-soil text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-soil/85 transition-colors"
+                    >
+                      <ExternalLink size={14} />
+                      Google Maps
+                    </a>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                <p className="text-[13px] text-amber-700 font-medium">No what3words address — use the text address below.</p>
+              <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                <MapPin size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-[13px] text-amber-700">
+                  No what3words address — use the street address below
+                </p>
               </div>
             )}
 
-            {/* Text address */}
-            <div className="flex items-start gap-2.5">
+            {/* Street address fallback */}
+            <div className="flex items-start gap-3">
               <MapPin size={14} className="text-stone/40 mt-0.5 shrink-0" />
-              <p className="text-[14px] text-soil leading-snug">{buyer?.location ?? 'No address provided'}</p>
-            </div>
-
-            {/* Navigation buttons */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              {w3wLink && (
-                <a href={w3wLink} target="_blank" rel="noopener noreferrer"
-                   className="flex items-center justify-center gap-2 bg-soil text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-soil/90 transition-colors">
-                  <Hash size={14} />
-                  Open W3W
-                </a>
-              )}
-              {googleLink && (
-                <a href={googleLink} target="_blank" rel="noopener noreferrer"
-                   className="flex items-center justify-center gap-2 bg-pepper text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-pepper-deep transition-colors">
-                  <Navigation size={14} />
-                  Google Maps
-                </a>
-              )}
-              {wazeLink && (
-                <a href={wazeLink} target="_blank" rel="noopener noreferrer"
-                   className="flex items-center justify-center gap-2 bg-grain-dim border border-soil/12 text-soil text-[13px] font-semibold py-3 rounded-xl hover:border-soil/25 transition-colors col-span-2">
-                  <ExternalLink size={14} />
-                  Open in Waze
-                </a>
-              )}
-              {!hasW3W && !hasCoords && (
-                <div className="col-span-2 text-center text-[12px] text-stone/40 py-2">
-                  No coordinates available — navigate via text address
-                </div>
-              )}
+              <div>
+                <p className="text-[11px] text-stone/40 mb-0.5">Street address</p>
+                <p className="text-[14px] text-soil">{buyer.location}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Buyer contact */}
-        <div className="bg-white rounded-2xl border border-soil/10 overflow-hidden">
-          <div className="px-5 py-4 border-b border-soil/8 flex items-center gap-2.5">
+        {/* Buyer details */}
+        <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
             <Phone size={16} className="text-pepper" />
-            <h2 className="font-display text-soil font-semibold text-[15px]">Buyer contact</h2>
+            <h2 className="font-display text-soil text-[15px] font-semibold">Buyer</h2>
           </div>
           <div className="px-5 py-4 space-y-3">
             <div>
-              <p className="text-[12px] text-stone/45 mb-0.5">Name</p>
-              <p className="text-[15px] font-semibold text-soil">{buyer?.full_name ?? '—'}</p>
+              <p className="text-[11px] text-stone/40 mb-0.5">Name</p>
+              <p className="text-[15px] font-semibold text-soil">{buyer.full_name}</p>
             </div>
-            <div>
-              <p className="text-[12px] text-stone/45 mb-0.5">Phone</p>
-              <p className="font-data text-[15px] font-bold text-soil">{buyer?.phone_number ?? '—'}</p>
-            </div>
-            {phoneLink && (
-              <a href={phoneLink}
-                 className="w-full flex items-center justify-center gap-2 bg-soil text-white text-[14px] font-semibold py-3.5 rounded-2xl hover:bg-soil/90 transition-colors mt-1">
+            <a
+              href={`tel:${buyer.phone_number}`}
+              className="flex items-center justify-between w-full bg-soil text-white rounded-xl px-4 py-3 hover:bg-soil/85 transition-colors"
+            >
+              <div className="flex items-center gap-2.5">
                 <Phone size={15} />
-                Call buyer
-              </a>
-            )}
+                <span className="text-[14px] font-semibold">{buyer.phone_number}</span>
+              </div>
+              <ChevronRight size={16} className="opacity-50" />
+            </a>
           </div>
         </div>
 
-        {/* Items */}
-        <div className="bg-white rounded-2xl border border-soil/10 overflow-hidden">
-          <div className="px-5 py-4 border-b border-soil/8 flex items-center gap-2.5">
+        {/* Order items */}
+        <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
             <Package size={16} className="text-pepper" />
-            <h2 className="font-display text-soil font-semibold text-[15px]">Items to deliver</h2>
+            <h2 className="font-display text-soil text-[15px] font-semibold">Items</h2>
           </div>
-          <div className="px-5 py-4">
+          <div className="px-5 py-4 space-y-3">
             <p className="text-[14px] text-soil leading-relaxed">{order.product_summary}</p>
             {order.notes && (
-              <div className="mt-3 bg-grain-dim rounded-xl px-4 py-3">
-                <p className="text-[11px] text-stone/45 font-semibold uppercase tracking-wider mb-1">Buyer notes</p>
-                <p className="text-[13px] text-soil/75">{order.notes}</p>
+              <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5">
+                <p className="text-[11px] text-amber-600 font-semibold mb-0.5">Buyer note</p>
+                <p className="text-[13px] text-amber-800">{order.notes}</p>
+              </div>
+            )}
+            {order.delivery_type && (
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-stone/50 flex items-center gap-1.5">
+                  <Clock size={12} />
+                  {order.delivery_type === 'express' ? 'Express (24hrs)' : 'Standard (3 days)'}
+                </span>
+                <span className="font-semibold text-soil">{fmt(order.delivery_fee)}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Delivery fee */}
-        {order.delivery_fee != null && (
-          <div className="bg-white rounded-2xl border border-soil/10 px-5 py-4 flex items-center justify-between">
-            <p className="text-[14px] text-soil/70 font-medium">Collection on delivery</p>
-            <p className="font-data text-soil text-[18px] font-bold">
-              ₦{order.delivery_fee.toLocaleString('en-NG')}
-            </p>
+        {/* Action button */}
+        {!isDelivered && !isCancelled && nextStatus && (
+          <button
+            onClick={markNextStatus}
+            disabled={updating}
+            className="w-full flex items-center justify-center gap-2 bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep active:scale-[0.98] transition-all disabled:opacity-60"
+          >
+            {updating
+              ? <Loader2 size={16} className="animate-spin" />
+              : <CheckCircle2 size={16} />
+            }
+            {updating ? 'Updating…' : nextStatusLabel[nextStatus]}
+          </button>
+        )}
+
+        {/* Delivered state */}
+        {(isDelivered || updated) && (
+          <div className="flex items-center gap-3 bg-green-50 border border-green-100 rounded-2xl px-5 py-4">
+            <CheckCircle2 size={22} className="text-green-500 shrink-0" />
+            <div>
+              <p className="text-[14px] font-semibold text-green-800">Delivered!</p>
+              <p className="text-[12px] text-green-600">Order complete.</p>
+            </div>
           </div>
         )}
-      </div>
+
+      </main>
     </div>
   )
 }
