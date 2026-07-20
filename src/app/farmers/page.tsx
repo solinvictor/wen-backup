@@ -62,7 +62,7 @@ export default function FarmersPage() {
           {/* Hero background — farmer in field */}
           <div className="absolute inset-0 z-0">
             <img
-              src="https://images.pexels.com/photos/7728332/pexels-photo-7728332.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
+              src="https://images.pexels.com/photos/6231764/pexels-photo-6231764.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
               alt=""
               aria-hidden
               className="w-full h-full object-cover"

@@ -88,9 +88,8 @@ export function LocationPicker({ onClose }: Props) {
         }
         setStep('error')
       },
-      // Low accuracy = much faster on mobile (uses cell/wifi instead of GPS chip)
-      // 20s timeout gives enough time without hanging the UI
-      { enableHighAccuracy: false, timeout: 20000, maximumAge: 300000 }
+      // High accuracy = real GPS chip, gives exact pinpoint instead of cell-tower area
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 60000 }
     )
   }
 

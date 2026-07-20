@@ -33,12 +33,19 @@ body {
 }
 
 body {
-  font-family: var(--font-display), 'Nohemi', sans-serif;
+  font-family: var(--font-body), 'Poppins', sans-serif;
 }
 
 h1, h2, h3, .font-display {
   font-family: var(--font-display), 'Nohemi', sans-serif;
   letter-spacing: -0.01em;
+}
+
+/* Hero h1 — maximum weight */
+.hero-headline {
+  font-family: var(--font-display), 'Nohemi', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .font-data {

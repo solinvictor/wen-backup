@@ -57,7 +57,18 @@ const FALLBACK_PRODUCTS: Product[] = [
 
 function fmt(price: number | null) {
   if (!price) return '—'
-  return '₦' + price.toLocaleString('en-NG')
+  return price.toLocaleString('en-NG')
+}
+
+// Use this in JSX: <PriceDisplay price={item.price} />
+function PriceDisplay({ price, className = '' }: { price: number | null; className?: string }) {
+  if (!price) return <span className={className}>—</span>
+  return (
+    <span className={`inline-flex items-baseline gap-0 ${className}`}>
+      <span style={{ fontSize: 'inherit', lineHeight: 'inherit' }}>₦</span>
+      <span>{price.toLocaleString('en-NG')}</span>
+    </span>
+  )
 }
 
 // ── Product card ───────────────────────────────────────────────────────────
@@ -84,7 +95,7 @@ function ProductCard({ item, inCart, onAdd, onRemove }: {
           {item.unit && <p className="text-stone/50 text-[11px] mt-0.5 font-data">{item.unit}</p>}
         </div>
         <div className="flex items-center justify-between gap-1">
-          <p className="text-soil text-[14px] font-bold font-display">{fmt(item.price)}</p>
+          <PriceDisplay price={item.price} className="text-soil text-[14px] font-bold font-display" />
           {inCart ? (
             <div className="flex items-center gap-1 bg-pepper rounded-full px-1.5 py-1">
               <button onClick={onRemove} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Remove one">
