@@ -15,11 +15,11 @@ const CATEGORIES = [
 ]
 
 const FALLBACK_PRODUCTS = [
-  { id: '1', name: 'Eggs',    category: 'poultry', unit: 'per crate', img: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '2', name: 'Catfish', category: 'fish',    unit: 'per kg',    img: 'https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '3', name: 'Chicken', category: 'poultry', unit: 'per kg',    img: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '4', name: 'Rice',    category: 'grains',  unit: 'per bag',   img: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '5', name: 'Beans',   category: 'grains',  unit: 'per bag',   img: 'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '1', name: 'Eggs',    category: 'poultry', unit: 'per crate', image_url: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '2', name: 'Catfish', category: 'fish',    unit: 'per kg',    image_url: 'https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '3', name: 'Chicken', category: 'poultry', unit: 'per kg',    image_url: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '4', name: 'Rice',    category: 'grains',  unit: 'per bag',   image_url: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '5', name: 'Beans',   category: 'grains',  unit: 'per bag',   image_url: 'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
 ]
 
 const HOW_IT_WORKS = [
@@ -71,7 +71,7 @@ function FeaturedProducts() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-6">
           {products.map(p => (
             <Link
               key={p.id}
@@ -80,7 +80,7 @@ function FeaturedProducts() {
             >
               <div className="aspect-square overflow-hidden bg-grain-dim">
                 <img
-                  src={p.img || (p as any).image_url || FALLBACK_PRODUCTS[0].img}
+                  src={(p as any).image_url || FALLBACK_PRODUCTS[0].image_url}
                   alt={p.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
