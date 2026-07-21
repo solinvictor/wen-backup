@@ -5,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense, useEffect } from 'react'
 import {
   Search, MapPin, ChevronDown, ShoppingCart, X, Menu, LogOut, User,
-  Wheat, Egg, Fish, Leaf, Drumstick,
+  Home, ShoppingBag, Wheat, Egg, Fish, Leaf, Drumstick,
   Sprout, Info, MessageCircle, Package,
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
@@ -321,7 +321,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
             {/* Nav links */}
             <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
               {[
-                { href: '/store',   label: 'Shop',    Icon: Store         },
+                { href: '/store',   label: 'Shop',    Icon: ShoppingBag   },
                 { href: '/farmers', label: 'Farmers', Icon: Sprout        },
                 { href: '/about',   label: 'About',   Icon: Info          },
                 { href: '/contact', label: 'Contact', Icon: MessageCircle },

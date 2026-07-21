@@ -19,6 +19,8 @@ const FARMER_STATS = [
   { value: '48h',  label: 'Avg. payment time' },
   { value: '5+',   label: 'States covered' },
 ]
+
+const BENEFITS = [
   'WEN contacts you directly — no middlemen involved',
   'Get paid at fair, consistent prices',
   'No market stress or price haggling',
@@ -221,6 +223,7 @@ export default function FarmersPage() {
             </div>
           </div>
         </section>
+      </main>
       <Footer />
     </>
   )
