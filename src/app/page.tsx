@@ -27,22 +27,25 @@ const HOW_IT_WORKS = [
     step: '01',
     title: 'Farmers supply to WEN',
     body: 'Local farmers list their available stock. WEN reviews, contacts them, and purchases directly at fair prices.',
-    img: 'https://images.pexels.com/photos/36846177/pexels-photo-36846177.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Nigerian farmers harvesting cassava in the field',
+    // African farmers harvesting
+    img: 'https://images.pexels.com/photos/6823560/pexels-photo-6823560.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'African farmers harvesting produce in the field',
   },
   {
     step: '02',
     title: 'We inspect & pack it',
     body: 'Every product is quality-checked and packed fresh before it enters our delivery network.',
-    img: 'https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Hands sorting and packing fresh produce',
+    // African woman sorting produce
+    img: 'https://images.pexels.com/photos/7656987/pexels-photo-7656987.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'African woman sorting and packing fresh produce',
   },
   {
     step: '03',
     title: 'You order, we deliver',
     body: "Shop from WEN's store and get fresh produce delivered to your door, same day or next morning.",
-    img: 'https://images.pexels.com/photos/4393426/pexels-photo-4393426.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Delivery rider bringing fresh produce to customer door',
+    // Delivery / motorbike rider Nigeria
+    img: 'https://images.pexels.com/photos/4391478/pexels-photo-4391478.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'Delivery rider bringing fresh produce to a customer',
   },
 ]
 
@@ -105,7 +108,7 @@ function FeaturedProducts() {
               </div>
               <div className="p-3 sm:p-4">
                 <p className="font-display text-soil font-bold text-[14px] sm:text-[15px] leading-tight truncate">{p.name}</p>
-                {p.unit && <p className="text-stone text-[12px] mt-0.5">{p.unit}</p>}
+                {p.unit && <p className="text-soil/60 text-[12px] mt-0.5">{p.unit}</p>}
               </div>
             </Link>
           ))}
@@ -129,15 +132,13 @@ export default function LandingPage() {
       <main>
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden min-h-[560px] sm:min-h-[640px] flex items-center">
-          {/* Full-bleed farm produce background */}
           <img
-            src="https://images.pexels.com/photos/1300972/pexels-photo-1300972.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
+            src="https://images.pexels.com/photos/6823560/pexels-photo-6823560.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
             alt=""
             aria-hidden="true"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          {/* Heavy dark overlay — legibility first */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(15,41,64,0.88) 0%, rgba(15,41,64,0.72) 60%, rgba(15,41,64,0.55) 100%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(15,41,64,0.90) 0%, rgba(15,41,64,0.75) 60%, rgba(15,41,64,0.55) 100%)' }} />
 
           <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-24 w-full">
             <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.25em] mb-5">
@@ -167,74 +168,33 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Featured products ─────────────────────────────────────── */}
-        <FeaturedProducts />
-
-        {/* ── Farm produce photo mosaic — desktop only ──────────────── */}
-        <section className="hidden sm:block bg-white py-14 sm:py-20">
-          <div className="max-w-6xl mx-auto px-5 sm:px-8">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">From farm to you</p>
-                <h2 className="font-display text-soil text-2xl sm:text-3xl">Fresh. Local. Real.</h2>
+        {/* ── Stats bar ─────────────────────────────────────────────── */}
+        <section className="bg-pepper">
+          <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8 grid grid-cols-3 gap-4 text-center">
+            {STATS.map(s => (
+              <div key={s.label}>
+                <p className="font-display text-white text-2xl sm:text-3xl font-bold">{s.value}</p>
+                <p className="text-white/90 text-[12px] sm:text-[13px] mt-0.5">{s.label}</p>
               </div>
-            </div>
-
-            {/* Asymmetric grid */}
-            <div className="grid grid-cols-12 grid-rows-2 gap-3 h-[500px]">
-              {/* Large left — Nigerian market */}
-              <div className="col-span-7 row-span-2 rounded-2xl overflow-hidden">
-                <img
-                  src="https://images.pexels.com/photos/2518893/pexels-photo-2518893.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
-                  alt="Fresh produce at Nigerian market"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              {/* Top right — eggs */}
-              <div className="col-span-5 row-span-1 rounded-2xl overflow-hidden">
-                <img
-                  src="https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=600&h=300&fit=crop"
-                  alt="Fresh eggs"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              {/* Bottom right — fish */}
-              <div className="col-span-2 row-span-1 rounded-2xl overflow-hidden">
-                <img
-                  src="https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
-                  alt="Fresh fish"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              {/* Bottom right — chicken with CTA */}
-              <div className="col-span-3 row-span-1 rounded-2xl overflow-hidden relative">
-                <img
-                  src="https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
-                  alt="Fresh chicken"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-soil/50 flex items-center justify-center">
-                  <Link href="/store" className="bg-white text-soil text-[13px] font-bold px-4 py-2 rounded-full hover:bg-pepper hover:text-white transition-colors">
-                    Shop all →
-                  </Link>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
+
+        {/* ── Featured products ─────────────────────────────────────── */}
+        <FeaturedProducts />
 
         {/* ── How it works ─────────────────────────────────────────────── */}
         <section className="bg-grain-dim py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-5 sm:px-8">
-            <div className="text-center mb-12">
+            <div className="text-center mb-10">
               <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">Simple process</p>
               <h2 className="font-display text-soil text-2xl sm:text-3xl">How WEN works</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {HOW_IT_WORKS.map(item => (
                 <div key={item.step} className="bg-white rounded-2xl overflow-hidden border border-soil/8">
-                  {/* Image — desktop only */}
-                  <div className="hidden sm:block aspect-[3/2] overflow-hidden">
+                  {/* Image — visible on ALL screens now */}
+                  <div className="aspect-[3/2] overflow-hidden">
                     <img
                       src={item.img}
                       alt={item.imgAlt}
@@ -259,7 +219,7 @@ export default function LandingPage() {
               <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">Why choose us</p>
               <h2 className="font-display text-soil text-2xl sm:text-3xl">The WEN difference</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {WHY_WEN.map(item => (
                 <div key={item.title} className="bg-grain-dim rounded-2xl p-6">
                   <h3 className="font-display text-soil text-lg mb-2">{item.title}</h3>
@@ -294,8 +254,3 @@ export default function LandingPage() {
     </>
   )
 }
-
-
-
-
-

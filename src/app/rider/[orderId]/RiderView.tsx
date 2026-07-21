@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   MapPin, Phone, Package, Clock, CheckCircle2,
-  Navigation, Loader2, ExternalLink, Hash, ChevronRight
+  Navigation, Loader2, ExternalLink, Hash, ChevronRight,
+  Locate, AlertCircle
 } from 'lucide-react'
 
 interface Buyer {
@@ -56,6 +57,129 @@ const NEXT_LABEL: Record<string, string> = {
 function fmt(n: number | null) {
   if (!n) return '—'
   return '₦' + n.toLocaleString('en-NG')
+}
+
+// GPS accuracy helper
+function formatAccuracy(meters: number): { label: string; color: string } {
+  if (meters <= 10) return { label: `±${Math.round(meters)}m — Excellent`, color: 'text-green-600' }
+  if (meters <= 30) return { label: `±${Math.round(meters)}m — Good`, color: 'text-green-500' }
+  if (meters <= 100) return { label: `±${Math.round(meters)}m — Fair`, color: 'text-amber-500' }
+  return { label: `±${Math.round(meters)}m — Poor`, color: 'text-red-500' }
+}
+
+function RiderGPS({ destLat, destLng }: { destLat: number | null; destLng: number | null }) {
+  const [pos, setPos] = useState<GeolocationPosition | null>(null)
+  const [error, setError] = useState('')
+  const [watching, setWatching] = useState(false)
+  const watchId = useRef<number | null>(null)
+
+  function startTracking() {
+    if (!navigator.geolocation) { setError('Geolocation not supported'); return }
+    setWatching(true)
+    setError('')
+    // High accuracy + short interval = GPS chip level precision
+    watchId.current = navigator.geolocation.watchPosition(
+      (p) => setPos(p),
+      (e) => {
+        if (e.code === 1) setError('Location access denied — allow it in browser settings')
+        else if (e.code === 2) setError('Cannot detect position — check GPS signal')
+        else setError('Location timed out')
+        setWatching(false)
+      },
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+      // maximumAge: 0 = never use cached position, always fresh GPS fix
+    )
+  }
+
+  function stopTracking() {
+    if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
+    setWatching(false)
+    setPos(null)
+  }
+
+  useEffect(() => () => { if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current) }, [])
+
+  // Distance in km between two coords (Haversine)
+  function distance(lat1: number, lng1: number, lat2: number, lng2: number) {
+    const R = 6371
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLng = (lng2 - lng1) * Math.PI / 180
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  }
+
+  const accuracy = pos ? formatAccuracy(pos.coords.accuracy) : null
+  const dist = pos && destLat && destLng
+    ? distance(pos.coords.latitude, pos.coords.longitude, destLat, destLng)
+    : null
+
+  const myGoogleMaps = pos
+    ? `https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${destLat},${destLng}`
+    : null
+
+  return (
+    <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
+      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
+        <Locate size={16} className="text-pepper" />
+        <h2 className="font-display text-soil text-[15px] font-semibold">My location</h2>
+        {watching && <span className="ml-auto flex items-center gap-1.5 text-[11px] text-green-600 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />Live</span>}
+      </div>
+
+      <div className="px-5 py-4 space-y-3">
+        {error && (
+          <div className="flex gap-2.5 bg-amber-50 border border-amber-100 rounded-xl px-3.5 py-3">
+            <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-[12.5px] text-amber-700">{error}</p>
+          </div>
+        )}
+
+        {pos && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[13px]">
+              <span className="text-soil/50">GPS accuracy</span>
+              <span className={`font-semibold ${accuracy?.color}`}>{accuracy?.label}</span>
+            </div>
+            {dist !== null && (
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-soil/50">Distance to delivery</span>
+                <span className="font-semibold text-soil">
+                  {dist < 1 ? `${Math.round(dist * 1000)}m` : `${dist.toFixed(1)}km`}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-2">
+          {!watching ? (
+            <button
+              onClick={startTracking}
+              className="col-span-2 flex items-center justify-center gap-2 bg-soil text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-soil/85 transition-colors"
+            >
+              <Locate size={14} /> Track my location
+            </button>
+          ) : (
+            <button
+              onClick={stopTracking}
+              className="flex items-center justify-center gap-2 border border-soil/15 text-soil/60 text-[13px] font-semibold py-3 rounded-xl hover:bg-grain-dim transition-colors"
+            >
+              Stop tracking
+            </button>
+          )}
+          {pos && myGoogleMaps && destLat && destLng && (
+            <a
+              href={myGoogleMaps}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 bg-pepper text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-pepper-deep transition-colors"
+            >
+              <Navigation size={14} /> Navigate
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function RiderView({ order: initialOrder }: { order: Order }) {
@@ -168,6 +292,11 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
             )}
           </div>
         </div>
+
+        {/* Live GPS tracker — only when in progress */}
+        {order.status === 'in_progress' && (
+          <RiderGPS destLat={order.w3w_lat} destLng={order.w3w_lng} />
+        )}
 
         {/* Buyer */}
         {buyer && (
