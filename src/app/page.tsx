@@ -152,6 +152,58 @@ export default function LandingPage() {
         {/* ── Featured products ─────────────────────────────────────── */}
         <FeaturedProducts />
 
+        {/* ── Farm produce photo mosaic ─────────────────────────────── */}
+        <section className="bg-white py-14 sm:py-20">
+          <div className="max-w-6xl mx-auto px-5 sm:px-8">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">From farm to you</p>
+                <h2 className="font-display text-soil text-2xl sm:text-3xl">Fresh. Local. Real.</h2>
+              </div>
+            </div>
+
+            {/* Asymmetric grid */}
+            <div className="grid grid-cols-12 grid-rows-2 gap-3 h-[420px] sm:h-[500px]">
+              {/* Large left */}
+              <div className="col-span-7 row-span-2 rounded-2xl overflow-hidden">
+                <img
+                  src="https://images.pexels.com/photos/2518893/pexels-photo-2518893.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
+                  alt="Nigerian market produce"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+              {/* Top right */}
+              <div className="col-span-5 row-span-1 rounded-2xl overflow-hidden">
+                <img
+                  src="https://images.pexels.com/photos/1656663/pexels-photo-1656663.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop"
+                  alt="Fresh fish"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+              {/* Bottom right — 2 equal */}
+              <div className="col-span-2 row-span-1 rounded-2xl overflow-hidden">
+                <img
+                  src="https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+                  alt="Rice"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+              <div className="col-span-3 row-span-1 rounded-2xl overflow-hidden relative">
+                <img
+                  src="https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+                  alt="Chicken"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-soil/40 flex items-center justify-center">
+                  <Link href="/store" className="bg-white text-soil text-[13px] font-bold px-4 py-2 rounded-full hover:bg-pepper hover:text-white transition-colors">
+                    Shop all →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── How it works ─────────────────────────────────────────────── */}
         <section className="bg-grain-dim py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-5 sm:px-8">

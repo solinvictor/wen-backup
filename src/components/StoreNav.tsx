@@ -5,8 +5,8 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense, useEffect } from 'react'
 import {
   Search, MapPin, ChevronDown, ShoppingCart, X, Menu, LogOut, User,
-  Home, ShoppingBag, Wheat, Egg, Fish, Leaf, Drumstick,
-  Sprout, Info, MessageCircle, Package,
+  Home, ShoppingBag, Wheat, Egg, Fish, Sprout, Drumstick,
+  Trees, Info, MessageCircle, Package,
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
@@ -17,7 +17,7 @@ const TABS = [
   { href: '/store?c=fish',    label: 'Fish',    Icon: Fish      },
   { href: '/store?c=chicken', label: 'Chicken', Icon: Drumstick },
   { href: '/store?c=rice',    label: 'Rice',    Icon: Wheat     },
-  { href: '/store?c=beans',   label: 'Beans',   Icon: Leaf      },
+  { href: '/store?c=beans',   label: 'Beans',   Icon: Sprout    },
 ]
 
 // ── Search ─────────────────────────────────────────────────────────────────
@@ -322,7 +322,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
             <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
               {[
                 { href: '/store',   label: 'Shop',    Icon: ShoppingBag   },
-                { href: '/farmers', label: 'Farmers', Icon: Sprout        },
+                { href: '/farmers', label: 'Farmers', Icon: Trees        },
                 { href: '/about',   label: 'About',   Icon: Info          },
                 { href: '/contact', label: 'Contact', Icon: MessageCircle },
               ].map(({ href, label, Icon }) => (
