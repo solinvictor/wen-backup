@@ -27,14 +27,14 @@ const HOW_IT_WORKS = [
     step: '01',
     title: 'Farmers supply to WEN',
     body: 'Local farmers list their available stock. WEN reviews, contacts them, and purchases directly at fair prices.',
-    img: 'https://images.pexels.com/photos/2252584/pexels-photo-2252584.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'African farmer harvesting produce',
+    img: 'https://images.pexels.com/photos/36846177/pexels-photo-36846177.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'Nigerian farmers harvesting cassava in the field',
   },
   {
     step: '02',
     title: 'We inspect & pack it',
     body: 'Every product is quality-checked and packed fresh before it enters our delivery network.',
-    img: 'https://images.pexels.com/photos/3737629/pexels-photo-3737629.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    img: 'https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
     imgAlt: 'Hands sorting and packing fresh produce',
   },
   {
@@ -42,7 +42,7 @@ const HOW_IT_WORKS = [
     title: 'You order, we deliver',
     body: "Shop from WEN's store and get fresh produce delivered to your door, same day or next morning.",
     img: 'https://images.pexels.com/photos/4393426/pexels-photo-4393426.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Delivery of fresh produce to customer',
+    imgAlt: 'Delivery rider bringing fresh produce to customer door',
   },
 ]
 
@@ -170,8 +170,8 @@ export default function LandingPage() {
         {/* ── Featured products ─────────────────────────────────────── */}
         <FeaturedProducts />
 
-        {/* ── Farm produce photo mosaic ─────────────────────────────── */}
-        <section className="bg-white py-14 sm:py-20">
+        {/* ── Farm produce photo mosaic — desktop only ──────────────── */}
+        <section className="hidden sm:block bg-white py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-5 sm:px-8">
             <div className="flex items-end justify-between mb-8">
               <div>
@@ -181,39 +181,39 @@ export default function LandingPage() {
             </div>
 
             {/* Asymmetric grid */}
-            <div className="grid grid-cols-12 grid-rows-2 gap-3 h-[420px] sm:h-[500px]">
-              {/* Large left — Nigerian market / fresh produce */}
+            <div className="grid grid-cols-12 grid-rows-2 gap-3 h-[500px]">
+              {/* Large left — Nigerian market */}
               <div className="col-span-7 row-span-2 rounded-2xl overflow-hidden">
                 <img
-                  src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
-                  alt="Fresh produce"
+                  src="https://images.pexels.com/photos/2518893/pexels-photo-2518893.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
+                  alt="Fresh produce at Nigerian market"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              {/* Top right — catfish */}
+              {/* Top right — eggs */}
               <div className="col-span-5 row-span-1 rounded-2xl overflow-hidden">
                 <img
-                  src="https://images.pexels.com/photos/725991/pexels-photo-725991.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop"
-                  alt="Fresh fish"
+                  src="https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=600&h=300&fit=crop"
+                  alt="Fresh eggs"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              {/* Bottom right — eggs */}
+              {/* Bottom right — fish */}
               <div className="col-span-2 row-span-1 rounded-2xl overflow-hidden">
                 <img
-                  src="https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
-                  alt="Eggs"
+                  src="https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+                  alt="Fresh fish"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                 />
               </div>
               {/* Bottom right — chicken with CTA */}
               <div className="col-span-3 row-span-1 rounded-2xl overflow-hidden relative">
                 <img
-                  src="https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
-                  alt="Rice and beans"
+                  src="https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+                  alt="Fresh chicken"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-soil/40 flex items-center justify-center">
+                <div className="absolute inset-0 bg-soil/50 flex items-center justify-center">
                   <Link href="/store" className="bg-white text-soil text-[13px] font-bold px-4 py-2 rounded-full hover:bg-pepper hover:text-white transition-colors">
                     Shop all →
                   </Link>
