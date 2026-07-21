@@ -23,9 +23,27 @@ const FALLBACK_PRODUCTS = [
 ]
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Farmers supply to WEN', body: 'Local farmers list their available stock. WEN reviews, contacts them, and purchases directly at fair prices.' },
-  { step: '02', title: 'We inspect & pack it', body: 'Every product is quality-checked and packed fresh before it enters our delivery network.' },
-  { step: '03', title: 'You order, we deliver', body: "Shop from WEN's store and get fresh produce delivered to your door, same day or next morning." },
+  {
+    step: '01',
+    title: 'Farmers supply to WEN',
+    body: 'Local farmers list their available stock. WEN reviews, contacts them, and purchases directly at fair prices.',
+    img: 'https://images.pexels.com/photos/2252584/pexels-photo-2252584.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'African farmer harvesting produce',
+  },
+  {
+    step: '02',
+    title: 'We inspect & pack it',
+    body: 'Every product is quality-checked and packed fresh before it enters our delivery network.',
+    img: 'https://images.pexels.com/photos/3737629/pexels-photo-3737629.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'Hands sorting and packing fresh produce',
+  },
+  {
+    step: '03',
+    title: 'You order, we deliver',
+    body: "Shop from WEN's store and get fresh produce delivered to your door, same day or next morning.",
+    img: 'https://images.pexels.com/photos/4393426/pexels-photo-4393426.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'Delivery of fresh produce to customer',
+  },
 ]
 
 const STATS = [
@@ -164,34 +182,35 @@ export default function LandingPage() {
 
             {/* Asymmetric grid */}
             <div className="grid grid-cols-12 grid-rows-2 gap-3 h-[420px] sm:h-[500px]">
-              {/* Large left */}
+              {/* Large left — Nigerian market / fresh produce */}
               <div className="col-span-7 row-span-2 rounded-2xl overflow-hidden">
                 <img
-                  src="https://images.pexels.com/photos/2518893/pexels-photo-2518893.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
-                  alt="Nigerian market produce"
+                  src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
+                  alt="Fresh produce"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              {/* Top right */}
+              {/* Top right — catfish */}
               <div className="col-span-5 row-span-1 rounded-2xl overflow-hidden">
                 <img
-                  src="https://images.pexels.com/photos/1656663/pexels-photo-1656663.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop"
+                  src="https://images.pexels.com/photos/725991/pexels-photo-725991.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop"
                   alt="Fresh fish"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              {/* Bottom right — 2 equal */}
+              {/* Bottom right — eggs */}
               <div className="col-span-2 row-span-1 rounded-2xl overflow-hidden">
                 <img
-                  src="https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
-                  alt="Rice"
+                  src="https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+                  alt="Eggs"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                 />
               </div>
+              {/* Bottom right — chicken with CTA */}
               <div className="col-span-3 row-span-1 rounded-2xl overflow-hidden relative">
                 <img
-                  src="https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
-                  alt="Chicken"
+                  src="https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop"
+                  alt="Rice and beans"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-soil/40 flex items-center justify-center">
@@ -211,12 +230,22 @@ export default function LandingPage() {
               <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">Simple process</p>
               <h2 className="font-display text-soil text-2xl sm:text-3xl">How WEN works</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {HOW_IT_WORKS.map(item => (
-                <div key={item.step} className="text-center sm:text-left">
-                  <p className="font-data text-[11px] text-pepper/70 mb-3">{item.step}</p>
-                  <h3 className="font-display text-soil text-lg mb-2">{item.title}</h3>
-                  <p className="text-soil/75 text-[14px] leading-relaxed">{item.body}</p>
+                <div key={item.step} className="bg-white rounded-2xl overflow-hidden border border-soil/8">
+                  {/* Image — desktop only */}
+                  <div className="hidden sm:block aspect-[3/2] overflow-hidden">
+                    <img
+                      src={item.img}
+                      alt={item.imgAlt}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-5 sm:p-6">
+                    <p className="font-data text-[11px] text-pepper/70 mb-3">{item.step}</p>
+                    <h3 className="font-display text-soil text-lg mb-2">{item.title}</h3>
+                    <p className="text-soil/75 text-[14px] leading-relaxed">{item.body}</p>
+                  </div>
                 </div>
               ))}
             </div>
