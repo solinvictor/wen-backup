@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, Suspense } from 'react'
+import { CATEGORY_IMAGES } from '@/lib/category-images'
 import { createClient } from '@/lib/supabase/client'
 import { StoreNav } from '@/components/StoreNav'
 import { Footer } from '@/components/Footer'
@@ -22,13 +23,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   eggs: 'Eggs', fish: 'Fish', chicken: 'Chicken', rice: 'Rice', beans: 'Beans',
 }
 
-const CATEGORY_IMAGES: Record<string, string> = {
-  eggs:    'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-  fish:    'https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-  chicken: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-  rice:    'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-  beans:   'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-}
+
 
 const FALLBACK_PRODUCTS: Product[] = [
   { id: 'f-eggs',    name: 'Eggs',    category: 'eggs',    unit: 'per crate', price: 4200,  image_url: CATEGORY_IMAGES.eggs,    is_available: true },
