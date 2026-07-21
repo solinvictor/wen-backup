@@ -27,25 +27,25 @@ const HOW_IT_WORKS = [
     step: '01',
     title: 'Farmers supply to WEN',
     body: 'Local farmers list their available stock. WEN reviews, contacts them, and purchases directly at fair prices.',
-    // African farmers harvesting
-    img: 'https://images.pexels.com/photos/6823560/pexels-photo-6823560.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'African farmers harvesting produce in the field',
+    // Real Nigerian farmers harvesting cassava — Victor Chijioke on Pexels
+    img: 'https://images.pexels.com/photos/36846173/pexels-photo-36846173.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'Nigerian farmers harvesting cassava in Anambra',
   },
   {
     step: '02',
     title: 'We inspect & pack it',
     body: 'Every product is quality-checked and packed fresh before it enters our delivery network.',
-    // African woman sorting produce
-    img: 'https://images.pexels.com/photos/7656987/pexels-photo-7656987.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'African woman sorting and packing fresh produce',
+    // Nigerian market fresh produce — Katsina market
+    img: 'https://images.pexels.com/photos/31743758/pexels-photo-31743758.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'Fresh produce at a local Nigerian market in Katsina',
   },
   {
     step: '03',
     title: 'You order, we deliver',
     body: "Shop from WEN's store and get fresh produce delivered to your door, same day or next morning.",
-    // Delivery / motorbike rider Nigeria
-    img: 'https://images.pexels.com/photos/4391478/pexels-photo-4391478.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Delivery rider bringing fresh produce to a customer',
+    // African motorcycle delivery rider — Nairobi
+    img: 'https://images.pexels.com/photos/30661401/pexels-photo-30661401.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
+    imgAlt: 'Motorcycle delivery rider delivering fresh produce',
   },
 ]
 
@@ -133,7 +133,7 @@ export default function LandingPage() {
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden min-h-[560px] sm:min-h-[640px] flex items-center">
           <img
-            src="https://images.pexels.com/photos/6823560/pexels-photo-6823560.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
+            src="https://images.pexels.com/photos/36846177/pexels-photo-36846177.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
             alt=""
             aria-hidden="true"
             className="absolute inset-0 w-full h-full object-cover"
