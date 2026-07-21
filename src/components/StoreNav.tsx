@@ -216,6 +216,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
         if (session?.user) {
           const name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Account'
           setUser({ email: session.user.email ?? '', name })
+          try { localStorage.setItem('wen_has_account', '1') } catch {}
         } else {
           setUser(null)
         }
@@ -377,19 +378,21 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
               ) : (
                 <div className="flex flex-col gap-3">
                   <Link
-                    href="/signup"
+                    href="/login"
                     onClick={() => setDrawerOpen(false)}
                     className="w-full text-center text-[14px] font-semibold bg-soil text-white py-3 rounded-full"
                   >
-                    Sign up
-                  </Link>
-                  <Link
-                    href="/login"
-                    onClick={() => setDrawerOpen(false)}
-                    className="w-full text-center text-[14px] font-semibold border border-soil/20 text-soil py-3 rounded-full"
-                  >
                     Log in
                   </Link>
+                  {typeof window !== 'undefined' && !localStorage.getItem('wen_has_account') && (
+                    <Link
+                      href="/signup"
+                      onClick={() => setDrawerOpen(false)}
+                      className="w-full text-center text-[14px] font-semibold border border-soil/20 text-soil py-3 rounded-full"
+                    >
+                      Sign up
+                    </Link>
+                  )}
                 </div>
               )}
             </div>

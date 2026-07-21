@@ -142,15 +142,24 @@ export function Nav() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [authed, setAuthed] = useState(false)
+  const [hasAccount, setHasAccount] = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => {
+    try { setHasAccount(!!localStorage.getItem('wen_has_account')) } catch {}
+  }, [])
 
   useEffect(() => {
     try {
       const { createClient } = require('@/lib/supabase/client')
       const supabase = createClient()
-      supabase.auth.getUser().then(({ data }: any) => setAuthed(!!data?.user))
+      supabase.auth.getUser().then(({ data }: any) => {
+        setAuthed(!!data?.user)
+        if (data?.user) { try { localStorage.setItem('wen_has_account', '1') } catch {} }
+      })
       const { data } = supabase.auth.onAuthStateChange((_: any, session: any) => {
         setAuthed(!!session?.user)
+        if (session?.user) { try { localStorage.setItem('wen_has_account', '1') } catch {} }
       })
       return () => data.subscription.unsubscribe()
     } catch {}
@@ -199,12 +208,22 @@ export function Nav() {
                 >
                   Log in
                 </Link>
-                <Link
-                  href="/signup"
-                  className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
-                >
-                  Sign up
-                </Link>
+                {!hasAccount && (
+                  <Link
+                    href="/signup"
+                    className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
+                  >
+                    Sign up
+                  </Link>
+                )}
+                {hasAccount && (
+                  <Link
+                    href="/login"
+                    className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap sm:hidden"
+                  >
+                    Log in
+                  </Link>
+                )}
               </>
             )}
           </div>
@@ -282,14 +301,16 @@ export function Nav() {
                 </Link>
               ) : (
                 <>
-                  <Link href="/signup" onClick={() => setDrawerOpen(false)}
-                    className="w-full text-center text-[14px] font-semibold bg-soil text-white py-3 rounded-full hover:bg-soil/85 transition-colors">
-                    Sign up
-                  </Link>
                   <Link href="/login" onClick={() => setDrawerOpen(false)}
-                    className="w-full text-center text-[14px] font-semibold border border-soil/20 text-soil py-3 rounded-full hover:bg-grain-dim transition-colors">
+                    className="w-full text-center text-[14px] font-semibold bg-soil text-white py-3 rounded-full hover:bg-soil/85 transition-colors">
                     Log in
                   </Link>
+                  {!hasAccount && (
+                    <Link href="/signup" onClick={() => setDrawerOpen(false)}
+                      className="w-full text-center text-[14px] font-semibold border border-soil/20 text-soil py-3 rounded-full hover:bg-grain-dim transition-colors">
+                      Sign up
+                    </Link>
+                  )}
                 </>
               )}
             </div>

@@ -6,7 +6,19 @@ import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
 import { Check, Loader2 } from 'lucide-react'
 
-const BENEFITS = [
+const FARMER_PHOTOS = [
+  { src: 'https://images.pexels.com/photos/2132227/pexels-photo-2132227.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop', caption: 'Rice farmers, Northern Nigeria' },
+  { src: 'https://images.pexels.com/photos/5529555/pexels-photo-5529555.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop', caption: 'Fresh produce at local farm' },
+  { src: 'https://images.pexels.com/photos/2382665/pexels-photo-2382665.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop', caption: 'Harvest season' },
+  { src: 'https://images.pexels.com/photos/1084540/pexels-photo-1084540.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop', caption: 'Poultry farming' },
+]
+
+const FARMER_STATS = [
+  { value: '200+', label: 'Active suppliers' },
+  { value: '₦0',   label: 'Commission charged' },
+  { value: '48h',  label: 'Avg. payment time' },
+  { value: '5+',   label: 'States covered' },
+]
   'WEN contacts you directly — no middlemen involved',
   'Get paid at fair, consistent prices',
   'No market stress or price haggling',
@@ -152,7 +164,63 @@ export default function FarmersPage() {
             </div>
           </div>
         </section>
-      </main>
+
+        {/* ── Farmer photo strip ─────────────────────────────────────── */}
+        <section className="bg-grain py-14 sm:py-20">
+          <div className="max-w-5xl mx-auto px-5 sm:px-8">
+            <div className="mb-8">
+              <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">Our farmers</p>
+              <h2 className="font-display text-soil text-2xl sm:text-3xl">The people behind your food</h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-12">
+              {FARMER_PHOTOS.map(({ src, caption }) => (
+                <div key={caption} className="group relative rounded-2xl overflow-hidden aspect-[4/3]">
+                  <img
+                    src={src}
+                    alt={caption}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-soil/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                    <p className="text-grain text-[11px] font-medium">{caption}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {FARMER_STATS.map(({ value, label }) => (
+                <div key={label} className="bg-grain-dim rounded-2xl p-5 text-center">
+                  <p className="font-display text-soil text-3xl font-bold mb-1">{value}</p>
+                  <p className="text-stone text-[12px]">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Why supply to WEN ──────────────────────────────────────── */}
+        <section className="bg-grain-dim py-14 sm:py-16">
+          <div className="max-w-5xl mx-auto px-5 sm:px-8">
+            <div className="text-center mb-10">
+              <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">Why WEN</p>
+              <h2 className="font-display text-soil text-2xl sm:text-3xl">A better deal for farmers</h2>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-6">
+              {[
+                { title: 'No middlemen', body: 'WEN buys directly from you. No agents, no market brokers taking a cut of your earnings.' },
+                { title: 'Fair pricing', body: 'We agree on prices upfront and stick to them — no last-minute haggling or underpaying at pickup.' },
+                { title: 'Reliable demand', body: 'We buy consistently. List your stock once and we reach out whenever we need what you have.' },
+              ].map(({ title, body }) => (
+                <div key={title} className="bg-white rounded-2xl p-6 border border-soil/8">
+                  <div className="w-8 h-1 bg-pepper rounded-full mb-4" />
+                  <h3 className="font-display text-soil text-lg mb-2">{title}</h3>
+                  <p className="text-soil/70 text-[14px] leading-relaxed">{body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       <Footer />
     </>
   )

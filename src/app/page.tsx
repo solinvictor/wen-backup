@@ -7,19 +7,19 @@ import { Footer } from '@/components/Footer'
 import { ArrowRight } from 'lucide-react'
 
 const CATEGORIES = [
-  { label: 'Eggs',    slug: 'poultry', img: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { label: 'Eggs',    slug: 'eggs',    img: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
   { label: 'Fish',    slug: 'fish',    img: 'https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { label: 'Chicken', slug: 'poultry', img: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { label: 'Rice',    slug: 'grains',  img: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { label: 'Beans',   slug: 'grains',  img: 'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { label: 'Chicken', slug: 'chicken', img: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { label: 'Rice',    slug: 'rice',    img: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { label: 'Beans',   slug: 'beans',   img: 'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
 ]
 
 const FALLBACK_PRODUCTS = [
-  { id: '1', name: 'Eggs',    category: 'poultry', unit: 'per crate', image_url: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '1', name: 'Eggs',    category: 'eggs',    unit: 'per crate', image_url: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
   { id: '2', name: 'Catfish', category: 'fish',    unit: 'per kg',    image_url: 'https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '3', name: 'Chicken', category: 'poultry', unit: 'per kg',    image_url: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '4', name: 'Rice',    category: 'grains',  unit: 'per bag',   image_url: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-  { id: '5', name: 'Beans',   category: 'grains',  unit: 'per bag',   image_url: 'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '3', name: 'Chicken', category: 'chicken', unit: 'per kg',    image_url: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '4', name: 'Rice',    category: 'rice',    unit: 'per bag',   image_url: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+  { id: '5', name: 'Beans',   category: 'beans',   unit: 'per bag',   image_url: 'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
 ]
 
 const HOW_IT_WORKS = [
@@ -75,7 +75,7 @@ function FeaturedProducts() {
           {products.map(p => (
             <Link
               key={p.id}
-              href={`/store?category=${p.category}`}
+              href={`/store?c=${p.category}`}
               className="group block bg-white rounded-2xl overflow-hidden border border-soil/8 hover:border-pepper/30 hover:shadow-md transition-all duration-300"
             >
               <div className="aspect-square overflow-hidden bg-grain-dim">
