@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AdminShell } from '@/components/AdminShell'
-import { Plus, Pencil, Trash2, Loader2, X, Check, ImageIcon } from 'lucide-react'
+import { Plus, Pencil, Trash2, Loader2, X, Check, ImageIcon, Upload } from 'lucide-react'
 
 const CATEGORIES = ['eggs', 'fish', 'chicken', 'rice', 'beans', 'vegetables', 'grains', 'tubers', 'poultry', 'other'] as const
 type Category = typeof CATEGORIES[number]
@@ -29,6 +29,9 @@ export default function AdminProductsPage() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { load() }, [])
 
@@ -45,6 +48,7 @@ export default function AdminProductsPage() {
   function openCreate() {
     setEditing(null)
     setForm(EMPTY_FORM)
+    setUploadError('')
     setShowForm(true)
   }
 
@@ -58,7 +62,42 @@ export default function AdminProductsPage() {
       image_url: p.image_url || '',
       is_available: p.is_available,
     })
+    setUploadError('')
     setShowForm(true)
+  }
+
+  async function handleImageUpload(file: File) {
+    if (!file) return
+    const MAX = 5 * 1024 * 1024
+    if (file.size > MAX) { setUploadError('Image must be under 5MB'); return }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setUploadError('Only JPG, PNG, or WebP allowed')
+      return
+    }
+
+    setUploading(true)
+    setUploadError('')
+
+    const supabase = createClient()
+    const ext = file.name.split('.').pop()
+    const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+    const { error } = await supabase.storage
+      .from('product-images')
+      .upload(path, file, { upsert: false, contentType: file.type })
+
+    if (error) {
+      setUploadError('Upload failed — ' + error.message)
+      setUploading(false)
+      return
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(path)
+
+    setForm(f => ({ ...f, image_url: publicUrl }))
+    setUploading(false)
   }
 
   async function handleSave() {
@@ -125,7 +164,6 @@ export default function AdminProductsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map(p => (
             <div key={p.id} className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
-              {/* Image */}
               <div className="aspect-[3/2] bg-grain-dim overflow-hidden relative">
                 {p.image_url ? (
                   <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
@@ -134,7 +172,6 @@ export default function AdminProductsPage() {
                     <ImageIcon size={28} className="text-soil/20" />
                   </div>
                 )}
-                {/* Availability toggle */}
                 <button
                   onClick={() => toggleAvailability(p)}
                   className={`absolute top-2 right-2 text-[11px] font-bold px-2.5 py-1 rounded-full transition-colors ${
@@ -242,19 +279,71 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              {/* Image URL */}
+              {/* Image upload */}
               <div>
-                <label className="block text-[12px] font-semibold text-soil/60 mb-1.5">Image URL</label>
+                <label className="block text-[12px] font-semibold text-soil/60 mb-1.5">Product image</label>
+
+                {/* Hidden file input */}
                 <input
-                  value={form.image_url}
-                  onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))}
-                  placeholder="https://..."
-                  className="w-full text-[14px] text-soil border border-soil/15 rounded-xl px-3.5 py-2.5 outline-none focus:border-pepper transition-colors"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (file) handleImageUpload(file)
+                    e.target.value = ''
+                  }}
                 />
-                {form.image_url && (
-                  <div className="mt-2 aspect-[3/2] rounded-xl overflow-hidden border border-soil/8">
-                    <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
+
+                {form.image_url ? (
+                  /* Preview with replace/remove controls */
+                  <div className="relative rounded-xl overflow-hidden border border-soil/10">
+                    <div className="aspect-[3/2]">
+                      <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="absolute inset-0 bg-soil/0 hover:bg-soil/40 transition-colors group flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 bg-white text-soil text-[12px] font-semibold px-3 py-2 rounded-lg shadow"
+                      >
+                        <Upload size={13} />
+                        Replace
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, image_url: '' }))}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 bg-white text-pepper text-[12px] font-semibold px-3 py-2 rounded-lg shadow"
+                      >
+                        <X size={13} />
+                        Remove
+                      </button>
+                    </div>
                   </div>
+                ) : (
+                  /* Upload dropzone */
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-full border-2 border-dashed border-soil/15 rounded-xl py-8 flex flex-col items-center gap-2 hover:border-pepper/40 hover:bg-pepper/3 transition-all disabled:opacity-60"
+                  >
+                    {uploading ? (
+                      <Loader2 size={22} className="text-pepper animate-spin" />
+                    ) : (
+                      <Upload size={22} className="text-soil/30" />
+                    )}
+                    <span className="text-[13px] text-soil/50 font-medium">
+                      {uploading ? 'Uploading…' : 'Click to upload image'}
+                    </span>
+                    <span className="text-[11px] text-soil/30">JPG, PNG or WebP · max 5MB</span>
+                  </button>
+                )}
+
+                {uploadError && (
+                  <p className="text-[12px] text-red-500 mt-1.5">{uploadError}</p>
                 )}
               </div>
 
@@ -276,7 +365,7 @@ export default function AdminProductsPage() {
             <div className="px-5 py-4 border-t border-soil/8">
               <button
                 onClick={handleSave}
-                disabled={saving || !form.name.trim()}
+                disabled={saving || !form.name.trim() || uploading}
                 className="w-full flex items-center justify-center gap-2 bg-pepper text-white font-semibold text-[15px] py-3.5 rounded-2xl hover:bg-pepper-deep transition-colors disabled:opacity-60"
               >
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
