@@ -19,23 +19,24 @@ interface Product {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  poultry: 'Eggs & Poultry', fish: 'Fish', grains: 'Rice & Beans', other: 'Other',
+  eggs: 'Eggs', fish: 'Fish', chicken: 'Chicken', rice: 'Rice', beans: 'Beans',
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  poultry: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+  eggs:    'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
   fish:    'https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-  grains:  'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-  other:   'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+  chicken: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+  rice:    'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+  beans:   'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
 }
 
 const FALLBACK_PRODUCTS: Product[] = [
-  { id: 'f-eggs',    name: 'Eggs',    category: 'poultry', unit: 'per crate', price: 4200,  image_url: 'https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',  is_available: true },
-  { id: 'f-chicken', name: 'Chicken', category: 'poultry', unit: 'per kg',    price: 2800,  image_url: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', is_available: true },
-  { id: 'f-catfish', name: 'Catfish', category: 'fish',    unit: 'per kg',    price: 2800,  image_url: 'https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',  is_available: true },
-  { id: 'f-tilapia', name: 'Tilapia', category: 'fish',    unit: 'per kg',    price: 2200,  image_url: 'https://images.pexels.com/photos/1148280/pexels-photo-1148280.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',  is_available: true },
-  { id: 'f-rice',    name: 'Rice',    category: 'grains',  unit: 'per bag',   price: 48000, image_url: 'https://images.pexels.com/photos/4110251/pexels-photo-4110251.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',  is_available: true },
-  { id: 'f-beans',   name: 'Beans',   category: 'grains',  unit: 'per bag',   price: 52000, image_url: 'https://images.pexels.com/photos/6157056/pexels-photo-6157056.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',  is_available: true },
+  { id: 'f-eggs',    name: 'Eggs',    category: 'eggs',    unit: 'per crate', price: 4200,  image_url: CATEGORY_IMAGES.eggs,    is_available: true },
+  { id: 'f-catfish', name: 'Catfish', category: 'fish',    unit: 'per kg',    price: 2800,  image_url: CATEGORY_IMAGES.fish,    is_available: true },
+  { id: 'f-tilapia', name: 'Tilapia', category: 'fish',    unit: 'per kg',    price: 2200,  image_url: CATEGORY_IMAGES.fish,    is_available: true },
+  { id: 'f-chicken', name: 'Chicken', category: 'chicken', unit: 'per kg',    price: 2800,  image_url: CATEGORY_IMAGES.chicken, is_available: true },
+  { id: 'f-rice',    name: 'Rice',    category: 'rice',    unit: 'per bag',   price: 48000, image_url: CATEGORY_IMAGES.rice,    is_available: true },
+  { id: 'f-beans',   name: 'Beans',   category: 'beans',   unit: 'per bag',   price: 52000, image_url: CATEGORY_IMAGES.beans,   is_available: true },
 ]
 
 function fmt(price: number | null) {

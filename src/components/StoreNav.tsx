@@ -5,21 +5,19 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense, useEffect } from 'react'
 import {
   Search, MapPin, ChevronDown, ShoppingCart, X, Menu, LogOut, User,
-  Home, Wheat, Carrot, Egg, Fish, Leaf, Drumstick,
-  Store, Sprout, Info, MessageCircle, Package,
+  Wheat, Egg, Fish, Leaf, Drumstick,
+  Sprout, Info, MessageCircle, Package,
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
 import { LocationPicker } from '@/components/LocationPicker'
 
 const TABS = [
-  { href: '/store',              label: 'Home',       Icon: Home      },
-  { href: '/store?c=vegetables', label: 'Vegetables', Icon: Leaf      },
-  { href: '/store?c=grains',     label: 'Grains',     Icon: Wheat     },
-  { href: '/store?c=tubers',     label: 'Tubers',     Icon: Carrot    },
-  { href: '/store?c=poultry',    label: 'Poultry',    Icon: Drumstick },
-  { href: '/store?c=fish',       label: 'Fish',       Icon: Fish      },
-  { href: '/store?c=eggs',       label: 'Eggs',       Icon: Egg       },
+  { href: '/store?c=eggs',    label: 'Eggs',    Icon: Egg       },
+  { href: '/store?c=fish',    label: 'Fish',    Icon: Fish      },
+  { href: '/store?c=chicken', label: 'Chicken', Icon: Drumstick },
+  { href: '/store?c=rice',    label: 'Rice',    Icon: Wheat     },
+  { href: '/store?c=beans',   label: 'Beans',   Icon: Leaf      },
 ]
 
 // ── Search ─────────────────────────────────────────────────────────────────
@@ -82,10 +80,7 @@ function IconTabBar() {
     <div className="border-t border-soil/8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex overflow-x-auto scrollbar-hide">
         {TABS.map(({ href, label, Icon }) => {
-          const isHome = label === 'Home'
-          const active = isHome
-            ? pathname === '/store' && !c
-            : href.includes(`c=${c}`) && c !== ''
+          const active = href.includes(`c=${c}`) && c !== ''
 
           return (
             <Link
