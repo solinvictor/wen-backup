@@ -55,9 +55,25 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // ── /rider/* — require rider role ─────────────────────────────────────────
+  const isRiderRoute = path.startsWith('/rider') && path !== '/rider/login'
+  if (isRiderRoute && !user) {
+    return NextResponse.redirect(new URL('/rider/login', request.url))
+  }
+  if (isRiderRoute && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (profile?.role !== 'rider') {
+      return NextResponse.redirect(new URL('/rider/login', request.url))
+    }
+  }
+
   return response
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/account/:path*', '/account', '/checkout'],
+  matcher: ['/admin/:path*', '/rider/:path*', '/account/:path*', '/account', '/checkout'],
 }

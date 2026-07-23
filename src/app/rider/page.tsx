@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { MapPin, Package, Clock } from 'lucide-react'
+import RiderLogout from './RiderLogout'
 
 const STATUS_COLORS: Record<string, string> = {
   pending:     'bg-amber-100 text-amber-700',
@@ -36,7 +37,10 @@ export default async function RiderHomePage() {
     <div className="min-h-screen bg-grain-dim">
       <header className="bg-white border-b border-soil/8 sticky top-0 z-40 px-5 h-14 flex items-center justify-between">
         <span className="font-body text-soil text-[17px] font-semibold">WEN Rider</span>
-        <span className="font-data text-[11px] text-stone/40 uppercase tracking-wider">Active orders</span>
+        <div className="flex items-center gap-3">
+          <span className="font-data text-[11px] text-stone/40 uppercase tracking-wider">Active orders</span>
+          <RiderLogout />
+        </div>
       </header>
 
       <main className="max-w-lg mx-auto px-4 py-6">
