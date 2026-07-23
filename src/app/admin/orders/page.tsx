@@ -18,9 +18,8 @@ interface Order {
   created_at: string
   delivered_at: string | null
   rider_id: string | null
-  rider?: { full_name: string } | null
+  rider?: { email: string } | null
   buyer: { full_name: string; phone_number: string } | null
-  farmer: { full_name: string } | null
 }
 
 const STATUS_OPTIONS: Order['status'][] = ['pending', 'matched', 'in_progress', 'delivered', 'cancelled']
@@ -46,7 +45,7 @@ export default function AdminOrdersPage() {
     const [{ data: ordersData }, { data: ridersData }] = await Promise.all([
       supabase
         .from('orders')
-        .select('*, delivered_at, rider_id, buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
+        .select('id, product_summary, status, notes, created_at, delivered_at, rider_id, buyer:buyers(full_name, phone_number)')
         .order('created_at', { ascending: false }),
       supabase
         .from('profiles')
@@ -98,7 +97,6 @@ export default function AdminOrdersPage() {
                   <p className="text-soil font-medium text-[15px]">{o.product_summary}</p>
                   <p className="text-soil/50 text-[13px]">
                     {o.buyer?.full_name || 'Unknown buyer'}
-                    {o.farmer?.full_name && <span> → {o.farmer.full_name}</span>}
                   </p>
                 </div>
                 <select
