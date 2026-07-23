@@ -17,7 +17,7 @@ function genRef() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { fullName, phoneNumber, location, buyerType, items, notes, deliveryType, deliveryFee, w3wAddress, w3wLat, w3wLng } = body as {
+    const { fullName, phoneNumber, location, buyerType, items, notes, deliveryType, deliveryFee } = body as {
       fullName?: string
       phoneNumber?: string
       location?: string
@@ -26,9 +26,6 @@ export async function POST(req: NextRequest) {
       notes?: string
       deliveryType?: 'standard' | 'express'
       deliveryFee?: number
-      w3wAddress?: string | null
-      w3wLat?: number | null
-      w3wLng?: number | null
     }
 
     if (!fullName?.trim() || !phoneNumber?.trim() || !location?.trim() || !buyerType?.trim()) {
@@ -84,9 +81,6 @@ export async function POST(req: NextRequest) {
       delivery_type: deliveryType ?? null,
       delivery_fee: deliveryFee ?? null,
       order_ref: orderRef,
-      w3w_address: w3wAddress ?? null,
-      w3w_lat: w3wLat ?? null,
-      w3w_lng: w3wLng ?? null,
     })
 
     if (orderError) {

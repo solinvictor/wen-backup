@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   MapPin, Phone, Package, Clock, CheckCircle2,
-  Navigation, Loader2, ExternalLink, Hash, ChevronRight,
+  Navigation, Loader2, ChevronRight,
   Locate, AlertCircle
 } from 'lucide-react'
 
@@ -23,9 +23,6 @@ interface Order {
   status: string
   notes: string | null
   created_at: string
-  w3w_address: string | null
-  w3w_lat: number | null
-  w3w_lng: number | null
   buyers: Buyer | Buyer[] | null
 }
 
@@ -67,11 +64,27 @@ function formatAccuracy(meters: number): { label: string; color: string } {
   return { label: `±${Math.round(meters)}m — Poor`, color: 'text-red-500' }
 }
 
-function RiderGPS({ destLat, destLng }: { destLat: number | null; destLng: number | null }) {
+function RiderGPS({ destAddress }: { destAddress: string | null }) {
   const [pos, setPos] = useState<GeolocationPosition | null>(null)
   const [error, setError] = useState('')
   const [watching, setWatching] = useState(false)
   const watchId = useRef<number | null>(null)
+  const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null)
+
+  // Resolve buyer address to coords once on mount
+  useEffect(() => {
+    if (!destAddress) return
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destAddress + ', Nigeria')}&format=json&limit=1&countrycodes=ng`
+    fetch(url, { headers: { 'Accept-Language': 'en' } })
+      .then(r => r.json())
+      .then(data => {
+        if (data?.[0]) setDestCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) })
+      })
+      .catch(() => {/* silent */})
+  }, [destAddress])
+
+  const destLat = destCoords?.lat ?? null
+  const destLng = destCoords?.lng ?? null
 
   function startTracking() {
     if (!navigator.geolocation) { setError('Geolocation not supported'); return }
@@ -195,9 +208,8 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
   const isDelivered = order.status === 'delivered'
   const isCancelled = order.status === 'cancelled'
 
-  const w3wUrl = order.w3w_address ? `https://what3words.com/${order.w3w_address}` : null
-  const googleMapsUrl = order.w3w_lat && order.w3w_lng
-    ? `https://www.google.com/maps/dir/?api=1&destination=${order.w3w_lat},${order.w3w_lng}`
+  const googleMapsUrl = buyer?.location
+    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(buyer.location + ', Nigeria')}`
     : null
 
   async function markNextStatus() {
@@ -246,48 +258,26 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
             <h2 className="font-body text-soil text-[15px] font-semibold">Delivery location</h2>
           </div>
           <div className="px-5 py-4 space-y-4">
-
-            {order.w3w_address ? (
+            {buyer ? (
               <div className="space-y-3">
-                <div className="flex items-start gap-3 bg-pepper/6 border border-pepper/20 rounded-xl px-4 py-3">
-                  <Hash size={16} className="text-pepper mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-stone/50 mb-0.5">what3words address</p>
-                    <p className="text-[15px] font-bold text-soil font-data">
-                      ///{order.w3w_address}
-                    </p>
-                    <p className="text-[11px] text-stone/40 mt-1">Precise 3m² delivery point</p>
+                <div className="flex items-start gap-3">
+                  <MapPin size={14} className="text-stone/40 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-[11px] text-stone/40 mb-0.5">Delivery address</p>
+                    <p className="text-[14px] text-soil">{buyer.location}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {w3wUrl && (
-                    <a href={w3wUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 bg-pepper text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-pepper-deep transition-colors">
-                      <Navigation size={14} /> Open in W3W
-                    </a>
-                  )}
-                  {googleMapsUrl && (
-                    <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 bg-soil text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-soil/85 transition-colors">
-                      <ExternalLink size={14} /> Google Maps
-                    </a>
-                  )}
-                </div>
+                {googleMapsUrl && (
+                  <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 bg-soil text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-soil/85 transition-colors">
+                    <Navigation size={14} /> Open in Google Maps
+                  </a>
+                )}
               </div>
             ) : (
               <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
                 <MapPin size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-[13px] text-amber-700">No what3words address — use street address below</p>
-              </div>
-            )}
-
-            {buyer && (
-              <div className="flex items-start gap-3">
-                <MapPin size={14} className="text-stone/40 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-[11px] text-stone/40 mb-0.5">Street address</p>
-                  <p className="text-[14px] text-soil">{buyer.location}</p>
-                </div>
+                <p className="text-[13px] text-amber-700">No delivery address on file</p>
               </div>
             )}
           </div>
@@ -295,7 +285,7 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
 
         {/* Live GPS tracker — only when in progress */}
         {order.status === 'in_progress' && (
-          <RiderGPS destLat={order.w3w_lat} destLng={order.w3w_lng} />
+          <RiderGPS destAddress={buyer?.location ?? null} />
         )}
 
         {/* Buyer */}

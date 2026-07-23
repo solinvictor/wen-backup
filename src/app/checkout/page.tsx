@@ -8,7 +8,6 @@ import { useCart } from '@/context/CartContext'
 import {
   ChevronLeft, ShoppingBag, Loader2, CheckCircle2, Truck,
   Phone, MapPin, User, FileText, Zap, Clock, Navigation, X,
-  Hash, ExternalLink,
 } from 'lucide-react'
 
 
@@ -53,19 +52,8 @@ interface FormData {
   fullName: string
   phone: string
   address: string
-  w3w: string
   notes: string
   buyerType: 'household' | 'business' | 'restaurant'
-}
-
-interface W3WResult {
-  valid: boolean
-  words?: string
-  lat?: number
-  lng?: number
-  nearestPlace?: string
-  map?: string
-  error?: string
 }
 
 const BUYER_TYPES = [
@@ -240,109 +228,6 @@ function AddressField({
 }
 
 
-// ── What3Words field ────────────────────────────────────────────────────────
-function W3WField({
-  value,
-  onChange,
-  onValidated,
-}: {
-  value: string
-  onChange: (v: string) => void
-  onValidated: (result: W3WResult | null) => void
-}) {
-  const [status, setStatus]   = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle')
-  const [result, setResult]   = useState<W3WResult | null>(null)
-  const debounceRef           = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const validate = useCallback(async (raw: string) => {
-    const clean = raw.trim().toLowerCase().replace(/^\/\/\//, '')
-    const parts = clean.split('.')
-    if (parts.length !== 3 || parts.some(p => !p)) {
-      setStatus('idle'); setResult(null); onValidated(null); return
-    }
-    setStatus('checking')
-    try {
-      const res  = await fetch(`/api/w3w?words=${encodeURIComponent(clean)}`)
-      const data: W3WResult = await res.json()
-      if (data.valid) {
-        setStatus('valid'); setResult(data); onValidated(data)
-      } else {
-        setStatus('invalid'); setResult(data); onValidated(null)
-      }
-    } catch {
-      setStatus('invalid'); setResult({ valid: false, error: 'Could not validate — check your connection' }); onValidated(null)
-    }
-  }, [onValidated])
-
-  function handleChange(v: string) {
-    onChange(v)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    setStatus('idle'); setResult(null); onValidated(null)
-    const clean = v.trim().replace(/^\/\/\//, '')
-    if (clean.split('.').length === 3) {
-      debounceRef.current = setTimeout(() => validate(v), 600)
-    }
-  }
-
-  const borderColor = status === 'valid' ? 'border-pepper' : status === 'invalid' ? 'border-red-400' : 'border-soil/10'
-
-  return (
-    <div>
-      <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
-        <Hash size={13} />
-        what3words address
-        <span className="text-stone/35 font-normal">(optional but recommended)</span>
-      </label>
-      <div className={`flex items-center bg-grain-dim border rounded-xl overflow-hidden transition-all focus-within:bg-white ${borderColor} focus-within:border-pepper`}>
-        <span className="pl-4 text-stone/40 text-[15px] font-semibold select-none shrink-0">///</span>
-        <input
-          value={value}
-          onChange={e => handleChange(e.target.value)}
-          placeholder="word.word.word"
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          className="flex-1 px-2 py-3.5 text-[15px] text-soil bg-transparent outline-none placeholder:text-stone/35"
-        />
-        {status === 'checking' && <Loader2 size={15} className="animate-spin text-stone/40 mr-3 shrink-0" />}
-        {status === 'valid'    && <CheckCircle2 size={15} className="text-pepper mr-3 shrink-0" />}
-        {value && (
-          <button type="button" onClick={() => { onChange(''); setStatus('idle'); setResult(null); onValidated(null) }}
-                  className="px-2 text-stone/30 hover:text-soil transition-colors">
-            <X size={15} />
-          </button>
-        )}
-      </div>
-
-      {/* Status feedback */}
-      {status === 'valid' && result && (
-        <div className="mt-2 flex items-center justify-between bg-pepper/6 border border-pepper/20 rounded-xl px-3 py-2">
-          <div>
-            <p className="text-[12px] font-semibold text-pepper-deep">///{result.words}</p>
-            {result.nearestPlace && (
-              <p className="text-[11px] text-stone/50 mt-0.5">Near {result.nearestPlace}</p>
-            )}
-          </div>
-          {result.map && (
-            <a href={result.map} target="_blank" rel="noopener noreferrer"
-               className="flex items-center gap-1 text-[11px] text-pepper font-semibold hover:underline shrink-0 ml-3">
-              View map <ExternalLink size={10} />
-            </a>
-          )}
-        </div>
-      )}
-      {status === 'invalid' && result?.error && (
-        <p className="text-[12px] text-red-500 mt-1">{result.error}</p>
-      )}
-      {status === 'idle' && !value && (
-        <p className="text-[11.5px] text-stone/40 mt-1">
-          Find yours at <a href="https://what3words.com" target="_blank" rel="noopener noreferrer" className="text-pepper hover:underline">what3words.com</a> — precise 3m delivery pin for our rider.
-        </p>
-      )}
-    </div>
-  )
-}
-
 // ── Main checkout ──────────────────────────────────────────────────────────
 export default function CheckoutPage() {
   const router = useRouter()
@@ -353,9 +238,8 @@ export default function CheckoutPage() {
   const [orderRef, setOrderRef]   = useState('')
   const [delivery, setDelivery]   = useState<DeliveryId>('standard')
   const [form, setForm]           = useState<FormData>({
-    fullName: '', phone: '', address: '', w3w: '', notes: '', buyerType: 'household',
+    fullName: '', phone: '', address: '', notes: '', buyerType: 'household',
   })
-  const [w3wResult, setW3wResult]   = useState<W3WResult | null>(null)
   const [errors, setErrors] = useState<Partial<FormData>>({})
 
   useEffect(() => {
@@ -392,9 +276,6 @@ export default function CheckoutPage() {
           notes:       form.notes,
           deliveryType: delivery,
           deliveryFee,
-          w3wAddress:  w3wResult?.words  ?? null,
-          w3wLat:      w3wResult?.lat    ?? null,
-          w3wLng:      w3wResult?.lng    ?? null,
           items: cartLines.map(l => ({
             name: l.name, category: l.category, unit: l.unit,
             quantity: l.quantity, price: l.price,
@@ -580,13 +461,6 @@ export default function CheckoutPage() {
                   />
                   {errors.phone && <p className="text-[12px] text-red-500 mt-1">{errors.phone}</p>}
                 </div>
-
-                {/* what3words — precise rider location */}
-                <W3WField
-                  value={form.w3w}
-                  onChange={v => setForm({ ...form, w3w: v })}
-                  onValidated={setW3wResult}
-                />
 
                 {/* Address with GPS + autocomplete */}
                 <AddressField
