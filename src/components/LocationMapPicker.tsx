@@ -100,11 +100,9 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
         movePin(e.latlng.lat, e.latlng.lng)
       })
 
-      // Set refs BEFORE calling GPS so movePin can find them
       LRef.current   = L
       mapObj.current = map
 
-      // Now request GPS
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
@@ -113,15 +111,22 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
             movePin(lat, lng)
             setLoading(false)
           },
-          () => {
-            setGpsError('Could not get your location — drag the pin or tap the map')
+          (err) => {
+            // Show actual error so we know what's happening
+            const msg: Record<number, string> = {
+              1: 'Location permission denied',
+              2: 'Position unavailable — poor GPS signal',
+              3: 'Location request timed out',
+            }
+            setGpsError(msg[err.code] ?? `GPS error ${err.code}: ${err.message}`)
             movePin(DEFAULT.lat, DEFAULT.lng)
             setLoading(false)
           },
-          { enableHighAccuracy: true, timeout: 10000 }
+          // Lower accuracy first so it responds faster, then high accuracy for pin
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
         )
       } else {
-        setGpsError('GPS not available — drag the pin or tap the map')
+        setGpsError('GPS not available on this device')
         movePin(DEFAULT.lat, DEFAULT.lng)
         setLoading(false)
       }
