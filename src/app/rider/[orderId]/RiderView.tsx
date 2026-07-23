@@ -25,9 +25,6 @@ interface Order {
   status: string
   notes: string | null
   created_at: string
-  w3w_address: string | null
-  w3w_lat: number | null
-  w3w_lng: number | null
   buyers: Buyer | Buyer[] | null
 }
 
@@ -216,9 +213,8 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
   const isDelivered = order.status === 'delivered'
   const isCancelled = order.status === 'cancelled'
 
-  // Best coords available: w3w pin > buyer GPS > nothing (don't use free text)
-  const destLat = order.w3w_lat ?? buyer?.delivery_lat ?? null
-  const destLng = order.w3w_lng ?? buyer?.delivery_lng ?? null
+  const destLat = buyer?.delivery_lat ?? null
+  const destLng = buyer?.delivery_lng ?? null
 
   const googleMapsUrl = destLat && destLng
     ? `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`
@@ -277,11 +273,6 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
                   <div>
                     <p className="text-[11px] text-stone/40 mb-0.5">Delivery address</p>
                     <p className="text-[14px] text-soil">{buyer.location}</p>
-                    {order.w3w_address && (
-                      <p className="text-[12px] text-pepper font-data font-semibold mt-1">
-                        ///{order.w3w_address}
-                      </p>
-                    )}
                     {destLat && destLng && (
                       <p className="text-[11px] text-green-600 font-medium mt-0.5">
                         📍 Exact GPS pin available

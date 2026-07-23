@@ -30,7 +30,7 @@ export default async function RiderHomePage() {
     .from('orders')
     .select(`
       id, order_ref, product_summary, status,
-      delivery_type, w3w_address, created_at,
+      delivery_type, created_at,
       buyers ( full_name, location )
     `)
     .eq('rider_id', user!.id)
@@ -81,12 +81,6 @@ export default async function RiderHomePage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      {o.w3w_address && (
-                        <div className="flex items-center gap-2 text-[13px] text-soil/60">
-                          <MapPin size={12} className="text-pepper shrink-0" />
-                          <span className="font-data font-semibold">///{o.w3w_address}</span>
-                        </div>
-                      )}
                       {buyer?.location && (
                         <div className="flex items-center gap-2 text-[13px] text-soil/60">
                           <MapPin size={12} className="text-stone/40 shrink-0" />

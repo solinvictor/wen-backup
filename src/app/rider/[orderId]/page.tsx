@@ -14,8 +14,7 @@ export default async function RiderPage({ params }: Props) {
     .from('orders')
     .select(`
       id, order_ref, product_summary, status,
-      delivery_type, delivery_fee, notes,
-      created_at, w3w_address, w3w_lat, w3w_lng,
+      delivery_type, delivery_fee, notes, created_at,
       buyers ( full_name, phone_number, location, delivery_lat, delivery_lng )
     `)
     .eq('id', orderId)
