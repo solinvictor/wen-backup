@@ -25,6 +25,9 @@ interface Order {
   status: string
   notes: string | null
   created_at: string
+  w3w_address: string | null
+  w3w_lat: number | null
+  w3w_lng: number | null
   buyers: Buyer | Buyer[] | null
 }
 
@@ -118,13 +121,9 @@ function RiderGPS({
     ? distance(pos.coords.latitude, pos.coords.longitude, destLat, destLng)
     : null
 
-  // If we have exact coords, use them. If not, fall back to text address.
-  const navigateUrl = pos
-    ? destLat && destLng
-      ? `https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${destLat},${destLng}`
-      : destAddress
-        ? `https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${encodeURIComponent(destAddress + ', Nigeria')}`
-        : null
+  // Only navigate if we have real coords — never use free-text address
+  const navigateUrl = pos && destLat && destLng
+    ? `https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${destLat},${destLng}`
     : null
 
   const hasDestination = !!(destLat && destLng) || !!destAddress
@@ -217,9 +216,13 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
   const isDelivered = order.status === 'delivered'
   const isCancelled = order.status === 'cancelled'
 
-  const googleMapsUrl = buyer?.location
-    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(buyer.location + ', Nigeria')}`
-    : null
+  // Best coords available: w3w pin > buyer GPS > nothing (don't use free text)
+  const destLat = order.w3w_lat ?? buyer?.delivery_lat ?? null
+  const destLng = order.w3w_lng ?? buyer?.delivery_lng ?? null
+
+  const googleMapsUrl = destLat && destLng
+    ? `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`
+    : null  // No coords = no nav link, don't guess
 
   async function markNextStatus() {
     if (!nextStatus) return
@@ -274,18 +277,28 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
                   <div>
                     <p className="text-[11px] text-stone/40 mb-0.5">Delivery address</p>
                     <p className="text-[14px] text-soil">{buyer.location}</p>
-                    {buyer.delivery_lat && buyer.delivery_lng && (
+                    {order.w3w_address && (
+                      <p className="text-[12px] text-pepper font-data font-semibold mt-1">
+                        ///{order.w3w_address}
+                      </p>
+                    )}
+                    {destLat && destLng && (
                       <p className="text-[11px] text-green-600 font-medium mt-0.5">
-                        📍 Exact GPS pin saved
+                        📍 Exact GPS pin available
                       </p>
                     )}
                   </div>
                 </div>
-                {googleMapsUrl && (
+                {googleMapsUrl ? (
                   <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 bg-soil text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-soil/85 transition-colors">
                     <Navigation size={14} /> Open in Google Maps
                   </a>
+                ) : (
+                  <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                    <AlertCircle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-[12.5px] text-amber-700">No GPS pin for this order — call the buyer to confirm location before heading out.</p>
+                  </div>
                 )}
               </div>
             ) : (
@@ -300,8 +313,8 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
         {/* Live GPS tracker — only when in progress */}
         {order.status === 'in_progress' && (
           <RiderGPS
-            destLat={buyer?.delivery_lat ?? null}
-            destLng={buyer?.delivery_lng ?? null}
+            destLat={destLat}
+            destLng={destLng}
             destAddress={buyer?.location ?? null}
           />
         )}
