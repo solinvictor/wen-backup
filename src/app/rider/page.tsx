@@ -1,3 +1,4 @@
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { MapPin, Package, Clock } from 'lucide-react'
@@ -20,14 +21,19 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 export default async function RiderHomePage() {
-  const supabase = createAdminClient()
-  const { data: orders } = await supabase
+  // Get the logged-in rider's ID from session
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const adminClient = createAdminClient()
+  const { data: orders } = await adminClient
     .from('orders')
     .select(`
       id, order_ref, product_summary, status,
       delivery_type, w3w_address, created_at,
       buyers ( full_name, location )
     `)
+    .eq('rider_id', user!.id)
     .in('status', ['matched', 'in_progress'])
     .order('created_at', { ascending: true })
 
@@ -48,11 +54,13 @@ export default async function RiderHomePage() {
           <div className="text-center py-20">
             <Package size={40} className="text-soil/15 mx-auto mb-4" />
             <p className="font-body text-soil text-lg font-medium mb-1">No active orders</p>
-            <p className="text-soil/50 text-[14px]">Check back soon — matched orders will appear here.</p>
+            <p className="text-soil/50 text-[14px]">Check back soon — assigned orders will appear here.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-[12px] text-soil/40 font-medium mb-4">{activeOrders.length} order{activeOrders.length !== 1 ? 's' : ''} waiting</p>
+            <p className="text-[12px] text-soil/40 font-medium mb-4">
+              {activeOrders.length} order{activeOrders.length !== 1 ? 's' : ''} assigned to you
+            </p>
             {activeOrders.map((o: any) => {
               const buyer = Array.isArray(o.buyers) ? o.buyers[0] : o.buyers
               return (

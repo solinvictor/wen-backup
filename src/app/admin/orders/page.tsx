@@ -3,6 +3,12 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AdminShell } from '@/components/AdminShell'
+import { Bike } from 'lucide-react'
+
+interface Rider {
+  id: string
+  full_name: string
+}
 
 interface Order {
   id: string
@@ -10,8 +16,9 @@ interface Order {
   status: 'pending' | 'matched' | 'in_progress' | 'delivered' | 'cancelled'
   notes: string | null
   created_at: string
-  delivered_by: string | null
   delivered_at: string | null
+  rider_id: string | null
+  rider?: { full_name: string } | null
   buyer: { full_name: string; phone_number: string } | null
   farmer: { full_name: string } | null
 }
@@ -19,45 +26,59 @@ interface Order {
 const STATUS_OPTIONS: Order['status'][] = ['pending', 'matched', 'in_progress', 'delivered', 'cancelled']
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-turmeric/15 text-turmeric',
-  matched: 'bg-[#5AA8FF]/15 text-[#3D7DCC]',
+  pending:     'bg-turmeric/15 text-turmeric',
+  matched:     'bg-[#5AA8FF]/15 text-[#3D7DCC]',
   in_progress: 'bg-okra/15 text-okra',
-  delivered: 'bg-soil/10 text-soil/60',
-  cancelled: 'bg-pepper/15 text-pepper',
+  delivered:   'bg-soil/10 text-soil/60',
+  cancelled:   'bg-pepper/15 text-pepper',
 }
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
+  const [riders, setRiders] = useState<Rider[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { load() }, [])
 
   async function load() {
     const supabase = createClient()
-    const { data } = await supabase
-      .from('orders')
-      .select('*, delivered_by, delivered_at, buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
-      .order('created_at', { ascending: false })
-    setOrders((data as any) || [])
+
+    const [{ data: ordersData }, { data: ridersData }] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('*, delivered_at, rider_id, rider:profiles!orders_rider_id_fkey(full_name), buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('role', 'rider')
+        .order('full_name'),
+    ])
+
+    setOrders((ordersData as any) || [])
+    setRiders(ridersData || [])
     setLoading(false)
   }
 
   async function updateStatus(id: string, status: Order['status']) {
     const supabase = createClient()
-    const updates: Partial<Order> = { status }
-    // Auto-stamp the delivery time the moment it's marked delivered —
-    // "delivered_by" is filled in separately since it's manual MVP delivery.
-    if (status === 'delivered') {
-      updates.delivered_at = new Date().toISOString()
-    }
+    const updates: any = { status }
+    if (status === 'delivered') updates.delivered_at = new Date().toISOString()
     await supabase.from('orders').update(updates).eq('id', id)
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...updates } : o)))
   }
 
-  async function updateDeliveredBy(id: string, deliveredBy: string) {
+  async function assignRider(orderId: string, riderId: string | null) {
     const supabase = createClient()
-    await supabase.from('orders').update({ delivered_by: deliveredBy }).eq('id', id)
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, delivered_by: deliveredBy } : o)))
+    await supabase.from('orders').update({ rider_id: riderId || null }).eq('id', orderId)
+    const rider = riders.find((r) => r.id === riderId) || null
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId
+          ? { ...o, rider_id: riderId, rider: rider ? { full_name: rider.full_name } : null }
+          : o
+      )
+    )
   }
 
   return (
@@ -67,7 +88,7 @@ export default function AdminOrdersPage() {
       {loading ? (
         <p className="text-soil/50 text-[14px]">Loading...</p>
       ) : orders.length === 0 ? (
-        <p className="text-soil/50 text-[14px]">No orders yet. Orders will appear here once buyers start requesting produce.</p>
+        <p className="text-soil/50 text-[14px]">No orders yet.</p>
       ) : (
         <div className="space-y-2.5">
           {orders.map((o) => (
@@ -90,21 +111,24 @@ export default function AdminOrdersPage() {
                   ))}
                 </select>
               </div>
+
               {o.notes && <p className="text-[13px] text-soil/60 mb-3">{o.notes}</p>}
 
-              {(o.status === 'in_progress' || o.status === 'delivered') && (
+              {/* Rider assignment — show for all non-cancelled, non-pending orders */}
+              {o.status !== 'cancelled' && o.status !== 'pending' && (
                 <div className="flex items-center gap-2.5 mt-1 pt-3 border-t border-soil/8">
-                  <label className="text-[11.5px] text-soil/50 font-medium shrink-0">Delivered by</label>
-                  <input
-                    defaultValue={o.delivered_by || ''}
-                    onBlur={(e) => {
-                      if (e.target.value !== (o.delivered_by || '')) {
-                        updateDeliveredBy(o.id, e.target.value)
-                      }
-                    }}
-                    placeholder="e.g. Musa (WEN staff)"
-                    className="flex-1 text-[13px] border border-soil/15 rounded-md px-2.5 py-1.5 outline-none focus:border-pepper transition-colors bg-white"
-                  />
+                  <Bike size={13} className="text-soil/30 shrink-0" />
+                  <label className="text-[11.5px] text-soil/50 font-medium shrink-0">Assign rider</label>
+                  <select
+                    value={o.rider_id || ''}
+                    onChange={(e) => assignRider(o.id, e.target.value || null)}
+                    className="flex-1 text-[13px] border border-soil/15 rounded-md px-2.5 py-1.5 outline-none focus:border-pepper transition-colors bg-white text-soil"
+                  >
+                    <option value="">— Unassigned —</option>
+                    {riders.map((r) => (
+                      <option key={r.id} value={r.id}>{r.full_name}</option>
+                    ))}
+                  </select>
                   {o.delivered_at && (
                     <span className="font-data text-[10.5px] text-soil/40 shrink-0 whitespace-nowrap">
                       {new Date(o.delivered_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
@@ -119,4 +143,3 @@ export default function AdminOrdersPage() {
     </AdminShell>
   )
 }
-
