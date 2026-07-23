@@ -7,7 +7,7 @@ import { Bike } from 'lucide-react'
 
 interface Rider {
   id: string
-  full_name: string
+  email: string
 }
 
 interface Order {
@@ -46,13 +46,13 @@ export default function AdminOrdersPage() {
     const [{ data: ordersData }, { data: ridersData }] = await Promise.all([
       supabase
         .from('orders')
-        .select('*, delivered_at, rider_id, rider:profiles!orders_rider_id_fkey(full_name), buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
+        .select('*, delivered_at, rider_id, rider:profiles!orders_rider_id_fkey(email), buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
         .order('created_at', { ascending: false }),
       supabase
         .from('profiles')
-        .select('id, full_name')
+        .select('id, email')
         .eq('role', 'rider')
-        .order('full_name'),
+        .order('email'),
     ])
 
     setOrders((ordersData as any) || [])
@@ -75,7 +75,7 @@ export default function AdminOrdersPage() {
     setOrders((prev) =>
       prev.map((o) =>
         o.id === orderId
-          ? { ...o, rider_id: riderId, rider: rider ? { full_name: rider.full_name } : null }
+          ? { ...o, rider_id: riderId, rider: rider ? { email: rider.email } : null }
           : o
       )
     )
@@ -126,7 +126,7 @@ export default function AdminOrdersPage() {
                   >
                     <option value="">— Unassigned —</option>
                     {riders.map((r) => (
-                      <option key={r.id} value={r.id}>{r.full_name}</option>
+                      <option key={r.id} value={r.id}>{r.email}</option>
                     ))}
                   </select>
                   {o.delivered_at && (
