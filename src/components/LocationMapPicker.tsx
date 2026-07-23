@@ -13,13 +13,14 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   const mapObj    = useRef<any>(null)
   const markerObj = useRef<any>(null)
   const LRef      = useRef<any>(null)
-  const pinDropped = useRef(false)
+  const watchId = useRef<number | null>(null)
 
   const [loading,   setLoading]   = useState(true)
   const [gpsError,  setGpsError]  = useState('')
   const [coords,    setCoords]    = useState<{ lat: number; lng: number } | null>(null)
   const [label,     setLabel]     = useState('')
   const [resolving, setResolving] = useState(false)
+  const [accuracy,  setAccuracy]  = useState<number | null>(null)
 
   const DEFAULT = { lat: 7.7322, lng: 8.5391 }
 
@@ -67,17 +68,25 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   }
 
   function onGPSSuccess(pos: GeolocationPosition) {
-    if (pinDropped.current) return // already got a fix, ignore duplicates
-    pinDropped.current = true
-    const { latitude: lat, longitude: lng } = pos.coords
-    movePin(lat, lng, 17)
+    const { latitude: lat, longitude: lng, accuracy } = pos.coords
+    // Keep refining pin as accuracy improves — zoom in more as we get better fix
+    const zoom = accuracy <= 20 ? 19 : accuracy <= 50 ? 18 : accuracy <= 200 ? 17 : 15
+    movePin(lat, lng, zoom)
+    setAccuracy(Math.round(accuracy))
     setGpsError('')
     setLoading(false)
+    // Stop watching once we hit ≤20m — precise enough
+    if (accuracy <= 20 && watchId.current !== null) {
+      navigator.geolocation.clearWatch(watchId.current)
+      watchId.current = null
+    }
   }
 
   function onGPSError() {
-    if (pinDropped.current) return
-    pinDropped.current = true
+    if (watchId.current !== null) {
+      navigator.geolocation.clearWatch(watchId.current)
+      watchId.current = null
+    }
     setGpsError('Could not find you — drag the pin to your location')
     movePin(DEFAULT.lat, DEFAULT.lng, 15)
     setLoading(false)
@@ -122,18 +131,12 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       mapObj.current = map
 
       if (navigator.geolocation) {
-        // First pass: accept any cached position so map moves fast
-        navigator.geolocation.getCurrentPosition(
+        // watchPosition keeps refining — pin moves as GPS chip gets a better fix
+        // maximumAge: 0 forces fresh reading every time, never stale cache
+        watchId.current = navigator.geolocation.watchPosition(
           onGPSSuccess,
-          () => {
-            // Cached lookup failed — now try high accuracy (slower but more precise)
-            navigator.geolocation.getCurrentPosition(
-              onGPSSuccess,
-              onGPSError,
-              { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
-            )
-          },
-          { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+          onGPSError,
+          { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
         )
       } else {
         onGPSError()
@@ -141,12 +144,15 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     })
 
     return () => {
+      if (watchId.current !== null) {
+        navigator.geolocation.clearWatch(watchId.current)
+        watchId.current = null
+      }
       if (mapObj.current) {
         mapObj.current.remove()
         mapObj.current    = null
         markerObj.current = null
         LRef.current      = null
-        pinDropped.current = false
       }
     }
   }, [])
@@ -181,6 +187,13 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       <div className="shrink-0 border-t border-soil/10 px-4 pt-3 pb-6 bg-white space-y-3">
         {gpsError && (
           <p className="text-[12px] text-amber-600 text-center">{gpsError}</p>
+        )}
+        {accuracy !== null && !gpsError && (
+          <div className={`text-center text-[11.5px] font-medium ${accuracy <= 20 ? 'text-green-600' : accuracy <= 50 ? 'text-amber-500' : 'text-orange-500'}`}>
+            {accuracy <= 20
+              ? `✓ Pin locked — ±${accuracy}m accuracy`
+              : `Refining GPS… ±${accuracy}m — hold still for better accuracy`}
+          </div>
         )}
         {label && (
           <div className="flex items-start gap-2 bg-grain-dim rounded-xl px-3 py-2.5">
