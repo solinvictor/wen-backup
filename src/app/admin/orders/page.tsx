@@ -46,7 +46,7 @@ export default function AdminOrdersPage() {
     const [{ data: ordersData }, { data: ridersData }] = await Promise.all([
       supabase
         .from('orders')
-        .select('*, delivered_at, rider_id, rider:profiles!orders_rider_id_fkey(email), buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
+        .select('*, delivered_at, rider_id, buyer:buyers(full_name, phone_number), farmer:farmers(full_name)')
         .order('created_at', { ascending: false }),
       supabase
         .from('profiles')
