@@ -17,10 +17,16 @@ function genRef() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { fullName, phoneNumber, location, buyerType, items, notes, deliveryType, deliveryFee } = body as {
+    const {
+      fullName, phoneNumber, location,
+      deliveryLat, deliveryLng,
+      buyerType, items, notes, deliveryType, deliveryFee,
+    } = body as {
       fullName?: string
       phoneNumber?: string
       location?: string
+      deliveryLat?: number | null
+      deliveryLng?: number | null
       buyerType?: string
       items?: CartItem[]
       notes?: string
@@ -35,7 +41,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Your list is empty — add at least one product.' }, { status: 400 })
     }
 
-    // Try to get the logged-in user — gracefully skip if env vars missing or no session
     let userId: string | null = null
     try {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -45,7 +50,7 @@ export async function POST(req: NextRequest) {
         const { data: { user } } = await supabase.auth.getUser()
         userId = user?.id ?? null
       }
-    } catch { /* no session — guest checkout, userId stays null */ }
+    } catch { /* guest checkout */ }
 
     const supabase = createAdminClient()
 
@@ -56,6 +61,8 @@ export async function POST(req: NextRequest) {
         full_name: fullName.trim(),
         phone_number: phoneNumber.trim(),
         location: location.trim(),
+        delivery_lat: deliveryLat ?? null,
+        delivery_lng: deliveryLng ?? null,
         buyer_type: buyerType,
         products_interested: productsInterested,
         ...(userId ? { user_id: userId } : {}),
