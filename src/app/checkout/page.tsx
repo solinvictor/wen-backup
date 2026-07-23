@@ -68,10 +68,12 @@ interface Suggestion { display_name: string; lat: string; lon: string }
 function AddressField({
   value,
   onChange,
+  onCoordsChange,
   error,
 }: {
   value: string
   onChange: (v: string) => void
+  onCoordsChange: (coords: { lat: number; lng: number } | null) => void
   error?: string
 }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
@@ -110,19 +112,22 @@ function AddressField({
 
   function handleChange(v: string) {
     onChange(v)
+    // Clear saved coords when user edits manually — they're no longer precise
+    onCoordsChange(null)
     search(v)
     setGpsError('')
   }
 
   function pick(s: Suggestion) {
-    // Trim to the human-readable parts, drop the long country suffix
     const parts = s.display_name.split(',').slice(0, 4).join(',').trim()
     onChange(parts)
+    // Save the coords from the autocomplete selection
+    onCoordsChange({ lat: parseFloat(s.lat), lng: parseFloat(s.lon) })
     setSuggestions([])
     setOpen(false)
   }
 
-  // GPS → reverse geocode via Nominatim
+  // GPS → reverse geocode via Nominatim, but KEEP the raw coords
   async function useGPS() {
     if (!navigator.geolocation) {
       setGpsError('GPS not supported on this device')
@@ -134,19 +139,24 @@ function AddressField({
       async (pos) => {
         try {
           const { latitude: lat, longitude: lon } = pos.coords
+          // Save exact coords immediately — don't lose them
+          onCoordsChange({ lat, lng: lon })
           const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
           const res  = await fetch(url, { headers: { 'Accept-Language': 'en' } })
           const data = await res.json()
           if (data?.display_name) {
             const parts = data.display_name.split(',').slice(0, 4).join(',').trim()
             onChange(parts)
-            setSuggestions([])
-            setOpen(false)
           } else {
-            setGpsError('Could not read your location. Type your address instead.')
+            onChange(`${lat.toFixed(6)}, ${lon.toFixed(6)}`)
           }
+          setSuggestions([])
+          setOpen(false)
         } catch {
-          setGpsError('Location lookup failed. Type your address instead.')
+          // Nominatim failed — coords are already saved, just show raw coords as label
+          const { latitude: lat, longitude: lon } = pos.coords
+          onChange(`${lat.toFixed(6)}, ${lon.toFixed(6)}`)
+          setGpsError('')
         } finally {
           setGpsLoading(false)
         }
@@ -180,7 +190,7 @@ function AddressField({
         {value && (
           <button
             type="button"
-            onClick={() => { onChange(''); setSuggestions([]); setOpen(false) }}
+            onClick={() => { onChange(''); onCoordsChange(null); setSuggestions([]); setOpen(false) }}
             className="px-2 text-stone/30 hover:text-soil transition-colors"
           >
             <X size={15} />
@@ -241,6 +251,8 @@ export default function CheckoutPage() {
     fullName: '', phone: '', address: '', notes: '', buyerType: 'household',
   })
   const [errors, setErrors] = useState<Partial<FormData>>({})
+  // Precise GPS coords captured at address selection time
+  const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null)
 
   useEffect(() => {
     if (cartCount === 0 && step !== 'success') router.replace('/store')
@@ -272,6 +284,8 @@ export default function CheckoutPage() {
           fullName:    form.fullName,
           phoneNumber: form.phone,
           location:    form.address,
+          deliveryLat: deliveryCoords?.lat ?? null,
+          deliveryLng: deliveryCoords?.lng ?? null,
           buyerType:   form.buyerType,
           notes:       form.notes,
           deliveryType: delivery,
@@ -466,6 +480,7 @@ export default function CheckoutPage() {
                 <AddressField
                   value={form.address}
                   onChange={v => setForm({ ...form, address: v })}
+                  onCoordsChange={setDeliveryCoords}
                   error={errors.address}
                 />
 
