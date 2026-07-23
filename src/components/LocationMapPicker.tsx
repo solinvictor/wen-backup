@@ -9,17 +9,17 @@ interface Props {
 }
 
 export default function LocationMapPicker({ onConfirm, onClose }: Props) {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const leafletMap = useRef<any>(null)
-  const marker = useRef<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [gpsError, setGpsError] = useState('')
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null)
-  const [label, setLabel] = useState('')
+  const mapRef    = useRef<HTMLDivElement>(null)
+  const mapObj    = useRef<any>(null)
+  const markerObj = useRef<any>(null)
+
+  const [loading,   setLoading]   = useState(true)
+  const [gpsError,  setGpsError]  = useState('')
+  const [coords,    setCoords]    = useState<{ lat: number; lng: number } | null>(null)
+  const [label,     setLabel]     = useState('')
   const [resolving, setResolving] = useState(false)
 
-  // Default center — Makurdi
-  const DEFAULT = { lat: 7.7322, lng: 8.5391 }
+  const DEFAULT = { lat: 7.7322, lng: 8.5391 } // Makurdi
 
   async function reverseGeocode(lat: number, lng: number): Promise<string> {
     try {
@@ -35,9 +35,22 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
   }
 
-  function updateMarker(lat: number, lng: number) {
-    if (!leafletMap.current || !marker.current) return
-    marker.current.setLatLng([lat, lng])
+  function placePin(L: any, lat: number, lng: number) {
+    if (!mapObj.current) return
+    if (markerObj.current) {
+      markerObj.current.setLatLng([lat, lng])
+    } else {
+      markerObj.current = L.marker([lat, lng], { draggable: true }).addTo(mapObj.current)
+      markerObj.current.on('dragend', () => {
+        const pos = markerObj.current.getLatLng()
+        updateCoords(pos.lat, pos.lng)
+      })
+    }
+    setCoords({ lat, lng })
+    updateCoords(lat, lng)
+  }
+
+  function updateCoords(lat: number, lng: number) {
     setCoords({ lat, lng })
     setResolving(true)
     reverseGeocode(lat, lng).then(l => {
@@ -47,16 +60,25 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   }
 
   useEffect(() => {
-    if (!mapRef.current || leafletMap.current) return
+    if (!mapRef.current || mapObj.current) return
 
-    // Dynamically import Leaflet — avoids SSR issues
+    // Inject Leaflet CSS
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link')
+      link.id   = 'leaflet-css'
+      link.rel  = 'stylesheet'
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+      document.head.appendChild(link)
+    }
+
     import('leaflet').then(L => {
-      // Fix default marker icons (Leaflet + webpack issue)
-      delete (L.Icon.Default.prototype as any)._getIconUrl
+      // Fix broken default icons in webpack/Next.js
+      const DefaultIcon = L.Icon.Default as any
+      delete DefaultIcon.prototype._getIconUrl
       L.Icon.Default.mergeOptions({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       })
 
       const map = L.map(mapRef.current!, {
@@ -66,64 +88,49 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       })
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
+        attribution: '© OpenStreetMap',
         maxZoom: 19,
       }).addTo(map)
 
-      const m = L.marker([DEFAULT.lat, DEFAULT.lng], { draggable: true }).addTo(map)
-
-      m.on('dragend', () => {
-        const { lat, lng } = m.getLatLng()
-        updateMarker(lat, lng)
-      })
-
+      // Tap anywhere on map to move pin
       map.on('click', (e: any) => {
-        updateMarker(e.latlng.lat, e.latlng.lng)
-        map.panTo([e.latlng.lat, e.latlng.lng])
+        map.panTo(e.latlng)
+        placePin(L, e.latlng.lat, e.latlng.lng)
       })
 
-      leafletMap.current = map
-      marker.current = m
+      mapObj.current = map
 
-      // Try to get actual GPS position
+      // Auto-drop pin on GPS position
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             const { latitude: lat, longitude: lng } = pos.coords
             map.setView([lat, lng], 17)
-            updateMarker(lat, lng)
+            placePin(L, lat, lng)
             setLoading(false)
           },
           () => {
-            // GPS denied or failed — stay on Makurdi default
-            setGpsError('Could not get your location — drag the pin to your spot')
-            setCoords(DEFAULT)
-            reverseGeocode(DEFAULT.lat, DEFAULT.lng).then(l => setLabel(l))
+            setGpsError('Could not get your location — drag the pin or tap the map')
+            placePin(L, DEFAULT.lat, DEFAULT.lng)
             setLoading(false)
           },
           { enableHighAccuracy: true, timeout: 10000 }
         )
       } else {
-        setGpsError('GPS not supported — drag the pin to your spot')
-        setCoords(DEFAULT)
-        reverseGeocode(DEFAULT.lat, DEFAULT.lng).then(l => setLabel(l))
+        setGpsError('GPS not available — drag the pin or tap the map')
+        placePin(L, DEFAULT.lat, DEFAULT.lng)
         setLoading(false)
       }
     })
 
     return () => {
-      if (leafletMap.current) {
-        leafletMap.current.remove()
-        leafletMap.current = null
-        marker.current = null
+      if (mapObj.current) {
+        mapObj.current.remove()
+        mapObj.current  = null
+        markerObj.current = null
       }
     }
   }, [])
-
-  function handleConfirm() {
-    if (!coords) return
-    onConfirm(coords, label)
-  }
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-white">
@@ -138,9 +145,9 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
         </button>
       </div>
 
-      {/* Instruction */}
-      <div className="px-4 py-2.5 bg-pepper/5 border-b border-pepper/10 shrink-0">
-        <p className="text-[12.5px] text-pepper-deep font-medium text-center">
+      {/* Hint bar */}
+      <div className="px-4 py-2.5 bg-pepper/5 border-b border-pepper/10 shrink-0 text-center">
+        <p className="text-[12.5px] text-pepper-deep font-medium">
           {loading ? 'Getting your location…' : 'Drag the pin or tap the map to adjust'}
         </p>
       </div>
@@ -155,7 +162,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
         <div ref={mapRef} className="w-full h-full" />
       </div>
 
-      {/* Bottom confirm panel */}
+      {/* Bottom panel */}
       <div className="shrink-0 border-t border-soil/10 px-4 pt-3 pb-6 bg-white space-y-3">
         {gpsError && (
           <p className="text-[12px] text-amber-600 text-center">{gpsError}</p>
@@ -164,12 +171,12 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
           <div className="flex items-start gap-2 bg-grain-dim rounded-xl px-3 py-2.5">
             <MapPin size={13} className="text-pepper shrink-0 mt-0.5" />
             <p className="text-[13px] text-soil leading-snug">
-              {resolving ? 'Resolving address…' : label}
+              {resolving ? 'Reading address…' : label}
             </p>
           </div>
         )}
         <button
-          onClick={handleConfirm}
+          onClick={() => coords && onConfirm(coords, label)}
           disabled={!coords || resolving}
           className="w-full flex items-center justify-center gap-2 bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep transition-colors disabled:opacity-50"
         >
@@ -177,12 +184,6 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
           Confirm this location
         </button>
       </div>
-
-      {/* Leaflet CSS */}
-      <style>{`
-        .leaflet-container { font-family: inherit; }
-        .leaflet-control-attribution { font-size: 9px !important; }
-      `}</style>
     </div>
   )
 }
