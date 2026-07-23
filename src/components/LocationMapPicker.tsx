@@ -13,6 +13,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   const mapObj    = useRef<any>(null)
   const markerObj = useRef<any>(null)
   const LRef      = useRef<any>(null)
+  const pinDropped = useRef(false)
 
   const [loading,   setLoading]   = useState(true)
   const [gpsError,  setGpsError]  = useState('')
@@ -36,7 +37,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
   }
 
-  function movePin(lat: number, lng: number) {
+  function movePin(lat: number, lng: number, zoom?: number) {
     const L   = LRef.current
     const map = mapObj.current
     if (!L || !map) return
@@ -52,7 +53,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       markerObj.current = m
     }
 
-    map.setView([lat, lng], map.getZoom())
+    map.setView([lat, lng], zoom ?? map.getZoom())
     resolvePin(lat, lng)
   }
 
@@ -63,6 +64,23 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       setLabel(l)
       setResolving(false)
     })
+  }
+
+  function onGPSSuccess(pos: GeolocationPosition) {
+    if (pinDropped.current) return // already got a fix, ignore duplicates
+    pinDropped.current = true
+    const { latitude: lat, longitude: lng } = pos.coords
+    movePin(lat, lng, 17)
+    setGpsError('')
+    setLoading(false)
+  }
+
+  function onGPSError() {
+    if (pinDropped.current) return
+    pinDropped.current = true
+    setGpsError('Could not find you — drag the pin to your location')
+    movePin(DEFAULT.lat, DEFAULT.lng, 15)
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -104,31 +122,21 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       mapObj.current = map
 
       if (navigator.geolocation) {
+        // First pass: accept any cached position so map moves fast
         navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const { latitude: lat, longitude: lng } = pos.coords
-            map.setView([lat, lng], 17)
-            movePin(lat, lng)
-            setLoading(false)
+          onGPSSuccess,
+          () => {
+            // Cached lookup failed — now try high accuracy (slower but more precise)
+            navigator.geolocation.getCurrentPosition(
+              onGPSSuccess,
+              onGPSError,
+              { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+            )
           },
-          (err) => {
-            // Show actual error so we know what's happening
-            const msg: Record<number, string> = {
-              1: 'Location permission denied',
-              2: 'Position unavailable — poor GPS signal',
-              3: 'Location request timed out',
-            }
-            setGpsError(msg[err.code] ?? `GPS error ${err.code}: ${err.message}`)
-            movePin(DEFAULT.lat, DEFAULT.lng)
-            setLoading(false)
-          },
-          // Lower accuracy first so it responds faster, then high accuracy for pin
-          { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
+          { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
         )
       } else {
-        setGpsError('GPS not available on this device')
-        movePin(DEFAULT.lat, DEFAULT.lng)
-        setLoading(false)
+        onGPSError()
       }
     })
 
@@ -138,6 +146,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
         mapObj.current    = null
         markerObj.current = null
         LRef.current      = null
+        pinDropped.current = false
       }
     }
   }, [])
