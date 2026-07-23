@@ -71,13 +71,13 @@ export default function AdminReportsPage() {
 
   return (
     <AdminShell>
-      <h1 className="font-display text-soil text-2xl mb-6">Reports</h1>
+      <h1 className="font-body text-soil text-2xl font-semibold mb-6">Reports</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         {cards.map(({ label, value, sub, icon: Icon }) => (
           <div key={label} className="bg-grain rounded-xl p-5 border border-soil/8">
             <Icon size={16} className="text-pepper mb-3" />
-            <p className="font-display text-soil text-2xl mb-0.5">{value}</p>
+            <p className="font-body text-soil text-2xl font-bold mb-0.5">{value}</p>
             <p className="text-soil/50 text-[12px]">{label} · {sub}</p>
           </div>
         ))}

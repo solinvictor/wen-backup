@@ -62,7 +62,7 @@ export default function AdminOrdersPage() {
 
   return (
     <AdminShell>
-      <h1 className="font-display text-soil text-2xl mb-6">Orders</h1>
+      <h1 className="font-body text-soil text-2xl font-semibold mb-6">Orders</h1>
 
       {loading ? (
         <p className="text-soil/50 text-[14px]">Loading...</p>

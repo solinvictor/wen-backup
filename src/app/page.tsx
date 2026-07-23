@@ -108,7 +108,7 @@ function FeaturedProducts() {
                 />
               </div>
               <div className="p-3 sm:p-4">
-                <p className="font-display text-soil font-bold text-[14px] sm:text-[15px] leading-tight truncate">{p.name}</p>
+                <p className="font-body text-soil font-bold text-[14px] sm:text-[15px] leading-tight truncate">{p.name}</p>
                 {p.unit && <p className="text-soil/60 text-[12px] mt-0.5">{p.unit}</p>}
               </div>
             </Link>
@@ -204,7 +204,7 @@ export default function LandingPage() {
                   </div>
                   <div className="p-5 sm:p-6">
                     <p className="font-data text-[11px] text-pepper/70 mb-3">{item.step}</p>
-                    <h3 className="font-display text-soil text-lg mb-2">{item.title}</h3>
+                    <h3 className="font-body text-soil text-lg mb-2 font-semibold">{item.title}</h3>
                     <p className="text-soil/75 text-[14px] leading-relaxed">{item.body}</p>
                   </div>
                 </div>
@@ -223,7 +223,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {WHY_WEN.map(item => (
                 <div key={item.title} className="bg-grain-dim rounded-2xl p-6">
-                  <h3 className="font-display text-soil text-lg mb-2">{item.title}</h3>
+                  <h3 className="font-body text-soil text-lg mb-2 font-semibold">{item.title}</h3>
                   <p className="text-soil/75 text-[14px] leading-relaxed">{item.body}</p>
                 </div>
               ))}

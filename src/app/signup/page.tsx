@@ -95,7 +95,7 @@ export default function SignupPage() {
               <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
             </svg>
           </div>
-          <h1 className="font-display text-soil text-2xl font-bold mb-2">Check your email</h1>
+          <h1 className="font-body text-soil text-2xl font-bold mb-2">Check your email</h1>
           <p className="text-stone/60 text-[14px] leading-relaxed mb-2">
             We sent a confirmation link to
           </p>
@@ -121,7 +121,7 @@ export default function SignupPage() {
       <Link href="/" className="font-display text-3xl font-bold text-soil mb-10">WEN</Link>
 
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-soil text-2xl font-bold mb-1">Create your account</h1>
+        <h1 className="font-body text-soil text-2xl font-bold mb-1">Create your account</h1>
         <p className="text-stone/60 text-[14px] mb-8">Fresh produce, delivered to your door.</p>
 
         {/* Google */}

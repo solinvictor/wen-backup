@@ -142,7 +142,7 @@ export default function AdminProductsPage() {
   return (
     <AdminShell>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-soil text-2xl">Products</h1>
+        <h1 className="font-body text-soil text-2xl font-semibold">Products</h1>
         <button
           onClick={openCreate}
           className="flex items-center gap-2 bg-pepper text-white text-[13px] font-semibold px-4 py-2.5 rounded-xl hover:bg-pepper-deep transition-colors"
@@ -184,7 +184,7 @@ export default function AdminProductsPage() {
 
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="font-display text-soil font-bold text-[15px] leading-tight">{p.name}</p>
+                  <p className="font-body text-soil font-bold text-[15px] leading-tight">{p.name}</p>
                   <span className="shrink-0 text-[10px] font-medium text-stone/50 bg-grain-dim px-2 py-0.5 rounded-full capitalize">{p.category}</span>
                 </div>
                 <div className="flex items-center justify-between mt-2">
@@ -221,7 +221,7 @@ export default function AdminProductsPage() {
           <div className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
 
             <div className="flex items-center justify-between px-5 py-4 border-b border-soil/8">
-              <h2 className="font-display text-soil text-[17px] font-semibold">
+              <h2 className="font-body text-soil text-[17px] font-semibold">
                 {editing ? 'Edit product' : 'Add product'}
               </h2>
               <button onClick={() => setShowForm(false)} className="p-1 text-soil/40 hover:text-soil transition-colors">

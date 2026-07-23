@@ -40,7 +40,7 @@ function LoginForm() {
       </Link>
 
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-soil text-2xl font-bold mb-1">Welcome back</h1>
+        <h1 className="font-body text-soil text-2xl font-bold mb-1">Welcome back</h1>
         <p className="text-stone/60 text-[14px] mb-8">Log in to track your orders and reorder easily.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

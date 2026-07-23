@@ -110,7 +110,7 @@ export default function FarmersPage() {
                     <div className="w-12 h-12 rounded-full bg-okra/10 flex items-center justify-center mx-auto mb-4">
                       <Check size={22} className="text-okra" />
                     </div>
-                    <p className="font-display text-soil text-xl mb-2">Application received</p>
+                    <p className="font-body text-soil text-xl font-semibold mb-2">Application received</p>
                     <p className="text-stone text-[14px]">We'll reach out to verify your details soon.</p>
                   </div>
                 ) : (
@@ -193,7 +193,7 @@ export default function FarmersPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {FARMER_STATS.map(({ value, label }) => (
                 <div key={label} className="bg-grain-dim rounded-2xl p-5 text-center">
-                  <p className="font-display text-soil text-3xl font-bold mb-1">{value}</p>
+                  <p className="font-body text-soil text-3xl font-bold mb-1">{value}</p>
                   <p className="text-stone text-[12px]">{label}</p>
                 </div>
               ))}
@@ -216,7 +216,7 @@ export default function FarmersPage() {
               ].map(({ title, body }) => (
                 <div key={title} className="bg-white rounded-2xl p-6 border border-soil/8">
                   <div className="w-8 h-1 bg-pepper rounded-full mb-4" />
-                  <h3 className="font-display text-soil text-lg mb-2">{title}</h3>
+                  <h3 className="font-body text-soil text-lg font-semibold mb-2">{title}</h3>
                   <p className="text-soil/70 text-[14px] leading-relaxed">{body}</p>
                 </div>
               ))}

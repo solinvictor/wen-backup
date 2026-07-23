@@ -48,7 +48,7 @@ export default function AdminBuyersPage() {
   return (
     <AdminShell>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-soil text-2xl">Buyers</h1>
+        <h1 className="font-body text-soil text-2xl font-semibold">Buyers</h1>
         <div className="flex gap-1.5">
           {['all', 'pending', 'verified', 'rejected'].map((s) => (
             <button

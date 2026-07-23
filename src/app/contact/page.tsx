@@ -227,7 +227,7 @@ export default function ContactPage() {
                   >
                     <Check size={24} className="text-okra" />
                   </motion.div>
-                  <p className="font-display text-soil text-2xl mb-2">Message received</p>
+                  <p className="font-body text-soil text-2xl font-semibold mb-2">Message received</p>
                   <p className="text-stone text-[14px] max-w-xs mx-auto">Our team will get back to you within 24 hours.</p>
                 </div>
               ) : (

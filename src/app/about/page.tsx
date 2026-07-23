@@ -15,7 +15,7 @@ export default function AboutPage() {
             <p className="text-stone text-[16px] leading-relaxed mb-4">
               WEN is a farm-to-market distribution network that connects local farmers directly with buyers.
             </p>
-            <p className="text-soil text-[17px] leading-relaxed font-display italic">
+            <p className="text-soil text-[17px] leading-relaxed font-body italic">
               We are not just a marketplace — we are a bridge between production and consumption.
             </p>
           </div>

@@ -121,7 +121,7 @@ function RiderGPS({ destLat, destLng }: { destLat: number | null; destLng: numbe
     <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
       <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
         <Locate size={16} className="text-pepper" />
-        <h2 className="font-display text-soil text-[15px] font-semibold">My location</h2>
+        <h2 className="font-body text-soil text-[15px] font-semibold">My location</h2>
         {watching && <span className="ml-auto flex items-center gap-1.5 text-[11px] text-green-600 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />Live</span>}
       </div>
 
@@ -217,7 +217,7 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
 
       {/* Header */}
       <header className="bg-white border-b border-soil/8 sticky top-0 z-40 px-5 h-14 flex items-center justify-between">
-        <span className="font-display text-soil text-[17px] font-semibold">WEN Rider</span>
+        <span className="font-body text-soil text-[17px] font-semibold">WEN Rider</span>
         {order.order_ref && (
           <span className="font-data text-[12px] text-stone/40 font-bold tracking-wider">
             {order.order_ref}
@@ -243,7 +243,7 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
         <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
           <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
             <MapPin size={16} className="text-pepper" />
-            <h2 className="font-display text-soil text-[15px] font-semibold">Delivery location</h2>
+            <h2 className="font-body text-soil text-[15px] font-semibold">Delivery location</h2>
           </div>
           <div className="px-5 py-4 space-y-4">
 
@@ -303,7 +303,7 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
           <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
             <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
               <Phone size={16} className="text-pepper" />
-              <h2 className="font-display text-soil text-[15px] font-semibold">Buyer</h2>
+              <h2 className="font-body text-soil text-[15px] font-semibold">Buyer</h2>
             </div>
             <div className="px-5 py-4 space-y-3">
               <div>
@@ -326,7 +326,7 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
         <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
           <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
             <Package size={16} className="text-pepper" />
-            <h2 className="font-display text-soil text-[15px] font-semibold">Items</h2>
+            <h2 className="font-body text-soil text-[15px] font-semibold">Items</h2>
           </div>
           <div className="px-5 py-4 space-y-3">
             <p className="text-[14px] text-soil leading-relaxed">{order.product_summary}</p>

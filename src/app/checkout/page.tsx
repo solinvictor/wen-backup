@@ -428,7 +428,7 @@ export default function CheckoutPage() {
             <div className="w-20 h-20 rounded-full bg-pepper/10 flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={36} className="text-pepper" strokeWidth={1.8} />
             </div>
-            <h1 className="font-display text-soil text-2xl font-bold mb-2">Order received!</h1>
+            <h1 className="font-body text-soil text-2xl font-bold mb-2">Order received!</h1>
             <p className="text-stone/60 text-[14px] leading-relaxed mb-1">
               We&apos;ll call <span className="font-semibold text-soil">{form.phone}</span> to confirm.
             </p>
@@ -472,7 +472,7 @@ export default function CheckoutPage() {
           <button onClick={() => router.back()} className="p-1.5 -ml-1 text-soil/60 hover:text-soil transition-colors">
             <ChevronLeft size={22} />
           </button>
-          <span className="font-display text-soil text-[17px] font-semibold">Checkout</span>
+          <span className="font-body text-soil text-[17px] font-semibold">Checkout</span>
           <div className="flex-1" />
           <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
         </div>
@@ -488,7 +488,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
               <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                 <Truck size={16} className="text-pepper" />
-                <h2 className="font-display text-soil text-[16px] font-semibold">Delivery speed</h2>
+                <h2 className="font-body text-soil text-[16px] font-semibold">Delivery speed</h2>
               </div>
               <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {DELIVERY_OPTIONS.map(opt => {
@@ -546,7 +546,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
               <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                 <MapPin size={16} className="text-pepper" />
-                <h2 className="font-display text-soil text-[16px] font-semibold">Your details</h2>
+                <h2 className="font-body text-soil text-[16px] font-semibold">Your details</h2>
               </div>
               <div className="px-5 py-5 space-y-4">
 
@@ -645,7 +645,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden sticky top-24">
               <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                 <ShoppingBag size={16} className="text-pepper" />
-                <h2 className="font-display text-soil text-[16px] font-semibold">Order summary</h2>
+                <h2 className="font-body text-soil text-[16px] font-semibold">Order summary</h2>
                 <span className="ml-auto font-data text-[12px] text-stone/40">{cartCount} items</span>
               </div>
 
@@ -691,7 +691,7 @@ export default function CheckoutPage() {
                     {fmt(deliveryFee)}
                   </span>
                 </div>
-                <div className="flex justify-between font-display text-soil text-[16px] font-bold pt-2 border-t border-soil/8">
+                <div className="flex justify-between font-body text-soil text-[16px] font-bold pt-2 border-t border-soil/8">
                   <span>Total</span>
                   <span>{grandTotal ? fmt(grandTotal) : hasPrices ? fmt(deliveryFee) : '—'}</span>
                 </div>

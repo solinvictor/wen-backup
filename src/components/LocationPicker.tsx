@@ -120,7 +120,7 @@ export function LocationPicker({ onClose }: Props) {
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-soil/8">
           <div className="flex items-center gap-2">
             <MapPin size={16} className="text-pepper" />
-            <h2 className="font-display text-soil text-[17px] font-semibold">Delivery area</h2>
+            <h2 className="font-body text-soil text-[17px] font-semibold">Delivery area</h2>
           </div>
           <button onClick={onClose} className="p-1 text-soil/40 hover:text-soil transition-colors">
             <X size={18} />

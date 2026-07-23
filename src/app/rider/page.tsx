@@ -35,7 +35,7 @@ export default async function RiderHomePage() {
   return (
     <div className="min-h-screen bg-grain-dim">
       <header className="bg-white border-b border-soil/8 sticky top-0 z-40 px-5 h-14 flex items-center justify-between">
-        <span className="font-display text-soil text-[17px] font-semibold">WEN Rider</span>
+        <span className="font-body text-soil text-[17px] font-semibold">WEN Rider</span>
         <span className="font-data text-[11px] text-stone/40 uppercase tracking-wider">Active orders</span>
       </header>
 
@@ -43,7 +43,7 @@ export default async function RiderHomePage() {
         {activeOrders.length === 0 ? (
           <div className="text-center py-20">
             <Package size={40} className="text-soil/15 mx-auto mb-4" />
-            <p className="font-display text-soil text-lg mb-1">No active orders</p>
+            <p className="font-body text-soil text-lg font-medium mb-1">No active orders</p>
             <p className="text-soil/50 text-[14px]">Check back soon — matched orders will appear here.</p>
           </div>
         ) : (
@@ -60,7 +60,7 @@ export default async function RiderHomePage() {
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex-1 min-w-0">
-                        <p className="font-display text-soil font-semibold text-[15px] truncate">{o.product_summary}</p>
+                        <p className="font-body text-soil font-semibold text-[15px] truncate">{o.product_summary}</p>
                         {buyer && <p className="text-soil/50 text-[13px] mt-0.5">{buyer.full_name}</p>}
                       </div>
                       <span className={`shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full ${STATUS_COLORS[o.status] || ''}`}>

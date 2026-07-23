@@ -203,7 +203,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
             <ChevronLeft size={18} />
             <span className="text-[14px] font-medium">Shop</span>
           </Link>
-          <span className="font-display text-soil font-bold text-[17px]">My account</span>
+          <span className="font-body text-soil font-bold text-[17px]">My account</span>
           <button
             onClick={handleLogout}
             className="flex items-center gap-1.5 text-stone/50 hover:text-red-500 transition-colors"
@@ -222,7 +222,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
             {(initialName || initialEmail).charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="font-display text-soil font-bold text-[16px] truncate">{initialName || 'No name set'}</p>
+            <p className="font-body text-soil font-bold text-[16px] truncate">{initialName || 'No name set'}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
               <Mail size={11} className="text-stone/40 shrink-0" />
               <p className="text-stone/50 text-[12.5px] truncate">{initialEmail}</p>
@@ -270,7 +270,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
                 <div className="w-14 h-14 rounded-full bg-grain-dim flex items-center justify-center">
                   <Package size={24} className="text-stone/30" />
                 </div>
-                <p className="font-display text-soil font-bold text-[16px]">No orders yet</p>
+                <p className="font-body text-soil font-bold text-[16px]">No orders yet</p>
                 <p className="text-stone/50 text-[13.5px] max-w-[28ch]">
                   When you place an order from the store, it will appear here.
                 </p>
@@ -290,7 +290,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
         {/* Profile tab */}
         {tab === 'profile' && (
           <div className="bg-white border border-soil/10 rounded-2xl px-5 py-5">
-            <h2 className="font-display text-soil font-bold text-[16px] mb-5">Edit profile</h2>
+            <h2 className="font-body text-soil font-bold text-[16px] mb-5">Edit profile</h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div>
                 <label className="block text-[12.5px] font-semibold text-soil/60 mb-1.5">Full name</label>

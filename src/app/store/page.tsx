@@ -74,7 +74,7 @@ function ProductCard({ item, inCart, onAdd, onRemove }: {
           {item.unit && <p className="text-stone/50 text-[11px] mt-0.5 font-data">{item.unit}</p>}
         </div>
         <div className="flex items-center justify-between gap-1">
-          <PriceDisplay price={item.price} className="text-soil text-[14px] font-bold font-display" />
+          <PriceDisplay price={item.price} className="text-soil text-[14px] font-bold font-body" />
           {inCart ? (
             <div className="flex items-center gap-1 bg-pepper rounded-full px-1.5 py-1">
               <button onClick={onRemove} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Remove one">
@@ -130,7 +130,7 @@ function CartSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-soil/8 shrink-0">
           <div>
-            <p className="font-display text-soil text-[18px] font-semibold">Your basket</p>
+            <p className="font-body text-soil text-[18px] font-semibold">Your basket</p>
             {cartCount > 0 && (
               <p className="text-stone/50 text-[12px] mt-0.5">{cartCount} item{cartCount !== 1 ? 's' : ''}</p>
             )}
@@ -149,7 +149,7 @@ function CartSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
                 <ShoppingBag size={32} className="text-stone/30" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="font-display text-soil text-[17px] font-semibold mb-1">Your basket is empty</p>
+                <p className="font-body text-soil text-[17px] font-semibold mb-1">Your basket is empty</p>
                 <p className="text-stone/55 text-[13px] leading-relaxed">Add some fresh produce to get started.</p>
               </div>
               <button
@@ -220,7 +220,7 @@ function CartSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
             {hasPrices && (
               <div className="flex items-center justify-between px-1">
                 <span className="text-soil/60 text-[14px]">Estimated total</span>
-                <span className="font-display text-soil text-[18px] font-bold">{fmt(cartTotal)}</span>
+                <span className="font-body text-soil text-[18px] font-bold">{fmt(cartTotal)}</span>
               </div>
             )}
 
@@ -411,7 +411,7 @@ function StoreInner({ sheetOpen, setSheetOpen }: {
               {Object.entries(grouped).map(([category, categoryItems]) => (
                 <div key={category} ref={el => { sectionRefs.current[category] = el }} className="scroll-mt-48 lg:scroll-mt-24">
                   <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                    <h2 className="font-display text-soil text-[17px] font-semibold">{CATEGORY_LABELS[category] || category}</h2>
+                    <h2 className="font-body text-soil text-[17px] font-semibold">{CATEGORY_LABELS[category] || category}</h2>
                     <span className="text-stone/35 text-[12px] font-data">{categoryItems.length}</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
