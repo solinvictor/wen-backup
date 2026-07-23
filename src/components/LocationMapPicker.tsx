@@ -12,6 +12,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   const mapRef    = useRef<HTMLDivElement>(null)
   const mapObj    = useRef<any>(null)
   const markerObj = useRef<any>(null)
+  const LRef      = useRef<any>(null)
 
   const [loading,   setLoading]   = useState(true)
   const [gpsError,  setGpsError]  = useState('')
@@ -19,7 +20,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   const [label,     setLabel]     = useState('')
   const [resolving, setResolving] = useState(false)
 
-  const DEFAULT = { lat: 7.7322, lng: 8.5391 } // Makurdi
+  const DEFAULT = { lat: 7.7322, lng: 8.5391 }
 
   async function reverseGeocode(lat: number, lng: number): Promise<string> {
     try {
@@ -35,22 +36,27 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
   }
 
-  function placePin(L: any, lat: number, lng: number) {
-    if (!mapObj.current) return
+  function movePin(lat: number, lng: number) {
+    const L   = LRef.current
+    const map = mapObj.current
+    if (!L || !map) return
+
     if (markerObj.current) {
       markerObj.current.setLatLng([lat, lng])
     } else {
-      markerObj.current = L.marker([lat, lng], { draggable: true }).addTo(mapObj.current)
-      markerObj.current.on('dragend', () => {
-        const pos = markerObj.current.getLatLng()
-        updateCoords(pos.lat, pos.lng)
+      const m = L.marker([lat, lng], { draggable: true }).addTo(map)
+      m.on('dragend', () => {
+        const p = m.getLatLng()
+        resolvePin(p.lat, p.lng)
       })
+      markerObj.current = m
     }
-    setCoords({ lat, lng })
-    updateCoords(lat, lng)
+
+    map.setView([lat, lng], map.getZoom())
+    resolvePin(lat, lng)
   }
 
-  function updateCoords(lat: number, lng: number) {
+  function resolvePin(lat: number, lng: number) {
     setCoords({ lat, lng })
     setResolving(true)
     reverseGeocode(lat, lng).then(l => {
@@ -62,7 +68,6 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   useEffect(() => {
     if (!mapRef.current || mapObj.current) return
 
-    // Inject Leaflet CSS
     if (!document.getElementById('leaflet-css')) {
       const link = document.createElement('link')
       link.id   = 'leaflet-css'
@@ -72,7 +77,6 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     }
 
     import('leaflet').then(L => {
-      // Fix broken default icons in webpack/Next.js
       const DefaultIcon = L.Icon.Default as any
       delete DefaultIcon.prototype._getIconUrl
       L.Icon.Default.mergeOptions({
@@ -92,33 +96,33 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
         maxZoom: 19,
       }).addTo(map)
 
-      // Tap anywhere on map to move pin
       map.on('click', (e: any) => {
-        map.panTo(e.latlng)
-        placePin(L, e.latlng.lat, e.latlng.lng)
+        movePin(e.latlng.lat, e.latlng.lng)
       })
 
+      // Set refs BEFORE calling GPS so movePin can find them
+      LRef.current   = L
       mapObj.current = map
 
-      // Auto-drop pin on GPS position
+      // Now request GPS
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             const { latitude: lat, longitude: lng } = pos.coords
             map.setView([lat, lng], 17)
-            placePin(L, lat, lng)
+            movePin(lat, lng)
             setLoading(false)
           },
           () => {
             setGpsError('Could not get your location — drag the pin or tap the map')
-            placePin(L, DEFAULT.lat, DEFAULT.lng)
+            movePin(DEFAULT.lat, DEFAULT.lng)
             setLoading(false)
           },
           { enableHighAccuracy: true, timeout: 10000 }
         )
       } else {
         setGpsError('GPS not available — drag the pin or tap the map')
-        placePin(L, DEFAULT.lat, DEFAULT.lng)
+        movePin(DEFAULT.lat, DEFAULT.lng)
         setLoading(false)
       }
     })
@@ -126,15 +130,15 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     return () => {
       if (mapObj.current) {
         mapObj.current.remove()
-        mapObj.current  = null
+        mapObj.current    = null
         markerObj.current = null
+        LRef.current      = null
       }
     }
   }, [])
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-white">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 h-14 border-b border-soil/10 shrink-0">
         <div className="flex items-center gap-2">
           <MapPin size={16} className="text-pepper" />
@@ -145,14 +149,12 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
         </button>
       </div>
 
-      {/* Hint bar */}
       <div className="px-4 py-2.5 bg-pepper/5 border-b border-pepper/10 shrink-0 text-center">
         <p className="text-[12.5px] text-pepper-deep font-medium">
           {loading ? 'Getting your location…' : 'Drag the pin or tap the map to adjust'}
         </p>
       </div>
 
-      {/* Map */}
       <div className="relative flex-1">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
@@ -162,7 +164,6 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
         <div ref={mapRef} className="w-full h-full" />
       </div>
 
-      {/* Bottom panel */}
       <div className="shrink-0 border-t border-soil/10 px-4 pt-3 pb-6 bg-white space-y-3">
         {gpsError && (
           <p className="text-[12px] text-amber-600 text-center">{gpsError}</p>
