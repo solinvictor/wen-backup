@@ -12,6 +12,8 @@ interface Buyer {
   full_name: string
   phone_number: string
   location: string
+  delivery_lat: number | null
+  delivery_lng: number | null
 }
 
 interface Order {
@@ -56,7 +58,6 @@ function fmt(n: number | null) {
   return '₦' + n.toLocaleString('en-NG')
 }
 
-// GPS accuracy helper
 function formatAccuracy(meters: number): { label: string; color: string } {
   if (meters <= 10) return { label: `±${Math.round(meters)}m — Excellent`, color: 'text-green-600' }
   if (meters <= 30) return { label: `±${Math.round(meters)}m — Good`, color: 'text-green-500' }
@@ -64,33 +65,24 @@ function formatAccuracy(meters: number): { label: string; color: string } {
   return { label: `±${Math.round(meters)}m — Poor`, color: 'text-red-500' }
 }
 
-function RiderGPS({ destAddress }: { destAddress: string | null }) {
+function RiderGPS({
+  destLat,
+  destLng,
+  destAddress,
+}: {
+  destLat: number | null
+  destLng: number | null
+  destAddress: string | null
+}) {
   const [pos, setPos] = useState<GeolocationPosition | null>(null)
   const [error, setError] = useState('')
   const [watching, setWatching] = useState(false)
   const watchId = useRef<number | null>(null)
-  const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null)
-
-  // Resolve buyer address to coords once on mount
-  useEffect(() => {
-    if (!destAddress) return
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destAddress + ', Nigeria')}&format=json&limit=1&countrycodes=ng`
-    fetch(url, { headers: { 'Accept-Language': 'en' } })
-      .then(r => r.json())
-      .then(data => {
-        if (data?.[0]) setDestCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) })
-      })
-      .catch(() => {/* silent */})
-  }, [destAddress])
-
-  const destLat = destCoords?.lat ?? null
-  const destLng = destCoords?.lng ?? null
 
   function startTracking() {
     if (!navigator.geolocation) { setError('Geolocation not supported'); return }
     setWatching(true)
     setError('')
-    // High accuracy + short interval = GPS chip level precision
     watchId.current = navigator.geolocation.watchPosition(
       (p) => setPos(p),
       (e) => {
@@ -100,7 +92,6 @@ function RiderGPS({ destAddress }: { destAddress: string | null }) {
         setWatching(false)
       },
       { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
-      // maximumAge: 0 = never use cached position, always fresh GPS fix
     )
   }
 
@@ -110,9 +101,10 @@ function RiderGPS({ destAddress }: { destAddress: string | null }) {
     setPos(null)
   }
 
-  useEffect(() => () => { if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current) }, [])
+  useEffect(() => () => {
+    if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
+  }, [])
 
-  // Distance in km between two coords (Haversine)
   function distance(lat1: number, lng1: number, lat2: number, lng2: number) {
     const R = 6371
     const dLat = (lat2 - lat1) * Math.PI / 180
@@ -126,16 +118,33 @@ function RiderGPS({ destAddress }: { destAddress: string | null }) {
     ? distance(pos.coords.latitude, pos.coords.longitude, destLat, destLng)
     : null
 
-  const myGoogleMaps = pos
-    ? `https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${destLat},${destLng}`
+  // If we have exact coords, use them. If not, fall back to text address.
+  const navigateUrl = pos
+    ? destLat && destLng
+      ? `https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${destLat},${destLng}`
+      : destAddress
+        ? `https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${encodeURIComponent(destAddress + ', Nigeria')}`
+        : null
     : null
+
+  const hasDestination = !!(destLat && destLng) || !!destAddress
 
   return (
     <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
       <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
         <Locate size={16} className="text-pepper" />
         <h2 className="font-body text-soil text-[15px] font-semibold">My location</h2>
-        {watching && <span className="ml-auto flex items-center gap-1.5 text-[11px] text-green-600 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />Live</span>}
+        {watching && (
+          <span className="ml-auto flex items-center gap-1.5 text-[11px] text-green-600 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />Live
+          </span>
+        )}
+        {/* Show a badge if exact coords are available */}
+        {destLat && destLng && (
+          <span className="ml-auto flex items-center gap-1 text-[11px] text-green-600 font-medium">
+            <MapPin size={11} />Exact pin
+          </span>
+        )}
       </div>
 
       <div className="px-5 py-4 space-y-3">
@@ -179,9 +188,9 @@ function RiderGPS({ destAddress }: { destAddress: string | null }) {
               Stop tracking
             </button>
           )}
-          {pos && myGoogleMaps && destLat && destLng && (
+          {pos && navigateUrl && hasDestination && (
             <a
-              href={myGoogleMaps}
+              href={navigateUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 bg-pepper text-white text-[13px] font-semibold py-3 rounded-xl hover:bg-pepper-deep transition-colors"
@@ -265,6 +274,11 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
                   <div>
                     <p className="text-[11px] text-stone/40 mb-0.5">Delivery address</p>
                     <p className="text-[14px] text-soil">{buyer.location}</p>
+                    {buyer.delivery_lat && buyer.delivery_lng && (
+                      <p className="text-[11px] text-green-600 font-medium mt-0.5">
+                        📍 Exact GPS pin saved
+                      </p>
+                    )}
                   </div>
                 </div>
                 {googleMapsUrl && (
@@ -285,7 +299,11 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
 
         {/* Live GPS tracker — only when in progress */}
         {order.status === 'in_progress' && (
-          <RiderGPS destAddress={buyer?.location ?? null} />
+          <RiderGPS
+            destLat={buyer?.delivery_lat ?? null}
+            destLng={buyer?.delivery_lng ?? null}
+            destAddress={buyer?.location ?? null}
+          />
         )}
 
         {/* Buyer */}
