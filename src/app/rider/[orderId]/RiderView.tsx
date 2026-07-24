@@ -12,6 +12,7 @@ interface Buyer {
   full_name: string
   phone_number: string
   location: string
+  landmark: string | null
   delivery_lat: number | null
   delivery_lng: number | null
 }
@@ -273,6 +274,9 @@ export default function RiderView({ order: initialOrder }: { order: Order }) {
                   <div>
                     <p className="text-[11px] text-stone/40 mb-0.5">Delivery address</p>
                     <p className="text-[14px] text-soil">{buyer.location}</p>
+                    {buyer.landmark && (
+                      <p className="text-[12px] text-pepper-deep font-medium mt-1">📍 {buyer.landmark}</p>
+                    )}
                     {destLat && destLng && (
                       <p className="text-[11px] text-green-600 font-medium mt-0.5">
                         📍 Exact GPS pin available

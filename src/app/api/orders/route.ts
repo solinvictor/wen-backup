@@ -18,13 +18,14 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
-      fullName, phoneNumber, location,
+      fullName, phoneNumber, location, landmark,
       deliveryLat, deliveryLng,
       buyerType, items, notes, deliveryType, deliveryFee,
     } = body as {
       fullName?: string
       phoneNumber?: string
       location?: string
+      landmark?: string
       deliveryLat?: number | null
       deliveryLng?: number | null
       buyerType?: string
@@ -61,6 +62,7 @@ export async function POST(req: NextRequest) {
         full_name: fullName.trim(),
         phone_number: phoneNumber.trim(),
         location: location.trim(),
+        landmark: landmark?.trim() || null,
         delivery_lat: deliveryLat ?? null,
         delivery_lng: deliveryLng ?? null,
         buyer_type: buyerType,

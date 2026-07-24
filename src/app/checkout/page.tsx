@@ -51,6 +51,7 @@ interface FormData {
   fullName: string
   phone: string
   address: string
+  landmark: string
   notes: string
   buyerType: 'household' | 'business' | 'restaurant'
 }
@@ -70,7 +71,7 @@ export default function CheckoutPage() {
   const [orderRef, setOrderRef]     = useState('')
   const [delivery, setDelivery]     = useState<DeliveryId>('standard')
   const [form, setForm]             = useState<FormData>({
-    fullName: '', phone: '', address: '', notes: '', buyerType: 'household',
+    fullName: '', phone: '', address: '', landmark: '', notes: '', buyerType: 'household',
   })
   const [errors, setErrors]         = useState<Partial<FormData>>({})
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null)
@@ -106,6 +107,7 @@ export default function CheckoutPage() {
           fullName:    form.fullName,
           phoneNumber: form.phone,
           location:    form.address,
+          landmark:    form.landmark,
           deliveryLat: deliveryCoords?.lat ?? null,
           deliveryLng: deliveryCoords?.lng ?? null,
           buyerType:   form.buyerType,
@@ -350,6 +352,23 @@ export default function CheckoutPage() {
                       </button>
                     )}
                     {errors.address && <p className="text-[12px] text-red-500 mt-1">{errors.address}</p>}
+
+                    {/* Landmark / directions — shown once location is set */}
+                    {form.address && (
+                      <div className="mt-3">
+                        <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+                          <MapPin size={13} />
+                          Landmark / directions for rider
+                        </label>
+                        <input
+                          value={form.landmark}
+                          onChange={e => setForm({ ...form, landmark: e.target.value })}
+                          placeholder="e.g. Beside First Bank, blue gate, 2nd house on the left"
+                          className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all"
+                        />
+                        <p className="text-[11.5px] text-stone/40 mt-1">Helps the rider find you faster</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Buyer type */}
