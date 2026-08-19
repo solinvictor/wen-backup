@@ -90,7 +90,9 @@ export default function CheckoutPage() {
     const e: Partial<FormData> = {}
     if (!form.fullName.trim() || form.fullName.trim().length < 2) e.fullName = 'Enter your full name'
     if (!/^0[789][01]\d{8}$/.test(form.phone.trim())) e.phone = 'Enter a valid Nigerian phone number'
-    if (!form.address.trim() || form.address.trim().length < 5) e.address = 'Tap "Set delivery location" to pin your location'
+    if (!form.address.trim() || form.address.trim().length < 5 || !deliveryCoords) {
+      e.address = 'Pin your exact delivery location on the map so the rider can find you'
+    }
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -324,8 +326,14 @@ export default function CheckoutPage() {
                         <MapPin size={15} className="text-green-600 shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <p className="text-[13px] text-soil leading-snug">{form.address}</p>
-                          {deliveryCoords && (
-                            <p className="text-[11px] text-green-600 font-medium mt-0.5">📍 Exact pin saved</p>
+                          {deliveryCoords ? (
+                            <p className="text-[11px] text-green-600 font-medium mt-0.5">
+                              📍 Exact pin saved ({deliveryCoords.lat.toFixed(5)}, {deliveryCoords.lng.toFixed(5)})
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-amber-600 font-medium mt-0.5">
+                              ⚠ No GPS pin — open map again and confirm your exact spot
+                            </p>
                           )}
                         </div>
                         <button
@@ -366,7 +374,9 @@ export default function CheckoutPage() {
                           placeholder="e.g. Beside First Bank, blue gate, 2nd house on the left"
                           className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all"
                         />
-                        <p className="text-[11.5px] text-stone/40 mt-1">Helps the rider find you faster</p>
+                        <p className="text-[11.5px] text-stone/50 mt-1">
+                          Strongly recommended — gate colour, nearby shop, or how to reach you
+                        </p>
                       </div>
                     )}
                   </div>
