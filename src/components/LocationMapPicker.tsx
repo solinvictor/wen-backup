@@ -27,14 +27,27 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   async function reverseGeocode(lat: number, lng: number): Promise<string> {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-        { headers: { 'Accept-Language': 'en' } }
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+        {
+          headers: {
+            'Accept-Language': 'en',
+            'User-Agent': 'WENPlatform/1.0 (farm-to-market; contact@wen.local)',
+          },
+        }
       )
+      if (!res.ok) throw new Error(`Nominatim ${res.status}`)
       const data = await res.json()
+      const addr = data.address || {}
+      const parts = [
+        addr.road || addr.suburb || addr.neighbourhood || addr.city_district || addr.town || addr.village,
+        addr.city || addr.county || addr.state_district,
+        addr.state,
+      ].filter(Boolean)
+      if (parts.length) return parts.slice(0, 3).join(', ')
       if (data?.display_name) {
         return data.display_name.split(',').slice(0, 4).join(', ').trim()
       }
-    } catch { /* silent */ }
+    } catch { /* silent — fall through */ }
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
   }
 
@@ -82,12 +95,16 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     }
   }
 
-  function onGPSError() {
+  function onGPSError(err?: GeolocationPositionError) {
     if (watchId.current !== null) {
       navigator.geolocation.clearWatch(watchId.current)
       watchId.current = null
     }
-    setGpsError('Could not find you — drag the pin to your location')
+    let msg = 'Could not find you — drag the pin to your location'
+    if (err?.code === 1) msg = 'Location permission denied — drag the pin or allow access and reopen'
+    else if (err?.code === 2) msg = 'Position unavailable — check GPS signal, or drag the pin'
+    else if (err?.code === 3) msg = 'GPS timed out — drag the pin to your location'
+    setGpsError(msg)
     movePin(DEFAULT.lat, DEFAULT.lng, 15)
     setLoading(false)
   }
@@ -141,6 +158,9 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       } else {
         onGPSError()
       }
+    }).catch(() => {
+      setGpsError('Map failed to load — check your connection and try again')
+      setLoading(false)
     })
 
     return () => {

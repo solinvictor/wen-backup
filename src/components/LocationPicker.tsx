@@ -89,7 +89,7 @@ export function LocationPicker({ onClose }: Props) {
         setStep('error')
       },
       // High accuracy = real GPS chip, gives exact pinpoint instead of cell-tower area
-      { enableHighAccuracy: true, timeout: 30000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
     )
   }
 
