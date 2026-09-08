@@ -99,15 +99,20 @@ export default function AdminOrdersPage() {
                     {o.buyer?.full_name || 'Unknown buyer'}
                   </p>
                 </div>
-                <select
-                  value={o.status}
-                  onChange={(e) => updateStatus(o.id, e.target.value as Order['status'])}
-                  className={`text-[11px] font-medium px-2.5 py-1 rounded-full capitalize border-0 outline-none cursor-pointer ${STATUS_STYLES[o.status]}`}
-                >
+                <div className="flex flex-wrap justify-end gap-1 max-w-[11rem]">
                   {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s} className="text-soil bg-white">{s.replace('_', ' ')}</option>
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => updateStatus(o.id, s)}
+                      className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize transition-opacity ${
+                        o.status === s ? STATUS_STYLES[s] : 'bg-soil/5 text-soil/40 hover:text-soil/70'
+                      }`}
+                    >
+                      {s.replace('_', ' ')}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
 
               {o.notes && <p className="text-[13px] text-soil/60 mb-3">{o.notes}</p>}
@@ -117,16 +122,34 @@ export default function AdminOrdersPage() {
                 <div className="flex items-center gap-2.5 mt-1 pt-3 border-t border-soil/8">
                   <Bike size={13} className="text-soil/30 shrink-0" />
                   <label className="text-[11.5px] text-soil/50 font-medium shrink-0">Assign rider</label>
-                  <select
-                    value={o.rider_id || ''}
-                    onChange={(e) => assignRider(o.id, e.target.value || null)}
-                    className="flex-1 text-[13px] border border-soil/15 rounded-md px-2.5 py-1.5 outline-none focus:border-pepper transition-colors bg-white text-soil"
-                  >
-                    <option value="">— Unassigned —</option>
+                  <div className="flex-1 flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => assignRider(o.id, null)}
+                      className={`text-[11px] px-2 py-1 rounded-lg border transition-colors ${
+                        !o.rider_id
+                          ? 'border-pepper/40 bg-pepper/10 text-pepper'
+                          : 'border-soil/10 text-soil/45 hover:border-soil/25'
+                      }`}
+                    >
+                      Unassigned
+                    </button>
                     {riders.map((r) => (
-                      <option key={r.id} value={r.id}>{r.email}</option>
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => assignRider(o.id, r.id)}
+                        className={`text-[11px] px-2 py-1 rounded-lg border transition-colors truncate max-w-[9rem] ${
+                          o.rider_id === r.id
+                            ? 'border-pepper/40 bg-pepper/10 text-pepper'
+                            : 'border-soil/10 text-soil/60 hover:border-soil/25'
+                        }`}
+                        title={r.email}
+                      >
+                        {r.email.split('@')[0]}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                   {o.delivered_at && (
                     <span className="font-data text-[10.5px] text-soil/40 shrink-0 whitespace-nowrap">
                       {new Date(o.delivered_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}

@@ -22,6 +22,8 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   const watchId    = useRef<number | null>(null)
   /** True once user dragged or tapped the map — pin is intentional, not raw GPS */
   const manualPin  = useRef(false)
+  /** Best (lowest) accuracy seen this session — ignore worse GPS samples */
+  const bestAccuracy = useRef<number | null>(null)
 
   const [loading,   setLoading]   = useState(true)
   const [gpsError,  setGpsError]  = useState('')
@@ -130,8 +132,14 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     if (manualPin.current) return
 
     const { latitude: lat, longitude: lng, accuracy: acc } = pos.coords
+    // Skip worse fixes than what we already have (cell tower → GPS chip)
+    if (bestAccuracy.current !== null && acc > bestAccuracy.current * 1.05) {
+      return
+    }
+    bestAccuracy.current = acc
+
     const rounded = Math.round(acc)
-    const zoom = acc <= 20 ? 19 : acc <= 50 ? 18 : acc <= 200 ? 17 : 15
+    const zoom = acc <= 15 ? 19 : acc <= 30 ? 18 : acc <= 80 ? 17 : acc <= 200 ? 16 : 15
 
     movePin(lat, lng, zoom, false)
     setAccuracy(rounded)
@@ -158,8 +166,12 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     else if (err?.code === 2) msg = 'GPS signal weak — go near a window, or drag the pin on the map'
     else if (err?.code === 3) msg = 'GPS timed out — drag the pin to your exact location'
     setGpsError(msg)
+    // Do not pretend a city default is the user's GPS — leave map for manual pin
     if (!coords) {
-      movePin(DEFAULT.lat, DEFAULT.lng, 15, true)
+      movePin(DEFAULT.lat, DEFAULT.lng, 13, true)
+      setPinSource('manual')
+      setAccuracy(null)
+      setLabel('Drag the pin to where the rider should stop')
     }
     setLoading(false)
   }
@@ -170,7 +182,9 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       return
     }
     manualPin.current = false
+    bestAccuracy.current = null
     setPinSource(null)
+    setAccuracy(null)
     setLoading(true)
     setGpsError('')
     if (watchId.current !== null) {
@@ -320,12 +334,20 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
             {accuracyHint}
           </div>
         )}
-        {label && (
+        {(label || coords) && (
           <div className="flex items-start gap-2 bg-grain-dim rounded-xl px-3 py-2.5">
             <MapPin size={13} className="text-pepper shrink-0 mt-0.5" />
-            <p className="text-[13px] text-soil leading-snug">
-              {resolving ? 'Reading address…' : label}
-            </p>
+            <div className="min-w-0">
+              <p className="text-[13px] text-soil leading-snug">
+                {resolving ? 'Reading address…' : (label || 'Pinned location')}
+              </p>
+              {coords && (
+                <p className="mt-1 font-mono text-[11px] text-soil/45 tabular-nums">
+                  {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+                  {pinSource === 'gps' ? ' · from GPS' : pinSource === 'manual' ? ' · adjusted by you' : ''}
+                </p>
+              )}
+            </div>
           </div>
         )}
         <button
