@@ -60,38 +60,53 @@ function ProductCard({ item, inCart, onAdd, onRemove }: {
   const img = item.image_url || CATEGORY_IMAGES[item.category] || CATEGORY_IMAGES.other
 
   return (
-    <div className={`bg-white rounded-2xl overflow-hidden border transition-all flex flex-col ${
-      inCart ? 'border-pepper/40 shadow-md ring-1 ring-pepper/10' : 'border-soil/8 hover:shadow-md hover:border-soil/15'
+    <div className={`group bg-white rounded-2xl overflow-hidden flex flex-col transition-all duration-200 ${
+      inCart
+        ? 'ring-2 ring-pepper/35 shadow-lg shadow-pepper/10'
+        : 'ring-1 ring-soil/8 shadow-sm hover:shadow-md hover:ring-soil/12'
     }`}>
-      <div className="bg-grain-dim p-2 sm:p-3 pb-0">
-        <div className="aspect-square rounded-xl overflow-hidden">
-          <img src={img} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
-        </div>
+      <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-grain-dim">
+        <img
+          src={img}
+          alt={item.name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          loading="lazy"
+        />
+        {inCart && (
+          <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wide bg-pepper text-white px-2 py-0.5 rounded-full">
+            In basket
+          </span>
+        )}
       </div>
-      <div className="px-2.5 sm:px-3 pt-2 pb-2.5 flex flex-col gap-2 flex-1">
-        <div className="flex-1 min-h-[2.5rem]">
-          <p className="text-soil text-[13px] sm:text-[14px] font-semibold leading-tight line-clamp-2">{item.name}</p>
-          {item.unit && <p className="text-stone/45 text-[11px] mt-0.5 font-data">{item.unit}</p>}
+      <div className="px-3 pt-2.5 pb-3 flex flex-col gap-2.5 flex-1">
+        <div className="flex-1 min-h-[2.6rem]">
+          <p className="text-soil text-[13px] sm:text-[14px] font-semibold leading-snug line-clamp-2 tracking-tight">
+            {item.name}
+          </p>
+          {item.unit && (
+            <p className="text-stone/40 text-[11px] mt-0.5 font-data">{item.unit}</p>
+          )}
         </div>
-        <div className="flex items-center justify-between gap-1">
-          <PriceDisplay price={item.price} className="text-soil text-[14px] font-bold font-body" />
+        <div className="flex items-center justify-between gap-2">
+          <PriceDisplay price={item.price} className="text-soil text-[15px] font-bold font-body tabular-nums" />
           {inCart ? (
-            <div className="flex items-center gap-1 bg-pepper rounded-full px-1.5 py-1">
-              <button onClick={onRemove} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Remove one">
-                <Minus size={11} className="text-white" />
+            <div className="flex items-center gap-0.5 bg-pepper rounded-full pl-1 pr-1 py-1 shadow-sm">
+              <button onClick={onRemove} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 transition-colors" aria-label="Remove one">
+                <Minus size={13} className="text-white" />
               </button>
-              <span className="text-white text-[12px] font-bold font-data w-4 text-center">{inCart.quantity}</span>
-              <button onClick={onAdd} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Add one">
-                <Plus size={11} className="text-white" />
+              <span className="text-white text-[13px] font-bold font-data w-5 text-center">{inCart.quantity}</span>
+              <button onClick={onAdd} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 transition-colors" aria-label="Add one">
+                <Plus size={13} className="text-white" />
               </button>
             </div>
           ) : (
             <button
               onClick={onAdd}
-              className="w-8 h-8 rounded-full bg-pepper hover:bg-pepper-deep transition-colors flex items-center justify-center shadow-sm active:scale-90"
+              className="h-9 px-3 rounded-full bg-soil hover:bg-pepper text-white text-[12px] font-semibold flex items-center gap-1 transition-colors active:scale-95 shadow-sm"
               aria-label={`Add ${item.name}`}
             >
-              <Plus size={16} className="text-white" />
+              <Plus size={14} />
+              Add
             </button>
           )}
         </div>
@@ -410,11 +425,15 @@ function StoreInner({ sheetOpen, setSheetOpen }: {
             <div className="space-y-8 sm:space-y-10">
               {Object.entries(grouped).map(([category, categoryItems]) => (
                 <div key={category} ref={el => { sectionRefs.current[category] = el }} className="scroll-mt-48 lg:scroll-mt-24">
-                  <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                    <h2 className="font-body text-soil text-[17px] font-semibold">{CATEGORY_LABELS[category] || category}</h2>
-                    <span className="text-stone/35 text-[12px] font-data">{categoryItems.length}</span>
+                  <div className="flex items-center gap-2.5 mb-3.5 sm:mb-5">
+                    <h2 className="font-body text-soil text-[18px] sm:text-[20px] font-semibold tracking-tight">
+                      {CATEGORY_LABELS[category] || category}
+                    </h2>
+                    <span className="text-stone/35 text-[11px] font-data bg-soil/5 px-2 py-0.5 rounded-full">
+                      {categoryItems.length}
+                    </span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
                     {categoryItems.map(item => (
                       <ProductCard
                         key={item.id}
@@ -443,7 +462,7 @@ function StoreInner({ sheetOpen, setSheetOpen }: {
       {cartCount > 0 && !sheetOpen && (
         <button
           onClick={() => setSheetOpen(true)}
-          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-soil text-white rounded-full pl-3.5 pr-5 py-3 flex items-center gap-3 shadow-2xl active:scale-95 transition-all whitespace-nowrap max-w-[min(100vw-2rem,24rem)]"
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-soil text-white rounded-full pl-3.5 pr-5 py-3.5 flex items-center gap-3 shadow-[0_12px_40px_rgba(15,41,64,0.35)] active:scale-95 transition-all whitespace-nowrap max-w-[min(100vw-2rem,24rem)] ring-1 ring-white/10"
         >
           <span className="w-7 h-7 rounded-full bg-pepper text-white text-[12px] font-bold font-data flex items-center justify-center shrink-0">
             {cartCount}
@@ -468,7 +487,7 @@ export default function StorePage() {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-grain-dim flex flex-col">
+    <div className="min-h-screen bg-[#eef1f4] flex flex-col">
       <StoreNav onCartOpen={() => setSheetOpen(true)} />
       <Suspense fallback={
         <div className="flex-1 flex items-center justify-center py-32">

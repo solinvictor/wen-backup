@@ -55,7 +55,7 @@ function DeliveryBadge({ type }: { type: Order['delivery_type'] }) {
   if (!type) return null
   return type === 'express'
     ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-soil/8 text-soil/70 text-[11px] font-semibold border border-soil/12">Express · 24h</span>
-    : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-grain-dim text-stone text-[11px] font-semibold border border-soil/10">Standard · 3 days</span>
+    : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#eef1f4] text-stone text-[11px] font-semibold border border-soil/10">Standard · 3 days</span>
 }
 
 // ── Order card ───────────────────────────────────────────────────────────────
@@ -70,10 +70,10 @@ function OrderCard({ order }: { order: Order }) {
       {/* Header row */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-grain-dim/60 transition-colors text-left"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#eef1f4]/60 transition-colors text-left"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-grain-dim flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#eef1f4] flex items-center justify-center shrink-0">
             <Package size={16} className="text-pepper" strokeWidth={2} />
           </div>
           <div className="min-w-0">
@@ -94,7 +94,7 @@ function OrderCard({ order }: { order: Order }) {
 
       {/* Expanded detail */}
       {open && (
-        <div className="border-t border-soil/8 px-5 py-4 space-y-3 bg-grain-dim/30">
+        <div className="border-t border-soil/8 px-5 py-4 space-y-3 bg-[#eef1f4]/30">
           {/* Items */}
           <div>
             <p className="text-[11px] font-semibold text-stone/50 uppercase tracking-wider mb-1.5">Items</p>
@@ -194,7 +194,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
   }
 
   return (
-    <div className="min-h-screen bg-grain-dim">
+    <div className="min-h-screen bg-[#eef1f4]">
 
       {/* Top bar */}
       <header className="bg-white border-b border-soil/10 sticky top-0 z-30">
@@ -267,7 +267,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
               </div>
             ) : orders.length === 0 ? (
               <div className="bg-white border border-soil/10 rounded-2xl px-5 py-14 flex flex-col items-center gap-3 text-center">
-                <div className="w-14 h-14 rounded-full bg-grain-dim flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-[#eef1f4] flex items-center justify-center">
                   <Package size={24} className="text-stone/30" />
                 </div>
                 <p className="font-body text-soil font-bold text-[16px]">No orders yet</p>
@@ -299,7 +299,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full bg-grain-dim border border-soil/12 rounded-xl px-4 py-3 text-[14.5px] text-soil outline-none focus:border-pepper focus:bg-white transition-all placeholder:text-stone/35"
+                  className="w-full bg-[#eef1f4] border border-soil/12 rounded-xl px-4 py-3 text-[14.5px] text-soil outline-none focus:border-pepper focus:bg-white transition-all placeholder:text-stone/35"
                 />
               </div>
               <div>
@@ -309,7 +309,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                   placeholder="+234 800 000 0000"
-                  className="w-full bg-grain-dim border border-soil/12 rounded-xl px-4 py-3 text-[14.5px] text-soil outline-none focus:border-pepper focus:bg-white transition-all placeholder:text-stone/35"
+                  className="w-full bg-[#eef1f4] border border-soil/12 rounded-xl px-4 py-3 text-[14.5px] text-soil outline-none focus:border-pepper focus:bg-white transition-all placeholder:text-stone/35"
                 />
               </div>
               <div>
@@ -318,7 +318,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
                   type="email"
                   value={initialEmail}
                   disabled
-                  className="w-full bg-grain-dim/60 border border-soil/8 rounded-xl px-4 py-3 text-[14.5px] text-stone/50 cursor-not-allowed"
+                  className="w-full bg-[#eef1f4]/60 border border-soil/8 rounded-xl px-4 py-3 text-[14.5px] text-stone/50 cursor-not-allowed"
                 />
                 <p className="text-[11.5px] text-stone/40 mt-1.5">Email cannot be changed here.</p>
               </div>

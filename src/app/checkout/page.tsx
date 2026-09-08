@@ -144,7 +144,7 @@ export default function CheckoutPage() {
       ? 'Dispatched within hours — arrives within 24 hours.'
       : 'Harvested fresh — delivered within about 3 days.'
     return (
-      <div className="min-h-screen bg-grain-dim flex flex-col">
+      <div className="min-h-screen bg-[#eef1f4] flex flex-col">
         <header className="bg-white border-b border-soil/8 px-5 h-14 flex items-center justify-between">
           <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
           <span className="text-[11px] font-mono uppercase tracking-wider text-pepper">Confirmed</span>
@@ -166,7 +166,7 @@ export default function CheckoutPage() {
             </div>
 
             {orderSummary.length > 0 && (
-              <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden mb-4 text-left">
+              <div className="wen-surface overflow-hidden mb-4 text-left">
                 <div className="px-4 py-3 border-b border-soil/8">
                   <p className="text-[12px] font-semibold text-soil/50 uppercase tracking-wide">Your basket</p>
                 </div>
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <div className="bg-white rounded-2xl border border-soil/8 p-4 text-left mb-4 space-y-3.5">
+            <div className="wen-surface p-4 text-left mb-4 space-y-3.5">
               <p className="text-[12px] font-semibold text-soil/50 uppercase tracking-wide">What happens next</p>
               {[
                 { icon: Phone, text: 'We call within 2 hours to confirm' },
@@ -253,8 +253,8 @@ export default function CheckoutPage() {
         </Suspense>
       )}
 
-      <div className="min-h-screen bg-grain-dim flex flex-col">
-        <header className="bg-white border-b border-soil/8 sticky top-0 z-40">
+      <div className="min-h-screen bg-[#eef1f4] flex flex-col">
+        <header className="bg-white/90 backdrop-blur-md border-b border-soil/8 sticky top-0 z-40">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
             <button onClick={() => router.back()} className="p-1.5 -ml-1 text-soil/60 hover:text-soil transition-colors">
               <ChevronLeft size={22} />
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
             <div className="w-full lg:flex-1 space-y-5">
 
               {/* Delivery speed picker */}
-              <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
+              <div className="wen-surface overflow-hidden">
                 <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                   <Truck size={16} className="text-pepper" />
                   <h2 className="font-body text-soil text-[16px] font-semibold">Delivery speed</h2>
@@ -328,7 +328,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* Delivery details card */}
-              <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
+              <div className="wen-surface overflow-hidden">
                 <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                   <MapPin size={16} className="text-pepper" />
                   <h2 className="font-body text-soil text-[16px] font-semibold">Your details</h2>
@@ -345,7 +345,7 @@ export default function CheckoutPage() {
                       value={form.fullName}
                       onChange={e => setForm({ ...form, fullName: e.target.value })}
                       placeholder="Your full name"
-                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all ${errors.fullName ? 'border-red-400' : 'border-soil/10'}`}
+                      className={`wen-input bg-white ${errors.fullName ? '!border-red-400' : ''}`}
                     />
                     {errors.fullName && <p className="text-[12px] text-red-500 mt-1">{errors.fullName}</p>}
                   </div>
@@ -361,7 +361,7 @@ export default function CheckoutPage() {
                       onChange={e => setForm({ ...form, phone: e.target.value })}
                       placeholder="08012345678"
                       type="tel"
-                      className={`w-full bg-grain-dim border rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all ${errors.phone ? 'border-red-400' : 'border-soil/10'}`}
+                      className={`wen-input bg-white ${errors.phone ? '!border-red-400' : ''}`}
                     />
                     {errors.phone && <p className="text-[12px] text-red-500 mt-1">{errors.phone}</p>}
                   </div>
@@ -425,7 +425,7 @@ export default function CheckoutPage() {
                           value={form.landmark}
                           onChange={e => setForm({ ...form, landmark: e.target.value })}
                           placeholder="e.g. Beside First Bank, blue gate, 2nd house on the left"
-                          className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all"
+                          className="wen-input bg-white"
                         />
                         <p className="text-[11.5px] text-stone/50 mt-1">
                           Strongly recommended — gate colour, nearby shop, or how to reach you
@@ -466,7 +466,7 @@ export default function CheckoutPage() {
                       onChange={e => setForm({ ...form, notes: e.target.value })}
                       placeholder="Any special instructions…"
                       rows={3}
-                      className="w-full bg-grain-dim border border-soil/10 rounded-xl px-4 py-3.5 text-[15px] text-soil outline-none focus:border-pepper focus:bg-white transition-all resize-none"
+                      className="wen-input bg-white resize-none min-h-[5.5rem]"
                     />
                   </div>
                 </div>
@@ -481,7 +481,7 @@ export default function CheckoutPage() {
 
             {/* ── Right: order summary ── */}
             <div className="w-full lg:w-80 shrink-0">
-              <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden sticky top-24">
+              <div className="wen-surface overflow-hidden sticky top-24">
                 <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                   <ShoppingBag size={16} className="text-pepper" />
                   <h2 className="font-body text-soil text-[16px] font-semibold">Order summary</h2>
