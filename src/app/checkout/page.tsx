@@ -69,6 +69,8 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]           = useState('')
   const [orderRef, setOrderRef]     = useState('')
+  const [orderSummary, setOrderSummary] = useState<{ name: string; quantity: number; price: number | null }[]>([])
+  const [orderTotal, setOrderTotal] = useState(0)
   const [delivery, setDelivery]     = useState<DeliveryId>('standard')
   const [form, setForm]             = useState<FormData>({
     fullName: '', phone: '', address: '', landmark: '', notes: '', buyerType: 'household',
@@ -125,6 +127,8 @@ export default function CheckoutPage() {
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Something went wrong. Try again.'); return }
       setOrderRef(genRef())
+      setOrderSummary(cartLines.map(l => ({ name: l.name, quantity: l.quantity, price: l.price })))
+      setOrderTotal(cartTotal + deliveryFee)
       clearCart()
       setStep('success')
     } catch {
@@ -137,48 +141,90 @@ export default function CheckoutPage() {
   // ── Success ───────────────────────────────────────────────────────────────
   if (step === 'success') {
     const deliveryText = delivery === 'express'
-      ? 'Your order will be dispatched within hours and arrive within 24 hours.'
-      : 'Your order will be harvested fresh and delivered within 3 days.'
+      ? 'Dispatched within hours — arrives within 24 hours.'
+      : 'Harvested fresh — delivered within about 3 days.'
     return (
       <div className="min-h-screen bg-grain-dim flex flex-col">
-        <header className="bg-white border-b border-soil/8 px-5 h-14 flex items-center">
+        <header className="bg-white border-b border-soil/8 px-5 h-14 flex items-center justify-between">
           <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
+          <span className="text-[11px] font-mono uppercase tracking-wider text-pepper">Confirmed</span>
         </header>
-        <main className="flex-1 flex items-center justify-center px-5 py-12">
-          <div className="w-full max-w-md text-center">
-            <div className="w-20 h-20 rounded-full bg-pepper/10 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 size={36} className="text-pepper" strokeWidth={1.8} />
+        <main className="flex-1 flex items-center justify-center px-4 sm:px-5 py-10">
+          <div className="w-full max-w-md">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-pepper/10 flex items-center justify-center mx-auto mb-4 ring-4 ring-pepper/5">
+                <CheckCircle2 size={32} className="text-pepper" strokeWidth={1.8} />
+              </div>
+              <h1 className="font-body text-soil text-2xl font-bold mb-1.5">Order received</h1>
+              <p className="text-stone/60 text-[14px] leading-relaxed">
+                We&apos;ll call <span className="font-semibold text-soil">{form.phone}</span> to confirm.
+              </p>
+              <div className="inline-flex items-center gap-2 bg-white border border-soil/10 rounded-full px-4 py-2 mt-4">
+                <span className="text-stone/50 text-[12px]">Ref</span>
+                <span className="font-data text-soil text-[13px] font-bold tracking-wider">{orderRef}</span>
+              </div>
             </div>
-            <h1 className="font-body text-soil text-2xl font-bold mb-2">Order received!</h1>
-            <p className="text-stone/60 text-[14px] leading-relaxed mb-1">
-              We&apos;ll call <span className="font-semibold text-soil">{form.phone}</span> to confirm.
-            </p>
-            <div className="inline-flex items-center gap-2 bg-white border border-soil/10 rounded-full px-4 py-2 mt-4 mb-8">
-              <span className="text-stone/50 text-[12px]">Order ref</span>
-              <span className="font-data text-soil text-[13px] font-bold tracking-wider">{orderRef}</span>
-            </div>
-            <div className="bg-white rounded-2xl border border-soil/8 p-5 text-left mb-8 space-y-4">
-              <p className="text-soil text-[13px] font-semibold mb-3">What happens next</p>
+
+            {orderSummary.length > 0 && (
+              <div className="bg-white rounded-2xl border border-soil/8 overflow-hidden mb-4 text-left">
+                <div className="px-4 py-3 border-b border-soil/8">
+                  <p className="text-[12px] font-semibold text-soil/50 uppercase tracking-wide">Your basket</p>
+                </div>
+                <ul className="divide-y divide-soil/6">
+                  {orderSummary.map((line, i) => (
+                    <li key={i} className="px-4 py-2.5 flex justify-between gap-3 text-[13px]">
+                      <span className="text-soil">
+                        <span className="font-data text-stone/45 mr-1.5">×{line.quantity}</span>
+                        {line.name}
+                      </span>
+                      <span className="font-data text-soil/70 shrink-0">
+                        {line.price ? `₦${(line.price * line.quantity).toLocaleString('en-NG')}` : '—'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {orderTotal > 0 && (
+                  <div className="px-4 py-3 border-t border-soil/8 flex justify-between text-[14px] font-semibold text-soil">
+                    <span>Est. total</span>
+                    <span className="font-data">₦{orderTotal.toLocaleString('en-NG')}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="bg-white rounded-2xl border border-soil/8 p-4 text-left mb-4 space-y-3.5">
+              <p className="text-[12px] font-semibold text-soil/50 uppercase tracking-wide">What happens next</p>
               {[
-                { icon: Phone, text: 'We call you within 2 hours to confirm your order' },
+                { icon: Phone, text: 'We call within 2 hours to confirm' },
                 { icon: Truck, text: deliveryText },
-                { icon: MapPin, text: `Delivered to: ${form.address}` },
+                { icon: MapPin, text: form.landmark
+                    ? `${form.address} · ${form.landmark}`
+                    : `Delivered to: ${form.address || 'your pinned location'}` },
               ].map(({ icon: Icon, text }, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-pepper/8 flex items-center justify-center shrink-0 mt-0.5">
-                    <Icon size={15} className="text-pepper-deep" />
+                  <div className="w-8 h-8 rounded-full bg-pepper/8 flex items-center justify-center shrink-0">
+                    <Icon size={14} className="text-pepper-deep" />
                   </div>
-                  <p className="text-stone/70 text-[13px] leading-relaxed pt-1">{text}</p>
+                  <p className="text-stone/70 text-[13px] leading-relaxed pt-1.5">{text}</p>
                 </div>
               ))}
             </div>
-            <Link
-              href="/store"
-              className="w-full inline-flex items-center justify-center gap-2 bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep transition-colors"
-            >
-              <ShoppingBag size={17} />
-              Continue shopping
-            </Link>
+
+            <div className="flex flex-col gap-2.5">
+              <Link
+                href="/store"
+                className="w-full inline-flex items-center justify-center gap-2 bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep transition-colors"
+              >
+                <ShoppingBag size={17} />
+                Continue shopping
+              </Link>
+              <Link
+                href="/"
+                className="w-full inline-flex items-center justify-center text-[13px] font-medium text-soil/50 hover:text-soil py-2"
+              >
+                Back to home
+              </Link>
+            </div>
           </div>
         </main>
       </div>
@@ -216,6 +262,13 @@ export default function CheckoutPage() {
             <span className="font-body text-soil text-[17px] font-semibold">Checkout</span>
             <div className="flex-1" />
             <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
+          </div>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-3 flex items-center gap-2 text-[11px] font-mono uppercase tracking-wide">
+            <span className="text-pepper font-semibold">1 · Details</span>
+            <span className="text-soil/20">—</span>
+            <span className="text-soil/35">2 · Place order</span>
+            <span className="text-soil/20">—</span>
+            <span className="text-soil/35">3 · Confirmed</span>
           </div>
         </header>
 
