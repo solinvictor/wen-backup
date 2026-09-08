@@ -69,9 +69,9 @@ function ProductCard({ item, inCart, onAdd, onRemove }: {
         </div>
       </div>
       <div className="px-2.5 sm:px-3 pt-2 pb-2.5 flex flex-col gap-2 flex-1">
-        <div className="flex-1">
-          <p className="text-soil text-[13px] font-semibold leading-tight">{item.name}</p>
-          {item.unit && <p className="text-stone/50 text-[11px] mt-0.5 font-data">{item.unit}</p>}
+        <div className="flex-1 min-h-[2.5rem]">
+          <p className="text-soil text-[13px] sm:text-[14px] font-semibold leading-tight line-clamp-2">{item.name}</p>
+          {item.unit && <p className="text-stone/45 text-[11px] mt-0.5 font-data">{item.unit}</p>}
         </div>
         <div className="flex items-center justify-between gap-1">
           <PriceDisplay price={item.price} className="text-soil text-[14px] font-bold font-body" />
@@ -253,7 +253,7 @@ function StoreInner({ sheetOpen, setSheetOpen }: {
   setSheetOpen: (v: boolean) => void
 }) {
   const searchParams = useSearchParams()
-  const { items, cartCount, addOne, removeOne } = useCart()
+  const { items, cartCount, cartTotal, addOne, removeOne } = useCart()
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -443,13 +443,17 @@ function StoreInner({ sheetOpen, setSheetOpen }: {
       {cartCount > 0 && !sheetOpen && (
         <button
           onClick={() => setSheetOpen(true)}
-          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-soil text-white rounded-full px-5 py-3.5 flex items-center gap-2.5 shadow-2xl active:scale-95 transition-all whitespace-nowrap"
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 bg-soil text-white rounded-full pl-3.5 pr-5 py-3 flex items-center gap-3 shadow-2xl active:scale-95 transition-all whitespace-nowrap max-w-[min(100vw-2rem,24rem)]"
         >
-          <span className="w-5 h-5 rounded-full bg-pepper text-white text-[11px] font-bold font-data flex items-center justify-center shrink-0">
+          <span className="w-7 h-7 rounded-full bg-pepper text-white text-[12px] font-bold font-data flex items-center justify-center shrink-0">
             {cartCount}
           </span>
-          <ShoppingCart size={16} strokeWidth={2} className="shrink-0" />
           <span className="text-[14px] font-semibold">View basket</span>
+          {cartTotal > 0 && (
+            <span className="ml-auto font-data text-[13px] font-bold tabular-nums opacity-95">
+              ₦{cartTotal.toLocaleString('en-NG')}
+            </span>
+          )}
         </button>
       )}
 
