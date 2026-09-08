@@ -28,6 +28,7 @@ export default function AdminProductsPage() {
   const [editing, setEditing] = useState<Product | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -125,12 +126,12 @@ export default function AdminProductsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this product?')) return
     setDeletingId(id)
     const supabase = createClient()
     await supabase.from('products').delete().eq('id', id)
     setProducts(prev => prev.filter(p => p.id !== id))
     setDeletingId(null)
+    setPendingDelete(null)
   }
 
   async function toggleAvailability(p: Product) {
@@ -199,13 +200,33 @@ export default function AdminProductsPage() {
                     >
                       <Pencil size={14} />
                     </button>
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      disabled={deletingId === p.id}
-                      className="p-1.5 text-soil/40 hover:text-pepper hover:bg-pepper/5 rounded-lg transition-colors"
-                    >
-                      {deletingId === p.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                    </button>
+                    {pendingDelete === p.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(p.id)}
+                          disabled={deletingId === p.id}
+                          className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-pepper text-white hover:bg-pepper-deep"
+                        >
+                          {deletingId === p.id ? '…' : 'Delete'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPendingDelete(null)}
+                          className="text-[11px] px-2 py-1 rounded-lg text-soil/50 hover:bg-grain-dim"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setPendingDelete(p.id)}
+                        className="p-1.5 text-soil/40 hover:text-pepper hover:bg-pepper/5 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -245,15 +266,22 @@ export default function AdminProductsPage() {
               {/* Category */}
               <div>
                 <label className="block text-[12px] font-semibold text-soil/60 mb-1.5">Category *</label>
-                <select
-                  value={form.category}
-                  onChange={e => setForm(f => ({ ...f, category: e.target.value as Category }))}
-                  className="w-full text-[14px] text-soil border border-soil/15 rounded-xl px-3.5 py-2.5 outline-none focus:border-pepper transition-colors bg-white capitalize"
-                >
+                <div className="flex flex-wrap gap-1.5">
                   {CATEGORIES.map(c => (
-                    <option key={c} value={c} className="capitalize">{c}</option>
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, category: c as Category }))}
+                      className={`text-[12px] capitalize px-3 py-1.5 rounded-full border transition-colors ${
+                        form.category === c
+                          ? 'bg-pepper text-white border-pepper'
+                          : 'bg-white text-soil/70 border-soil/15 hover:border-pepper/40'
+                      }`}
+                    >
+                      {c}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
 
               {/* Price & Unit */}
