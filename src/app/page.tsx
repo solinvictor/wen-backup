@@ -82,30 +82,79 @@ function fmtPrice(n: number | null | undefined) {
   return `₦${n.toLocaleString('en-NG')}`
 }
 
+type BoardRow = {
+  slug: string
+  label: string
+  unit: string
+  price: number | null
+  href: string
+}
+
 function WeeklyBoard() {
-  const [prices, setPrices] = useState<Record<string, number | null>>({})
+  const [rows, setRows] = useState<BoardRow[]>(
+    CATEGORIES.map((c) => ({
+      slug: c.slug,
+      label: c.label,
+      unit: c.unit,
+      price: null,
+      href: `/store?c=${c.slug}`,
+    }))
+  )
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    try {
-      const { createClient } = require('@/lib/supabase/client')
-      const supabase = createClient()
-      supabase
-        .from('products')
-        .select('name, category, price, is_available')
-        .eq('is_available', true)
-        .then(({ data }: { data: { name: string; category: string; price: number | null }[] | null }) => {
-          if (!data?.length) return
-          const next: Record<string, number | null> = {}
-          for (const cat of CATEGORIES) {
-            const match =
-              data.find((p) => p.category === cat.slug && p.price) ||
-              data.find((p) => p.name.toLowerCase().includes(cat.slug) && p.price)
-            next[cat.slug] = match?.price ?? null
-          }
-          setPrices(next)
-        })
-    } catch {
-      /* ignore */
+    let cancelled = false
+    async function load() {
+      try {
+        const { createClient } = require('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('products')
+          .select('name, category, unit, price, is_available')
+          .eq('is_available', true)
+
+        if (cancelled) return
+
+        type Prod = {
+          name: string
+          category: string
+          unit: string | null
+          price: number | null
+        }
+        const products = (data || []) as Prod[]
+
+        setRows(
+          CATEGORIES.map((c) => {
+            const inCat = products.filter(
+              (p) =>
+                p.category === c.slug ||
+                p.name.toLowerCase().includes(c.slug) ||
+                p.name.toLowerCase().includes(c.label.toLowerCase())
+            )
+            // Prefer a row with a real price; if several, take the lowest
+            const withPrice = inCat
+              .filter((p) => p.price != null && Number(p.price) > 0)
+              .sort((a, b) => Number(a.price) - Number(b.price))
+            const pick = withPrice[0] || inCat[0]
+            const unitRaw = pick?.unit?.replace(/^per\s+/i, '') || c.unit
+            return {
+              slug: c.slug,
+              label: c.label,
+              unit: unitRaw,
+              price: pick?.price != null ? Number(pick.price) : null,
+              href: `/store?c=${c.slug}`,
+            }
+          })
+        )
+      } catch {
+        /* keep category fallbacks */
+      } finally {
+        if (!cancelled) setLoaded(true)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
     }
   }, [])
 
@@ -115,24 +164,48 @@ function WeeklyBoard() {
         <p className="text-[12px] font-semibold text-soil/55 uppercase tracking-wide">
           This week, WEN has
         </p>
-        <p className="text-[10px] text-stone/45 font-data shrink-0">Updated regularly</p>
+        <p className="text-[10px] text-stone/45 font-data shrink-0">
+          {loaded ? 'From live stock' : 'Loading…'}
+        </p>
       </div>
       <ul className="divide-y divide-soil/6">
-        {CATEGORIES.map((c) => {
-          const price = fmtPrice(prices[c.slug])
+        {rows.map((r) => {
+          const price = fmtPrice(r.price)
           return (
-            <li key={c.slug} className="px-4 sm:px-5 py-3 flex items-baseline justify-between gap-3">
-              <span className="font-semibold text-soil text-[14px] uppercase tracking-wide">
-                {c.label}
-              </span>
-              <span className="font-data text-[14px] font-bold text-pepper tabular-nums text-right">
-                {price ?? 'See store'}
-                <span className="text-stone/40 font-medium text-[11px]"> / {c.unit}</span>
-              </span>
+            <li key={r.slug}>
+              <Link
+                href={r.href}
+                className="px-4 sm:px-5 py-3 flex items-baseline justify-between gap-3 hover:bg-pepper/5 transition-colors group"
+              >
+                <span className="font-semibold text-soil text-[14px] uppercase tracking-wide group-hover:text-pepper transition-colors">
+                  {r.label}
+                </span>
+                <span className="font-data text-[14px] font-bold tabular-nums text-right shrink-0">
+                  {price ? (
+                    <>
+                      <span className="text-pepper">{price}</span>
+                      <span className="text-stone/40 font-medium text-[11px]"> / {r.unit}</span>
+                    </>
+                  ) : (
+                    <span className="text-pepper text-[13px] font-semibold underline-offset-2 group-hover:underline">
+                      See store
+                    </span>
+                  )}
+                </span>
+              </Link>
             </li>
           )
         })}
       </ul>
+      <div className="px-4 sm:px-5 py-2.5 border-t border-soil/8 bg-grain-dim/50">
+        <Link
+          href="/store"
+          className="text-[12px] font-semibold text-pepper hover:text-pepper-deep inline-flex items-center gap-1"
+        >
+          Browse full store
+          <ArrowRight size={12} />
+        </Link>
+      </div>
     </div>
   )
 }
