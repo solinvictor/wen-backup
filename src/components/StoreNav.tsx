@@ -239,7 +239,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-soil/6">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
 
           {/* Row 1: hamburger | WEN | auth + cart */}
