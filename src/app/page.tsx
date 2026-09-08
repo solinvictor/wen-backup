@@ -50,32 +50,32 @@ const HOW_IT_WORKS = [
     step: '01',
     title: 'We source',
     body: 'We find the best available deals from our selected suppliers.',
-    // Warm produce / wholesale feel — cohesive food photography set
-    img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=500&fit=crop&q=80',
-    imgAlt: 'Fresh produce ready for bulk sourcing',
+    img: '/landing/steps/01-source.jpg',
+    imgAlt: 'Fresh produce sourced in bulk',
   },
   {
     step: '02',
     title: 'We list',
     body: "We show you what's available and the current price.",
-    img: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=800&h=500&fit=crop&q=80',
-    imgAlt: 'Quality chicken and kitchen staples',
+    img: '/landing/steps/02-list.jpg',
+    imgAlt: 'Produce listed and ready to buy',
   },
   {
     step: '03',
     title: 'You order',
     body: 'Pick what you need from the store.',
-    img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&h=500&fit=crop&q=80',
-    imgAlt: 'Kitchen ready to place a bulk order',
+    img: '/landing/steps/03-order.jpg',
+    imgAlt: 'Choosing what your kitchen needs',
   },
   {
     step: '04',
     title: 'We deliver',
     body: 'We coordinate fulfilment and get it to you.',
-    img: 'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&h=500&fit=crop&q=80',
-    imgAlt: 'Delivery on the way to your kitchen',
+    img: '/landing/steps/04-deliver.jpg',
+    imgAlt: 'Order packed and on the way',
   },
 ]
+
 
 function fmtPrice(n: number | null | undefined) {
   if (n == null || Number.isNaN(n)) return null
