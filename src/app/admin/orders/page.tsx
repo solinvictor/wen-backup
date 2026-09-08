@@ -82,7 +82,7 @@ export default function AdminOrdersPage() {
 
   return (
     <AdminShell>
-      <h1 className="font-body text-soil text-2xl font-semibold mb-6">Orders</h1>
+      <h1 className="font-body text-soil text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Orders</h1>
 
       {loading ? (
         <p className="text-soil/50 text-[14px]">Loading...</p>
@@ -91,22 +91,29 @@ export default function AdminOrdersPage() {
       ) : (
         <div className="space-y-2.5">
           {orders.map((o) => (
-            <div key={o.id} className="bg-grain rounded-xl p-5 border border-soil/8">
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div>
-                  <p className="text-soil font-medium text-[15px]">{o.product_summary}</p>
-                  <p className="text-soil/50 text-[13px]">
+            <div key={o.id} className="bg-white sm:bg-grain rounded-xl p-4 sm:p-5 border border-soil/8 overflow-hidden">
+              <div className="flex flex-col gap-3 mb-3">
+                <div className="min-w-0">
+                  <p className="text-soil font-medium text-[14px] sm:text-[15px] leading-snug break-words">
+                    {o.product_summary}
+                  </p>
+                  <p className="text-soil/50 text-[12px] sm:text-[13px] mt-0.5">
                     {o.buyer?.full_name || 'Unknown buyer'}
+                    {o.buyer?.phone_number ? (
+                      <a href={`tel:${o.buyer.phone_number}`} className="text-pepper ml-1.5">
+                        {o.buyer.phone_number}
+                      </a>
+                    ) : null}
                   </p>
                 </div>
-                <div className="flex flex-wrap justify-end gap-1 max-w-[11rem]">
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-0.5">
                   {STATUS_OPTIONS.map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => updateStatus(o.id, s)}
-                      className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize transition-opacity ${
-                        o.status === s ? STATUS_STYLES[s] : 'bg-soil/5 text-soil/40 hover:text-soil/70'
+                      className={`shrink-0 text-[10px] font-medium px-2.5 py-1 rounded-full capitalize transition-opacity ${
+                        o.status === s ? STATUS_STYLES[s] : 'bg-soil/5 text-soil/40'
                       }`}
                     >
                       {s.replace('_', ' ')}
@@ -119,10 +126,12 @@ export default function AdminOrdersPage() {
 
               {/* Rider assignment — show for all non-cancelled, non-pending orders */}
               {o.status !== 'cancelled' && o.status !== 'pending' && (
-                <div className="flex items-center gap-2.5 mt-1 pt-3 border-t border-soil/8">
-                  <Bike size={13} className="text-soil/30 shrink-0" />
-                  <label className="text-[11.5px] text-soil/50 font-medium shrink-0">Assign rider</label>
-                  <div className="flex-1 flex flex-wrap gap-1.5">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-1 pt-3 border-t border-soil/8">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Bike size={13} className="text-soil/30 shrink-0" />
+                    <label className="text-[11.5px] text-soil/50 font-medium">Assign rider</label>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
                     <button
                       type="button"
                       onClick={() => assignRider(o.id, null)}

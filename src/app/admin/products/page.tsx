@@ -142,8 +142,8 @@ export default function AdminProductsPage() {
 
   return (
     <AdminShell>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-body text-soil text-2xl font-semibold">Products</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6">
+        <h1 className="font-body text-soil text-xl sm:text-2xl font-semibold">Products</h1>
         <button
           onClick={openCreate}
           className="flex items-center gap-2 bg-pepper text-white text-[13px] font-semibold px-4 py-2.5 rounded-xl hover:bg-pepper-deep transition-colors"
