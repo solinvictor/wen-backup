@@ -50,29 +50,30 @@ const HOW_IT_WORKS = [
     step: '01',
     title: 'We source',
     body: 'We find the best available deals from our selected suppliers.',
-    img: 'https://images.pexels.com/photos/36846173/pexels-photo-36846173.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Farmers working in the field',
+    // Warm produce / wholesale feel — cohesive food photography set
+    img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=500&fit=crop&q=80',
+    imgAlt: 'Fresh produce ready for bulk sourcing',
   },
   {
     step: '02',
     title: 'We list',
     body: "We show you what's available and the current price.",
-    img: 'https://images.pexels.com/photos/31743758/pexels-photo-31743758.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Fresh produce at a local market',
+    img: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=800&h=500&fit=crop&q=80',
+    imgAlt: 'Quality chicken and kitchen staples',
   },
   {
     step: '03',
     title: 'You order',
     body: 'Pick what you need from the store.',
-    img: 'https://images.pexels.com/photos/36846177/pexels-photo-36846177.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Fresh food ready to order',
+    img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&h=500&fit=crop&q=80',
+    imgAlt: 'Kitchen ready to place a bulk order',
   },
   {
     step: '04',
     title: 'We deliver',
     body: 'We coordinate fulfilment and get it to you.',
-    img: 'https://images.pexels.com/photos/30661401/pexels-photo-30661401.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
-    imgAlt: 'Delivery rider on the way',
+    img: 'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&h=500&fit=crop&q=80',
+    imgAlt: 'Delivery on the way to your kitchen',
   },
 ]
 
@@ -382,7 +383,7 @@ export default function LandingPage() {
         {/* ── Restaurants ── */}
         <section className="relative overflow-hidden py-14 sm:py-20">
           <img
-            src="https://images.pexels.com/photos/31743758/pexels-photo-31743758.jpeg?auto=compress&cs=tinysrgb&w=1400&h=700&fit=crop"
+            src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1400&h=700&fit=crop&q=80"
             alt=""
             aria-hidden
             className="absolute inset-0 w-full h-full object-cover"

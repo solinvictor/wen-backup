@@ -87,26 +87,31 @@ function ProductCard({ item, inCart, onAdd, onRemove }: {
             <p className="text-stone/40 text-[11px] mt-0.5 font-data">{item.unit}</p>
           )}
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <PriceDisplay price={item.price} className="text-soil text-[15px] font-bold font-body tabular-nums" />
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="min-w-0 flex-1 truncate pr-1">
+            <PriceDisplay price={item.price} className="text-soil text-[14px] sm:text-[15px] font-bold font-body tabular-nums" />
+          </div>
           {inCart ? (
-            <div className="flex items-center gap-0.5 bg-pepper rounded-full pl-1 pr-1 py-1 shadow-sm">
-              <button onClick={onRemove} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 transition-colors" aria-label="Remove one">
-                <Minus size={13} className="text-white" />
+            <div className="shrink-0 flex items-center justify-between w-[5.5rem] h-8 bg-pepper rounded-full px-0.5 shadow-sm">
+              <button type="button" onClick={onRemove} className="w-7 h-7 shrink-0 rounded-full flex items-center justify-center hover:bg-white/15 transition-colors" aria-label="Remove one">
+                <Minus size={12} className="text-white" />
               </button>
-              <span className="text-white text-[13px] font-bold font-data w-5 text-center">{inCart.quantity}</span>
-              <button onClick={onAdd} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/15 transition-colors" aria-label="Add one">
-                <Plus size={13} className="text-white" />
+              <span className="text-white text-[12px] font-bold font-data tabular-nums min-w-[1.25rem] text-center leading-none">
+                {inCart.quantity}
+              </span>
+              <button type="button" onClick={onAdd} className="w-7 h-7 shrink-0 rounded-full flex items-center justify-center hover:bg-white/15 transition-colors" aria-label="Add one">
+                <Plus size={12} className="text-white" />
               </button>
             </div>
           ) : (
             <button
+              type="button"
               onClick={onAdd}
-              className="h-9 px-3 rounded-full bg-soil hover:bg-pepper text-white text-[12px] font-semibold flex items-center gap-1 transition-colors active:scale-95 shadow-sm"
+              className="shrink-0 h-8 w-8 sm:h-9 sm:w-auto sm:px-3 rounded-full bg-soil hover:bg-pepper text-white text-[12px] font-semibold flex items-center justify-center gap-1 transition-colors active:scale-95 shadow-sm"
               aria-label={`Add ${item.name}`}
             >
               <Plus size={14} />
-              Add
+              <span className="hidden sm:inline">Add</span>
             </button>
           )}
         </div>
