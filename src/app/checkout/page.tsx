@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import {
-  ChevronLeft, ShoppingBag, Loader2, CheckCircle2, Truck,
+  ChevronLeft, ShoppingBag, Loader2, Truck,
   Phone, MapPin, User, FileText, Zap, Clock, Navigation, Pencil, Mail,
 } from 'lucide-react'
 
@@ -41,7 +41,6 @@ const DELIVERY_OPTIONS = [
 ]
 
 type DeliveryId = 'standard' | 'express'
-type Step = 'details' | 'success'
 
 interface FormData {
   fullName: string
@@ -61,13 +60,9 @@ const BUYER_TYPES = [
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { cartLines, cartCount, cartTotal, clearCart } = useCart()
-  const [step, setStep]             = useState<Step>('details')
+  const { cartLines, cartCount, cartTotal } = useCart()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]           = useState('')
-  const [orderRef, setOrderRef]     = useState('')
-  const [orderSummary, setOrderSummary] = useState<{ name: string; quantity: number; price: number | null }[]>([])
-  const [orderTotal, setOrderTotal] = useState(0)
   const [delivery, setDelivery]     = useState<DeliveryId>('standard')
   const [form, setForm]             = useState<FormData>({
     fullName: '', phone: '', email: '', address: '', landmark: '', notes: '', buyerType: 'household',
@@ -77,8 +72,8 @@ export default function CheckoutPage() {
   const [showMap, setShowMap]       = useState(false)
 
   useEffect(() => {
-    if (cartCount === 0 && step !== 'success') router.replace('/store')
-  }, [cartCount, step, router])
+    if (cartCount === 0) router.replace('/store')
+  }, [cartCount, router])
 
   const hasPrices   = cartLines.some(l => l.price)
   const deliveryOpt = DELIVERY_OPTIONS.find(o => o.id === delivery)!
@@ -125,109 +120,27 @@ export default function CheckoutPage() {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Something went wrong. Try again.'); return }
-      setOrderRef(data.orderRef)
-      setOrderSummary(cartLines.map(l => ({ name: l.name, quantity: l.quantity, price: l.price })))
-      setOrderTotal(data.amountTotal ?? (cartTotal + deliveryFee))
-      clearCart()
-      setStep('success')
+
+      // Order is created as pending_payment — now start the actual Paystack
+      // checkout. Cart is intentionally NOT cleared yet: if the buyer
+      // abandons payment, they should still have their items.
+      const payRes = await fetch('/api/payment/paystack-initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderRef: data.orderRef }),
+      })
+      const payData = await payRes.json()
+      if (!payRes.ok || !payData.authorizationUrl) {
+        setError(payData.error || 'Could not start payment. Please try again.')
+        return
+      }
+
+      window.location.href = payData.authorizationUrl
     } catch {
       setError('Could not place order. Check your connection and try again.')
     } finally {
       setSubmitting(false)
     }
-  }
-
-  // ── Success ───────────────────────────────────────────────────────────────
-  if (step === 'success') {
-    const deliveryText = delivery === 'express'
-      ? 'Dispatched within hours — arrives within 24 hours.'
-      : 'Harvested fresh — delivered within about 3 days.'
-    return (
-      <div className="min-h-screen bg-[#eef1f4] flex flex-col">
-        <header className="bg-white border-b border-soil/8 px-5 h-14 flex items-center justify-between">
-          <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
-          <span className="text-[11px] font-mono uppercase tracking-wider text-pepper">Confirmed</span>
-        </header>
-        <main className="flex-1 flex items-center justify-center px-4 sm:px-5 py-10">
-          <div className="w-full max-w-md">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-pepper/10 flex items-center justify-center mx-auto mb-4 ring-4 ring-pepper/5">
-                <CheckCircle2 size={32} className="text-pepper" strokeWidth={1.8} />
-              </div>
-              <h1 className="font-body text-soil text-2xl font-bold mb-1.5">Order received</h1>
-              <p className="text-stone/60 text-[14px] leading-relaxed">
-                We&apos;ll call <span className="font-semibold text-soil">{form.phone}</span> to confirm.
-              </p>
-              <div className="inline-flex items-center gap-2 bg-white border border-soil/10 rounded-full px-4 py-2 mt-4">
-                <span className="text-stone/50 text-[12px]">Ref</span>
-                <span className="font-data text-soil text-[13px] font-bold tracking-wider">{orderRef}</span>
-              </div>
-            </div>
-
-            {orderSummary.length > 0 && (
-              <div className="wen-surface overflow-hidden mb-4 text-left">
-                <div className="px-4 py-3 border-b border-soil/8">
-                  <p className="text-[12px] font-semibold text-soil/50 uppercase tracking-wide">Your basket</p>
-                </div>
-                <ul className="divide-y divide-soil/6">
-                  {orderSummary.map((line, i) => (
-                    <li key={i} className="px-4 py-2.5 flex justify-between gap-3 text-[13px]">
-                      <span className="text-soil">
-                        <span className="font-data text-stone/45 mr-1.5">×{line.quantity}</span>
-                        {line.name}
-                      </span>
-                      <span className="font-data text-soil/70 shrink-0">
-                        {line.price ? `₦${(line.price * line.quantity).toLocaleString('en-NG')}` : '—'}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                {orderTotal > 0 && (
-                  <div className="px-4 py-3 border-t border-soil/8 flex justify-between text-[14px] font-semibold text-soil">
-                    <span>Est. total</span>
-                    <span className="font-data">₦{orderTotal.toLocaleString('en-NG')}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="wen-surface p-4 text-left mb-4 space-y-3.5">
-              <p className="text-[12px] font-semibold text-soil/50 uppercase tracking-wide">What happens next</p>
-              {[
-                { icon: Phone, text: 'We call within 2 hours to confirm' },
-                { icon: Truck, text: deliveryText },
-                { icon: MapPin, text: form.landmark
-                    ? `${form.address} · ${form.landmark}`
-                    : `Delivered to: ${form.address || 'your pinned location'}` },
-              ].map(({ icon: Icon, text }, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-pepper/8 flex items-center justify-center shrink-0">
-                    <Icon size={14} className="text-pepper-deep" />
-                  </div>
-                  <p className="text-stone/70 text-[13px] leading-relaxed pt-1.5">{text}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              <Link
-                href="/store"
-                className="w-full inline-flex items-center justify-center gap-2 bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep transition-colors"
-              >
-                <ShoppingBag size={17} />
-                Continue shopping
-              </Link>
-              <Link
-                href="/"
-                className="w-full inline-flex items-center justify-center text-[13px] font-medium text-soil/50 hover:text-soil py-2"
-              >
-                Back to home
-              </Link>
-            </div>
-          </div>
-        </main>
-      </div>
-    )
   }
 
   // ── Form ──────────────────────────────────────────────────────────────────
