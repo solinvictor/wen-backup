@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import {
   ChevronLeft, ShoppingBag, Loader2, CheckCircle2, Truck,
-  Phone, MapPin, User, FileText, Zap, Clock, Navigation, Pencil,
+  Phone, MapPin, User, FileText, Zap, Clock, Navigation, Pencil, Mail,
 } from 'lucide-react'
 
 const LocationMapPicker = lazy(() => import('@/components/LocationMapPicker'))
@@ -50,6 +50,7 @@ type Step = 'details' | 'success'
 interface FormData {
   fullName: string
   phone: string
+  email: string
   address: string
   landmark: string
   notes: string
@@ -73,7 +74,7 @@ export default function CheckoutPage() {
   const [orderTotal, setOrderTotal] = useState(0)
   const [delivery, setDelivery]     = useState<DeliveryId>('standard')
   const [form, setForm]             = useState<FormData>({
-    fullName: '', phone: '', address: '', landmark: '', notes: '', buyerType: 'household',
+    fullName: '', phone: '', email: '', address: '', landmark: '', notes: '', buyerType: 'household',
   })
   const [errors, setErrors]         = useState<Partial<FormData>>({})
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null)
@@ -92,6 +93,7 @@ export default function CheckoutPage() {
     const e: Partial<FormData> = {}
     if (!form.fullName.trim() || form.fullName.trim().length < 2) e.fullName = 'Enter your full name'
     if (!/^0[789][01]\d{8}$/.test(form.phone.trim())) e.phone = 'Enter a valid Nigerian phone number'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Enter a valid email — we\'ll send your receipt here'
     if (!form.address.trim() || form.address.trim().length < 5 || !deliveryCoords) {
       e.address = 'Pin your exact delivery location on the map so the rider can find you'
     }
@@ -110,6 +112,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           fullName:    form.fullName,
           phoneNumber: form.phone,
+          email:       form.email,
           location:    form.address,
           landmark:    form.landmark,
           deliveryLat: deliveryCoords?.lat ?? null,
@@ -364,6 +367,26 @@ export default function CheckoutPage() {
                       className={`wen-input bg-white ${errors.phone ? '!border-red-400' : ''}`}
                     />
                     {errors.phone && <p className="text-[12px] text-red-500 mt-1">{errors.phone}</p>}
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+                      <Mail size={13} />
+                      Email
+                    </label>
+                    <input
+                      value={form.email}
+                      onChange={e => setForm({ ...form, email: e.target.value })}
+                      placeholder="you@example.com"
+                      type="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      className={`wen-input bg-white ${errors.email ? '!border-red-400' : ''}`}
+                    />
+                    {errors.email
+                      ? <p className="text-[12px] text-red-500 mt-1">{errors.email}</p>
+                      : <p className="text-[12px] text-soil/40 mt-1">Your payment receipt goes here</p>}
                   </div>
 
                   {/* Location picker */}

@@ -18,12 +18,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
-      fullName, phoneNumber, location, landmark,
+      fullName, phoneNumber, email, location, landmark,
       deliveryLat, deliveryLng,
       buyerType, items, notes, deliveryType, deliveryFee,
     } = body as {
       fullName?: string
       phoneNumber?: string
+      email?: string
       location?: string
       landmark?: string
       deliveryLat?: number | null
@@ -37,6 +38,9 @@ export async function POST(req: NextRequest) {
 
     if (!fullName?.trim() || !phoneNumber?.trim() || !location?.trim() || !buyerType?.trim()) {
       return NextResponse.json({ error: 'Please fill in all required fields.' }, { status: 400 })
+    }
+    if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return NextResponse.json({ error: 'Please enter a valid email for your payment receipt.' }, { status: 400 })
     }
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Your list is empty — add at least one product.' }, { status: 400 })
@@ -90,6 +94,7 @@ export async function POST(req: NextRequest) {
       .insert({
         full_name: fullName.trim(),
         phone_number: phoneNumber.trim(),
+        email: email.trim(),
         location: location.trim(),
         landmark: landmark?.trim() || null,
         delivery_lat: deliveryLat ?? null,
@@ -128,7 +133,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, orderRef, amountTotal })
+    return NextResponse.json({ success: true, orderRef, amountTotal, email: email.trim() })
   } catch (err) {
     console.error('[orders] unexpected error:', err)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
