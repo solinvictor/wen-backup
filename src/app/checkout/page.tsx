@@ -17,10 +17,6 @@ function fmt(n: number | null) {
   return '₦' + n.toLocaleString('en-NG')
 }
 
-function genRef() {
-  return 'WEN-' + Math.random().toString(36).substring(2, 8).toUpperCase()
-}
-
 const DELIVERY_OPTIONS = [
   {
     id: 'standard' as const,
@@ -129,9 +125,9 @@ export default function CheckoutPage() {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Something went wrong. Try again.'); return }
-      setOrderRef(genRef())
+      setOrderRef(data.orderRef)
       setOrderSummary(cartLines.map(l => ({ name: l.name, quantity: l.quantity, price: l.price })))
-      setOrderTotal(cartTotal + deliveryFee)
+      setOrderTotal(data.amountTotal ?? (cartTotal + deliveryFee))
       clearCart()
       setStep('success')
     } catch {
