@@ -119,8 +119,8 @@ export default function CheckoutPage() {
           deliveryType: delivery,
           deliveryFee,
           items: cartLines.map(l => ({
-            name: l.name, category: l.category, unit: l.unit,
-            quantity: l.quantity, price: l.price,
+            id: l.id, name: l.name, category: l.category, unit: l.unit,
+            quantity: l.quantity,
           })),
         }),
       })

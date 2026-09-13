@@ -3,11 +3,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
 interface CartItem {
+  id: string
   name: string
   category: string
   unit: string | null
   quantity: number
-  price?: number | null
 }
 
 function genRef() {
@@ -41,19 +41,48 @@ export async function POST(req: NextRequest) {
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Your list is empty — add at least one product.' }, { status: 400 })
     }
+    if (items.some(i => !i.id)) {
+      return NextResponse.json({ error: 'Something went wrong with your cart. Please refresh and try again.' }, { status: 400 })
+    }
+
+    const supabase = createAdminClient()
+
+    // Never trust client-sent prices — look up the real, current price for
+    // every item server-side so a tampered request can't change what's charged.
+    const { data: dbProducts, error: productsError } = await supabase
+      .from('products')
+      .select('id, price, is_available')
+      .in('id', items.map(i => i.id))
+
+    if (productsError) {
+      console.error('[orders] product lookup failed:', productsError.message)
+      return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
+    }
+
+    const priceById = new Map((dbProducts ?? []).map(p => [p.id, p]))
+    let itemsTotal = 0
+    for (const item of items) {
+      const product = priceById.get(item.id)
+      if (!product || product.is_available === false || product.price == null) {
+        return NextResponse.json(
+          { error: `"${item.name}" is no longer available. Please remove it and try again.` },
+          { status: 400 }
+        )
+      }
+      itemsTotal += Number(product.price) * item.quantity
+    }
+    const amountTotal = itemsTotal + (deliveryFee ?? 0)
 
     let userId: string | null = null
     try {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL
       const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       if (url && key) {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        const authClient = await createClient()
+        const { data: { user } } = await authClient.auth.getUser()
         userId = user?.id ?? null
       }
     } catch { /* guest checkout */ }
-
-    const supabase = createAdminClient()
 
     const productsInterested = items.map(i => i.name).join(', ')
     const { data: buyer, error: buyerError } = await supabase
@@ -90,6 +119,8 @@ export async function POST(req: NextRequest) {
       delivery_type: deliveryType ?? null,
       delivery_fee: deliveryFee ?? null,
       order_ref: orderRef,
+      amount_total: amountTotal,
+      status: 'pending_payment',
     })
 
     if (orderError) {
@@ -97,7 +128,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, orderRef })
+    return NextResponse.json({ success: true, orderRef, amountTotal })
   } catch (err) {
     console.error('[orders] unexpected error:', err)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
