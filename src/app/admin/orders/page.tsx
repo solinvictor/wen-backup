@@ -13,7 +13,8 @@ interface Rider {
 interface Order {
   id: string
   product_summary: string
-  status: 'pending' | 'matched' | 'in_progress' | 'delivered' | 'cancelled'
+  status: 'pending_payment' | 'payment_failed' | 'paid' | 'pending' | 'matched' | 'in_progress' | 'delivered' | 'cancelled'
+  amount_total: number | null
   notes: string | null
   created_at: string
   delivered_at: string | null
@@ -22,6 +23,9 @@ interface Order {
   buyer: { full_name: string; phone_number: string } | null
 }
 
+// Delivery-lifecycle statuses only — payment state is shown and reasoned
+// about separately below, never toggled by hand here (Paystack's webhook
+// is the only thing allowed to mark an order paid).
 const STATUS_OPTIONS: Order['status'][] = ['pending', 'matched', 'in_progress', 'delivered', 'cancelled']
 
 const STATUS_STYLES: Record<string, string> = {
@@ -30,6 +34,31 @@ const STATUS_STYLES: Record<string, string> = {
   in_progress: 'bg-okra/15 text-okra',
   delivered:   'bg-soil/10 text-soil/60',
   cancelled:   'bg-pepper/15 text-pepper',
+}
+
+const PAYMENT_STYLES: Record<string, string> = {
+  pending_payment: 'bg-turmeric/15 text-turmeric',
+  paid:            'bg-okra/15 text-okra',
+  payment_failed:  'bg-pepper/15 text-pepper',
+}
+
+const PAYMENT_LABELS: Record<string, string> = {
+  pending_payment: 'Awaiting payment',
+  paid:            'Paid',
+  payment_failed:  'Payment failed',
+}
+
+function fmtNaira(n: number | null) {
+  if (n == null) return '—'
+  return '₦' + n.toLocaleString('en-NG')
+}
+
+function paymentState(status: Order['status']): 'pending_payment' | 'paid' | 'payment_failed' {
+  if (status === 'paid' || status === 'pending_payment' || status === 'payment_failed') return status
+  // Any delivery-lifecycle status (pending/matched/in_progress/delivered/
+  // cancelled) implies payment already cleared, for orders created before
+  // this payment flow existed.
+  return 'paid'
 }
 
 export default function AdminOrdersPage() {
@@ -45,7 +74,7 @@ export default function AdminOrdersPage() {
     const [{ data: ordersData }, { data: ridersData }] = await Promise.all([
       supabase
         .from('orders')
-        .select('id, product_summary, status, notes, created_at, delivered_at, rider_id, buyer:buyers(full_name, phone_number)')
+        .select('id, product_summary, status, amount_total, notes, created_at, delivered_at, rider_id, buyer:buyers(full_name, phone_number)')
         .order('created_at', { ascending: false }),
       supabase
         .from('profiles')
@@ -60,6 +89,13 @@ export default function AdminOrdersPage() {
   }
 
   async function updateStatus(id: string, status: Order['status']) {
+    const order = orders.find((o) => o.id === id)
+    if (order && paymentState(order.status) !== 'paid') {
+      // Never let an order move into the delivery pipeline until Paystack's
+      // webhook has actually confirmed the charge went through.
+      alert('This order hasn\u2019t been paid for yet — it can\u2019t be dispatched until payment is confirmed.')
+      return
+    }
     const supabase = createClient()
     const updates: any = { status }
     if (status === 'delivered') updates.delivered_at = new Date().toISOString()
@@ -94,6 +130,12 @@ export default function AdminOrdersPage() {
             <div key={o.id} className="bg-white sm:bg-grain rounded-xl p-4 sm:p-5 border border-soil/8 overflow-hidden">
               <div className="flex flex-col gap-3 mb-3">
                 <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${PAYMENT_STYLES[paymentState(o.status)]}`}>
+                      {PAYMENT_LABELS[paymentState(o.status)]}
+                    </span>
+                    <span className="font-data text-[12px] text-soil/50">{fmtNaira(o.amount_total)}</span>
+                  </div>
                   <p className="text-soil font-medium text-[14px] sm:text-[15px] leading-snug break-words">
                     {o.product_summary}
                   </p>
@@ -107,25 +149,32 @@ export default function AdminOrdersPage() {
                   </p>
                 </div>
                 <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-0.5">
-                  {STATUS_OPTIONS.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => updateStatus(o.id, s)}
-                      className={`shrink-0 text-[10px] font-medium px-2.5 py-1 rounded-full capitalize transition-opacity ${
-                        o.status === s ? STATUS_STYLES[s] : 'bg-soil/5 text-soil/40'
-                      }`}
-                    >
-                      {s.replace('_', ' ')}
-                    </button>
-                  ))}
+                  {STATUS_OPTIONS.map((s) => {
+                    const disabled = paymentState(o.status) !== 'paid'
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => updateStatus(o.id, s)}
+                        title={disabled ? 'Awaiting payment confirmation' : undefined}
+                        className={`shrink-0 text-[10px] font-medium px-2.5 py-1 rounded-full capitalize transition-opacity ${
+                          disabled
+                            ? 'bg-soil/5 text-soil/25 cursor-not-allowed'
+                            : o.status === s ? STATUS_STYLES[s] : 'bg-soil/5 text-soil/40'
+                        }`}
+                      >
+                        {s.replace('_', ' ')}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
               {o.notes && <p className="text-[13px] text-soil/60 mb-3">{o.notes}</p>}
 
-              {/* Rider assignment — show for all non-cancelled, non-pending orders */}
-              {o.status !== 'cancelled' && o.status !== 'pending' && (
+              {/* Rider assignment — only for paid orders past the initial 'pending' delivery stage */}
+              {paymentState(o.status) === 'paid' && o.status !== 'cancelled' && o.status !== 'pending' && (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-1 pt-3 border-t border-soil/8">
                   <div className="flex items-center gap-2 shrink-0">
                     <Bike size={13} className="text-soil/30 shrink-0" />
