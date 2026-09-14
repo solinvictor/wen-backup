@@ -32,6 +32,7 @@ export default function AdminProductsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [saveError, setSaveError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { load() }, [])
@@ -104,6 +105,7 @@ export default function AdminProductsPage() {
   async function handleSave() {
     if (!form.name.trim()) return
     setSaving(true)
+    setSaveError('')
     const supabase = createClient()
     const payload = {
       name: form.name.trim(),
@@ -115,10 +117,20 @@ export default function AdminProductsPage() {
     }
 
     if (editing) {
-      const { data } = await supabase.from('products').update(payload).eq('id', editing.id).select().single()
+      const { data, error } = await supabase.from('products').update(payload).eq('id', editing.id).select().single()
+      if (error) {
+        setSaveError(error.message || 'Could not save changes. Please try again.')
+        setSaving(false)
+        return
+      }
       if (data) setProducts(prev => prev.map(p => p.id === editing.id ? data as Product : p))
     } else {
-      const { data } = await supabase.from('products').insert(payload).select().single()
+      const { data, error } = await supabase.from('products').insert(payload).select().single()
+      if (error) {
+        setSaveError(error.message || 'Could not add this product. Please try again.')
+        setSaving(false)
+        return
+      }
       if (data) setProducts(prev => [data as Product, ...prev])
     }
     setSaving(false)
@@ -127,16 +139,28 @@ export default function AdminProductsPage() {
 
   async function handleDelete(id: string) {
     setDeletingId(id)
+    setSaveError('')
     const supabase = createClient()
-    await supabase.from('products').delete().eq('id', id)
+    const { error } = await supabase.from('products').delete().eq('id', id)
+    if (error) {
+      setSaveError(error.message || 'Could not delete this product. Please try again.')
+      setDeletingId(null)
+      setPendingDelete(null)
+      return
+    }
     setProducts(prev => prev.filter(p => p.id !== id))
     setDeletingId(null)
     setPendingDelete(null)
   }
 
   async function toggleAvailability(p: Product) {
+    setSaveError('')
     const supabase = createClient()
-    await supabase.from('products').update({ is_available: !p.is_available }).eq('id', p.id)
+    const { error } = await supabase.from('products').update({ is_available: !p.is_available }).eq('id', p.id)
+    if (error) {
+      setSaveError(error.message || 'Could not update this product. Please try again.')
+      return
+    }
     setProducts(prev => prev.map(x => x.id === p.id ? { ...x, is_available: !x.is_available } : x))
   }
 
@@ -391,6 +415,11 @@ export default function AdminProductsPage() {
             </div>
 
             <div className="px-5 py-4 border-t border-soil/8">
+              {saveError && (
+                <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-3">
+                  <p className="text-[13px] text-red-600">{saveError}</p>
+                </div>
+              )}
               <button
                 onClick={handleSave}
                 disabled={saving || !form.name.trim() || uploading}
