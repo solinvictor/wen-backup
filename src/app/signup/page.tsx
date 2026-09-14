@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
@@ -19,7 +19,20 @@ function GoogleIcon() {
 }
 
 export default function SignupPage() {
-  const router = useRouter()
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-grain-dim flex items-center justify-center">
+        <Loader2 size={24} className="animate-spin text-stone/40" />
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
+  )
+}
+
+function SignupForm() {
+  const searchParams = useSearchParams()
+  const nextPath = searchParams?.get('next') ?? '/store'
   const [step, setStep]           = useState<'form' | 'check-email'>('form')
   const [showPwd, setShowPwd]     = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -74,7 +87,7 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
     })
     if (error) {
