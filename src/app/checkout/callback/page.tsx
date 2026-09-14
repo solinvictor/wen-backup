@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
@@ -13,7 +13,7 @@ function fmt(n: number | null | undefined) {
 
 type VerifyState = 'checking' | 'paid' | 'failed'
 
-export default function CheckoutCallbackPage() {
+function CallbackContent() {
   const searchParams = useSearchParams()
   const { clearCart } = useCart()
   const [state, setState] = useState<VerifyState>('checking')
@@ -173,5 +173,19 @@ export default function CheckoutCallbackPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function CheckoutCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#eef1f4] flex items-center justify-center px-5">
+          <Loader2 size={28} className="animate-spin text-pepper" />
+        </div>
+      }
+    >
+      <CallbackContent />
+    </Suspense>
   )
 }
