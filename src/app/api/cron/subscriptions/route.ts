@@ -1,0 +1,125 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+/**
+ * Runs daily (see vercel.json). Finds every active subscription whose
+ * next_delivery_date has arrived, creates a real order for it, and
+ * charges the buyer's saved, reusable Paystack authorization directly —
+ * no checkout page, no redirect, this is a true background charge.
+ *
+ * The actual order gets marked 'paid' by the SAME webhook that handles
+ * normal checkouts, once Paystack's charge.success event for this
+ * reference comes back — this route only creates the pending_payment
+ * order and fires the charge request; it does not mark anything paid
+ * itself, to keep exactly one source of truth for "is this order paid".
+ */
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const secretKey = process.env.PAYSTACK_SECRET_KEY
+  if (!secretKey) {
+    console.error('[cron/subscriptions] PAYSTACK_SECRET_KEY is not set')
+    return NextResponse.json({ error: 'Not configured' }, { status: 500 })
+  }
+
+  const supabase = createAdminClient()
+  const today = new Date().toISOString().slice(0, 10)
+
+  const { data: due, error: dueError } = await supabase
+    .from('subscriptions')
+    .select('id, buyer_id, product_id, quantity, frequency_days, paystack_authorization_code, paystack_email, products(name, price, is_available)')
+    .eq('status', 'active')
+    .lte('next_delivery_date', today)
+
+  if (dueError) {
+    console.error('[cron/subscriptions] failed to load due subscriptions:', dueError.message)
+    return NextResponse.json({ error: 'Failed to load subscriptions' }, { status: 500 })
+  }
+
+  const results: { subscriptionId: string; outcome: string }[] = []
+
+  for (const sub of due ?? []) {
+    const productRow = Array.isArray(sub.products) ? sub.products[0] : sub.products
+
+    if (!sub.paystack_authorization_code || !sub.paystack_email) {
+      await supabase.from('subscriptions').update({ status: 'payment_issue' }).eq('id', sub.id)
+      results.push({ subscriptionId: sub.id, outcome: 'missing_authorization' })
+      continue
+    }
+    if (!productRow || productRow.is_available === false || productRow.price == null) {
+      // Skip this cycle rather than charge for something we can't deliver.
+      // Still advance next_delivery_date so it doesn't fire again tomorrow.
+      const next = new Date()
+      next.setDate(next.getDate() + sub.frequency_days)
+      await supabase.from('subscriptions')
+        .update({ next_delivery_date: next.toISOString().slice(0, 10) })
+        .eq('id', sub.id)
+      results.push({ subscriptionId: sub.id, outcome: 'product_unavailable_skipped' })
+      continue
+    }
+
+    const amount = Number(productRow.price) * sub.quantity
+    const orderRef = `WEN-SUB-${sub.id}-${Date.now().toString(36).toUpperCase()}`
+
+    // Create the order first, as pending_payment — same invariant as every
+    // other order in the system: it only becomes 'paid' via the webhook.
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        buyer_id: sub.buyer_id,
+        product_summary: `${sub.quantity} × ${productRow.name} (subscription)`,
+        status: 'pending_payment',
+        amount_total: amount,
+        order_ref: orderRef,
+        subscription_id: sub.id,
+      })
+      .select('id')
+      .single()
+
+    if (orderError || !order) {
+      console.error('[cron/subscriptions] order creation failed for', sub.id, orderError?.message)
+      results.push({ subscriptionId: sub.id, outcome: 'order_creation_failed' })
+      continue
+    }
+
+    const psRes = await fetch('https://api.paystack.co/transaction/charge_authorization', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        authorization_code: sub.paystack_authorization_code,
+        email: sub.paystack_email,
+        amount: Math.round(amount * 100),
+        reference: orderRef,
+      }),
+    })
+    const psData = await psRes.json()
+
+    if (!psRes.ok || !psData?.status) {
+      console.error('[cron/subscriptions] charge_authorization failed for', sub.id, psData?.message)
+      await supabase.from('orders').update({ status: 'payment_failed' }).eq('id', order.id)
+      await supabase.from('subscriptions').update({ status: 'payment_issue', last_order_id: order.id }).eq('id', sub.id)
+      results.push({ subscriptionId: sub.id, outcome: 'charge_failed' })
+      continue
+    }
+
+    // Charge accepted — webhook will confirm/mark the order paid.
+    // Advance next_delivery_date now so this subscription isn't picked up
+    // again before the webhook has a chance to land.
+    const next = new Date()
+    next.setDate(next.getDate() + sub.frequency_days)
+    await supabase
+      .from('subscriptions')
+      .update({ next_delivery_date: next.toISOString().slice(0, 10), last_order_id: order.id })
+      .eq('id', sub.id)
+
+    results.push({ subscriptionId: sub.id, outcome: 'charge_initiated' })
+  }
+
+  return NextResponse.json({ processed: results.length, results })
+}
