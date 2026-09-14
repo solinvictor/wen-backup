@@ -51,6 +51,20 @@ export async function POST(req: NextRequest) {
 
     const supabase = createAdminClient()
 
+    // Fallback/demo items shown when the store has no live products yet
+    // carry non-UUID placeholder ids (e.g. "f-eggs") and were never meant
+    // to be purchasable — querying Postgres with one of these as a uuid
+    // throws instead of just finding nothing, so filter them out up front
+    // and treat them the same as "product not found" rather than crashing.
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    const invalidItem = items.find(i => !UUID_RE.test(i.id))
+    if (invalidItem) {
+      return NextResponse.json(
+        { error: `"${invalidItem.name}" is not available for purchase yet. Please remove it and try again.` },
+        { status: 400 }
+      )
+    }
+
     // Never trust client-sent prices — look up the real, current price for
     // every item server-side so a tampered request can't change what's charged.
     const { data: dbProducts, error: productsError } = await supabase
