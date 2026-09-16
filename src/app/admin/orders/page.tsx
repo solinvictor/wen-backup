@@ -24,7 +24,7 @@ interface Order {
 }
 
 // Delivery-lifecycle statuses only — payment state is shown and reasoned
-// about separately below, never toggled by hand here (Paystack's webhook
+// about separately below, never toggled by hand here (Monnify's webhook
 // is the only thing allowed to mark an order paid).
 const STATUS_OPTIONS: Order['status'][] = ['pending', 'matched', 'in_progress', 'delivered', 'cancelled']
 
@@ -91,7 +91,7 @@ export default function AdminOrdersPage() {
   async function updateStatus(id: string, status: Order['status']) {
     const order = orders.find((o) => o.id === id)
     if (order && paymentState(order.status) !== 'paid') {
-      // Never let an order move into the delivery pipeline until Paystack's
+      // Never let an order move into the delivery pipeline until Monnify's
       // webhook has actually confirmed the charge went through.
       alert('This order hasn\u2019t been paid for yet — it can\u2019t be dispatched until payment is confirmed.')
       return

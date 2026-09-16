@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { amountsMatch, getMonnifyConfig, monnifyRequest, type MonnifyTransactionStatus } from '@/lib/monnify'
 
 /**
- * Called by the checkout callback page after Paystack redirects the buyer
+ * Called by the checkout callback page after Monnify redirects the buyer
  * back. This does NOT trust the redirect happened — it independently asks
- * Paystack whether the transaction actually succeeded, and only then
+ * Monnify whether the transaction actually succeeded, and only then
  * (defensively — the webhook is the primary path) marks the order paid.
  * Safe to call multiple times: idempotent on order.status.
  */
@@ -15,8 +16,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing reference.' }, { status: 400 })
     }
 
-    const secretKey = process.env.PAYSTACK_SECRET_KEY
-    if (!secretKey) {
+    const config = getMonnifyConfig()
+    if (!config) {
       return NextResponse.json({ error: 'Payments are not configured yet.' }, { status: 500 })
     }
 
@@ -33,22 +34,23 @@ export async function POST(req: NextRequest) {
     }
 
     // Already confirmed (likely by the webhook, which is the primary path) —
-    // just return the current state, don't re-verify with Paystack again.
+    // just return the current state, don't re-verify with Monnify again.
     if (order.status === 'paid') {
       return NextResponse.json({ paid: true, order })
     }
 
-    const psRes = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference.trim())}`, {
-      headers: { Authorization: `Bearer ${secretKey}` },
-    })
-    const psData = await psRes.json()
+    const verifyRes = await monnifyRequest<MonnifyTransactionStatus>(
+      config,
+      `/api/v2/merchant/transactions/query?paymentReference=${encodeURIComponent(reference.trim())}`
+    )
 
-    if (!psRes.ok || !psData?.status) {
-      return NextResponse.json({ paid: false, error: psData?.message || 'Could not verify payment.' })
+    if (!verifyRes.requestSuccessful) {
+      return NextResponse.json({ paid: false, error: verifyRes.responseMessage || 'Could not verify payment.' })
     }
 
-    const expectedKobo = Math.round(Number(order.amount_total) * 100)
-    const isSuccessful = psData.data?.status === 'success' && psData.data?.amount === expectedKobo
+    const expectedAmount = Number(order.amount_total)
+    const isSuccessful =
+      verifyRes.responseBody?.paymentStatus === 'PAID' && amountsMatch(Number(verifyRes.responseBody.amountPaid), expectedAmount)
 
     if (!isSuccessful) {
       if (order.status === 'pending_payment') {
@@ -60,13 +62,13 @@ export async function POST(req: NextRequest) {
     if (order.status === 'pending_payment') {
       await supabase
         .from('orders')
-        .update({ status: 'paid', paystack_reference: reference.trim() })
+        .update({ status: 'paid', monnify_transaction_reference: verifyRes.responseBody.transactionReference })
         .eq('id', order.id)
     }
 
     return NextResponse.json({ paid: true, order: { ...order, status: 'paid' } })
   } catch (err) {
-    console.error('[paystack-verify] unexpected error:', err)
+    console.error('[monnify-verify] unexpected error:', err)
     return NextResponse.json({ error: 'Something went wrong.' }, { status: 500 })
   }
 }

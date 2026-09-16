@@ -5,8 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 /**
  * Creates a subscription row and starts the first (tokenizing) payment.
  * A subscription only becomes 'active' once that first payment succeeds
- * and the webhook captures a reusable authorization code — see
- * /api/payment/paystack-webhook.
+ * and the webhook captures a reusable card token — see
+ * /api/payment/monnify-webhook.
  *
  * Body: { productId, quantity, frequencyDays, email, fullName, phoneNumber, location, landmark? }
  */
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
         quantity,
         frequency_days: frequencyDays,
         status: 'pending_first_payment',
-        paystack_email: email.trim(),
+        monnify_email: email.trim(),
       })
       .select('id')
       .single()

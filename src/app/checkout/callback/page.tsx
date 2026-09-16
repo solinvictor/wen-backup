@@ -27,7 +27,14 @@ function CallbackContent() {
   } | null>(null)
 
   useEffect(() => {
-    const reference = searchParams.get('reference') || searchParams.get('trxref')
+    // Monnify appends paymentReference (occasionally alongside
+    // transactionReference) to the redirect URL; keep the legacy
+    // reference/trxref fallback in case an old link is still in flight.
+    const reference =
+      searchParams.get('paymentReference') ||
+      searchParams.get('transactionReference') ||
+      searchParams.get('reference') ||
+      searchParams.get('trxref')
     if (!reference) {
       setState('failed')
       setError('Missing payment reference.')
@@ -35,7 +42,7 @@ function CallbackContent() {
     }
 
     let cancelled = false
-    fetch('/api/payment/paystack-verify', {
+    fetch('/api/payment/monnify-verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reference }),
