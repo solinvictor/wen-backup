@@ -121,21 +121,21 @@ export default function CheckoutPage() {
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Something went wrong. Try again.'); return }
 
-      // Order is created as pending_payment — now start the actual Paystack
+      // Order is created as pending_payment — now start the actual Monnify
       // checkout. Cart is intentionally NOT cleared yet: if the buyer
       // abandons payment, they should still have their items.
-      const payRes = await fetch('/api/payment/paystack-initialize', {
+      const payRes = await fetch('/api/payment/monnify-initialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderRef: data.orderRef }),
       })
       const payData = await payRes.json()
-      if (!payRes.ok || !payData.authorizationUrl) {
+      if (!payRes.ok || !payData.checkoutUrl) {
         setError(payData.error || 'Could not start payment. Please try again.')
         return
       }
 
-      window.location.href = payData.authorizationUrl
+      window.location.href = payData.checkoutUrl
     } catch {
       setError('Could not place order. Check your connection and try again.')
     } finally {

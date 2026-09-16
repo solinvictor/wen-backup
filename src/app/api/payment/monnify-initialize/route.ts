@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getMonnifyConfig, monnifyRequest, type MonnifyInitTransactionResponse } from '@/lib/monnify'
 
 /**
- * Starts a Paystack checkout for either:
+ * Starts a Monnify checkout for either:
  *  - a one-time order (orderRef) — the original flow
  *  - a subscription's first, tokenizing payment (subscriptionId) — the
- *    reusable authorization captured from THIS charge is what the daily
+ *    reusable card token captured from THIS charge is what the daily
  *    cron uses to charge future deliveries automatically
  *
  * Never trusts anything the client sends beyond which record to charge for
@@ -22,9 +23,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing order or subscription reference.' }, { status: 400 })
     }
 
-    const secretKey = process.env.PAYSTACK_SECRET_KEY
-    if (!secretKey) {
-      console.error('[paystack-initialize] PAYSTACK_SECRET_KEY is not set')
+    const config = getMonnifyConfig()
+    if (!config) {
+      console.error('[monnify-initialize] Monnify env vars are not fully set')
       return NextResponse.json({ error: 'Payments are not configured yet. Please try again later.' }, { status: 500 })
     }
 
@@ -32,15 +33,16 @@ export async function POST(req: NextRequest) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${req.headers.get('host')}`
 
     let email: string
-    let amountKobo: number
+    let customerName: string
+    let amount: number
     let reference: string
     let callbackPath: string
-    let metadata: Record<string, unknown>
+    let paymentMethods: string[]
 
     if (orderRef?.trim()) {
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .select('id, status, amount_total, buyer_id, buyers(email)')
+        .select('id, status, amount_total, buyer_id, buyers(email, full_name)')
         .eq('order_ref', orderRef.trim())
         .single()
 
@@ -60,14 +62,15 @@ export async function POST(req: NextRequest) {
       }
 
       email = buyerRow.email
-      amountKobo = Math.round(Number(order.amount_total) * 100)
+      customerName = buyerRow.full_name || 'WEN buyer'
+      amount = Number(order.amount_total)
       reference = orderRef.trim()
       callbackPath = '/checkout/callback'
-      metadata = { kind: 'order', order_ref: orderRef.trim(), order_id: order.id }
+      paymentMethods = ['CARD', 'ACCOUNT_TRANSFER']
     } else {
       const { data: sub, error: subError } = await supabase
         .from('subscriptions')
-        .select('id, status, quantity, product_id, paystack_email, products(price)')
+        .select('id, status, quantity, product_id, monnify_email, buyers(full_name), products(price)')
         .eq('id', subscriptionId!.trim())
         .single()
 
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
       if (sub.status !== 'pending_first_payment') {
         return NextResponse.json({ error: 'This subscription has already been activated.' }, { status: 409 })
       }
-      if (!sub.paystack_email) {
+      if (!sub.monnify_email) {
         return NextResponse.json({ error: 'Missing email for this subscription.' }, { status: 400 })
       }
 
@@ -87,41 +90,56 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'This product no longer has a price set.' }, { status: 400 })
       }
 
-      email = sub.paystack_email
-      amountKobo = Math.round(Number(price) * sub.quantity * 100)
-      reference = `WEN-SUB-${sub.id}-${Date.now().toString(36).toUpperCase()}`
+      const buyerRow = Array.isArray(sub.buyers) ? sub.buyers[0] : sub.buyers
+
+      email = sub.monnify_email
+      customerName = buyerRow?.full_name || 'WEN buyer'
+      amount = Number(price) * sub.quantity
+      reference = `WEN-SUBSETUP-${sub.id}-${Date.now().toString(36).toUpperCase()}`
       callbackPath = '/subscribe/callback'
-      metadata = { kind: 'subscription_setup', subscription_id: sub.id }
+      // Only CARD can be tokenized for the recurring charges that follow —
+      // account transfer / USSD have nothing to reuse next cycle.
+      paymentMethods = ['CARD']
+
+      // The webhook can't rely on Monnify echoing back custom metadata, so
+      // it looks the subscription up by this reference directly instead.
+      const { error: refError } = await supabase
+        .from('subscriptions')
+        .update({ setup_payment_reference: reference })
+        .eq('id', sub.id)
+      if (refError) {
+        console.error('[monnify-initialize] failed to store setup_payment_reference:', refError.message)
+        return NextResponse.json({ error: 'Could not start payment. Please try again.' }, { status: 500 })
+      }
     }
 
-    const psRes = await fetch('https://api.paystack.co/transaction/initialize', {
+    const initRes = await monnifyRequest<MonnifyInitTransactionResponse>(config, '/api/v1/merchant/transactions/init-transaction', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${secretKey}`,
-        'Content-Type': 'application/json',
+      body: {
+        amount,
+        customerName,
+        customerEmail: email,
+        paymentReference: reference,
+        paymentDescription: `WEN payment ${reference}`,
+        currencyCode: 'NGN',
+        contractCode: config.contractCode,
+        redirectUrl: `${siteUrl}${callbackPath}`,
+        paymentMethods,
       },
-      body: JSON.stringify({
-        email,
-        amount: amountKobo,
-        reference,
-        callback_url: `${siteUrl}${callbackPath}`,
-        metadata,
-      }),
     })
 
-    const psData = await psRes.json()
-    if (!psRes.ok || !psData?.status) {
-      console.error('[paystack-initialize] Paystack rejected the request:', psData?.message)
-      return NextResponse.json({ error: psData?.message || 'Could not start payment. Please try again.' }, { status: 502 })
+    if (!initRes.requestSuccessful || !initRes.responseBody?.checkoutUrl) {
+      console.error('[monnify-initialize] Monnify rejected the request:', initRes.responseMessage)
+      return NextResponse.json({ error: initRes.responseMessage || 'Could not start payment. Please try again.' }, { status: 502 })
     }
 
     return NextResponse.json({
-      authorizationUrl: psData.data.authorization_url,
-      accessCode: psData.data.access_code,
-      reference: psData.data.reference,
+      checkoutUrl: initRes.responseBody.checkoutUrl,
+      transactionReference: initRes.responseBody.transactionReference,
+      reference: initRes.responseBody.paymentReference,
     })
   } catch (err) {
-    console.error('[paystack-initialize] unexpected error:', err)
+    console.error('[monnify-initialize] unexpected error:', err)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
   }
 }
