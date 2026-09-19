@@ -123,3 +123,10 @@ h1, h2, .font-display {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ── Category tints — used by CategoryChip pills ── */
+.tint-chicken  { background: #FFF1E6; color: #B45309; }
+.tint-eggs     { background: #FFFBEA; color: #A16207; }
+.tint-fish     { background: #EAF4FF; color: #1D4ED8; }
+.tint-rice     { background: #F3F0E8; color: #78716C; }
+.tint-beans    { background: #EDF7E9; color: #2D5E1E; }

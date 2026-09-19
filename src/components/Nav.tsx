@@ -82,7 +82,7 @@ function CartButton() {
 
   return (
     <Link
-      href="/store"
+      href="/cart"
       aria-label={`Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}`}
       className="relative flex items-center justify-center w-9 h-9 text-soil hover:bg-soil/6 rounded-full transition-colors"
     >

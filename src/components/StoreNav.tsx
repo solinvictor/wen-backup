@@ -5,20 +5,13 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, Suspense, useEffect } from 'react'
 import {
   Search, MapPin, ChevronDown, ShoppingCart, X, Menu, LogOut, User,
-  Home, ShoppingBag, Wheat, Egg, Fish, Sprout, Drumstick,
-  Trees, Info, MessageCircle, Package,
+  ShoppingBag, Trees, Info, MessageCircle, Package, SlidersHorizontal,
 } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
 import { LocationPicker } from '@/components/LocationPicker'
-
-const TABS = [
-  { href: '/store?c=eggs',    label: 'Eggs',    Icon: Egg       },
-  { href: '/store?c=fish',    label: 'Fish',    Icon: Fish      },
-  { href: '/store?c=chicken', label: 'Chicken', Icon: Drumstick },
-  { href: '/store?c=rice',    label: 'Rice',    Icon: Wheat     },
-  { href: '/store?c=beans',   label: 'Beans',   Icon: Sprout    },
-]
+import { CATEGORY_META } from '@/lib/categories'
+import { CategoryChip } from '@/components/CategoryChip'
 
 // ── Search ─────────────────────────────────────────────────────────────────
 function SearchBar() {
@@ -32,21 +25,30 @@ function SearchBar() {
   }
 
   return (
-    <div className="flex items-center w-full bg-grain-dim border border-soil/10 rounded-full px-4 py-2.5 gap-3 focus-within:border-pepper/50 focus-within:bg-white focus-within:shadow-sm transition-all">
-      <Search size={16} className="text-stone/50 shrink-0" />
-      <input
-        type="text"
-        value={q}
-        onChange={e => setQ(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && go()}
-        placeholder="Search produce — tomatoes, yam, catfish…"
-        className="flex-1 min-w-0 text-[14px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
-      />
-      {q && (
-        <button onClick={() => { setQ(''); router.push('/store') }} className="text-stone/40 hover:text-soil transition-colors shrink-0">
-          <X size={15} />
-        </button>
-      )}
+    <div className="flex items-center gap-2 w-full">
+      <div className="flex items-center flex-1 min-w-0 bg-grain-dim border border-soil/10 rounded-full px-4 py-2.5 gap-3 focus-within:border-pepper/50 focus-within:bg-white focus-within:shadow-sm transition-all">
+        <Search size={16} className="text-stone/50 shrink-0" />
+        <input
+          type="text"
+          value={q}
+          onChange={e => setQ(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && go()}
+          placeholder="Search produce — tomatoes, yam, catfish…"
+          className="flex-1 min-w-0 text-[14px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
+        />
+        {q && (
+          <button onClick={() => { setQ(''); router.push('/store') }} className="text-stone/40 hover:text-soil transition-colors shrink-0">
+            <X size={15} />
+          </button>
+        )}
+      </div>
+      <button
+        type="button"
+        aria-label="Filter"
+        className="shrink-0 w-[42px] h-[42px] rounded-full bg-grain-dim border border-soil/10 flex items-center justify-center text-soil/60 hover:text-soil hover:border-soil/25 transition-colors"
+      >
+        <SlidersHorizontal size={16} />
+      </button>
     </div>
   )
 }
@@ -70,41 +72,22 @@ function CartBtn({ onClick }: { onClick: () => void }) {
   )
 }
 
-// ── Icon tab bar ────────────────────────────────────────────────────────────
-function IconTabBar() {
-  const pathname = usePathname()
+// ── Category chip row ────────────────────────────────────────────────────────
+function CategoryRow() {
   const searchParams = useSearchParams()
   const c = searchParams?.get('c') ?? ''
 
   return (
-    <div className="border-t border-soil/8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex overflow-x-auto scrollbar-hide">
-        {TABS.map(({ href, label, Icon }) => {
-          const active = href.includes(`c=${c}`) && c !== ''
-
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex flex-col items-center gap-1 shrink-0 px-4 pt-2.5 pb-2 border-b-[2.5px] transition-all min-w-[64px] ${
-                active
-                  ? 'border-soil text-soil'
-                  : 'border-transparent text-stone/45 hover:text-soil/70'
-              }`}
-            >
-              <Icon
-                size={22}
-                strokeWidth={active ? 2.4 : 1.8}
-                className={active ? 'text-soil' : 'text-stone/50'}
-              />
-              <span className={`text-[11px] font-semibold whitespace-nowrap tracking-tight ${
-                active ? 'text-soil' : 'text-stone/50'
-              }`}>
-                {label}
-              </span>
-            </Link>
-          )
-        })}
+    <div className="border-t border-soil/8 py-3">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-2 overflow-x-auto scrollbar-hide">
+        {CATEGORY_META.map((cat) => (
+          <CategoryChip
+            key={cat.slug}
+            category={cat}
+            active={c === cat.slug}
+            href={`/store?c=${cat.slug}`}
+          />
+        ))}
       </div>
     </div>
   )
@@ -283,9 +266,9 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
           </div>
         </div>
 
-        {/* Row 4: icon tabs */}
-        <Suspense fallback={<div className="h-[56px] border-t border-soil/8" />}>
-          <IconTabBar />
+        {/* Row 4: category chips */}
+        <Suspense fallback={<div className="h-[64px] border-t border-soil/8" />}>
+          <CategoryRow />
         </Suspense>
       </header>
 

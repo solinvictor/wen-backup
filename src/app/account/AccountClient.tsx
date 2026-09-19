@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -9,6 +9,7 @@ import {
   ChevronRight, Phone, Mail, MapPin,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { BottomTabBar } from '@/components/BottomTabBar'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface Order {
@@ -121,6 +122,15 @@ function OrderCard({ order }: { order: Order }) {
               <p className="text-[13px] text-soil/75">{order.notes}</p>
             </div>
           )}
+          {/* Track order */}
+          {order.status !== 'delivered' && order.status !== 'cancelled' && (
+            <Link
+              href={`/track/${order.id}`}
+              className="block text-center bg-pepper text-white text-[13.5px] font-semibold py-2.5 rounded-xl hover:bg-pepper-deep transition-colors"
+            >
+              Track order
+            </Link>
+          )}
         </div>
       )}
     </div>
@@ -194,7 +204,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
   }
 
   return (
-    <div className="min-h-screen bg-[#eef1f4]">
+    <div className="min-h-screen bg-[#eef1f4] pb-20 sm:pb-0">
 
       {/* Top bar */}
       <header className="bg-white border-b border-soil/10 sticky top-0 z-30">
@@ -353,6 +363,10 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
           </div>
         )}
       </div>
+
+      <Suspense fallback={null}>
+        <BottomTabBar />
+      </Suspense>
     </div>
   )
 }
