@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Plus } from 'lucide-react'
 import { CATEGORY_IMAGES } from '@/lib/category-images'
 
 const CATEGORIES = [
@@ -76,6 +76,101 @@ const HOW_IT_WORKS = [
   },
 ]
 
+
+const FAQS = [
+  {
+    q: 'What areas do you deliver to?',
+    a: 'Right now, Abuja. Add your address at checkout and we’ll confirm before anything ships.',
+  },
+  {
+    q: 'How much is delivery, and how long does it take?',
+    a: 'Standard delivery is ₦1,500 and arrives within 3 days. Need it sooner, express is ₦3,500 and arrives within 24 hours.',
+  },
+  {
+    q: 'What can I actually order from WEN?',
+    a: 'Five things, on purpose: chicken, eggs, fish, rice and beans. We’d rather do a few things reliably than everything badly.',
+  },
+  {
+    q: 'How do I pay?',
+    a: 'Card or bank transfer at checkout. Payments are handled securely, and your final price is confirmed before delivery goes out.',
+  },
+  {
+    q: 'Can I set up recurring orders?',
+    a: 'Yes. If your kitchen buys the same things every week, set a subscription once and pick how often it repeats — no reordering from scratch.',
+  },
+  {
+    q: 'I farm or supply produce — how do I sell through WEN?',
+    a: 'Apply as a supplier. We work with a selected group who can consistently deliver what we list, not everyone who signs up.',
+  },
+]
+
+function FAQItem({
+  q,
+  a,
+  open,
+  onToggle,
+}: {
+  q: string
+  a: string
+  open: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div className="border-b border-soil/10 last:border-b-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-4 py-5 text-left"
+      >
+        <span className="font-body text-soil text-[15px] sm:text-[16px] font-semibold pr-2">
+          {q}
+        </span>
+        <Plus
+          size={18}
+          className={`shrink-0 text-pepper transition-transform duration-200 ${
+            open ? 'rotate-45' : ''
+          }`}
+        />
+      </button>
+      <div
+        className={`grid transition-all duration-200 ease-out ${
+          open ? 'grid-rows-[1fr] opacity-100 pb-5' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="text-soil/70 text-[14px] leading-relaxed pr-8">{a}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FAQSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
+
+  return (
+    <section id="faq" className="bg-grain py-14 sm:py-20 scroll-mt-24">
+      <div className="max-w-3xl mx-auto px-5 sm:px-8">
+        <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-3">
+          Questions?
+        </p>
+        <h2 className="font-display text-soil text-2xl sm:text-3xl mb-6">Good to know</h2>
+        <div className="wen-surface px-5 sm:px-6">
+          {FAQS.map((item, i) => (
+            <FAQItem
+              key={item.q}
+              q={item.q}
+              a={item.a}
+              open={openIndex === i}
+              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function fmtPrice(n: number | null | undefined) {
   if (n == null || Number.isNaN(n)) return null
@@ -511,6 +606,9 @@ export default function LandingPage() {
             </Link>
           </div>
         </section>
+
+        {/* ── FAQ ── */}
+        <FAQSection />
 
         {/* ── Close ── */}
         <section className="bg-grain py-14 sm:py-16 border-t border-soil/8">

@@ -16,7 +16,6 @@ const COLS = [
     title: 'Company',
     links: [
       { href: '/about', label: 'About' },
-      { href: '/contact', label: 'Contact' },
       { href: '/buyers', label: 'For businesses' },
     ],
   },
@@ -28,14 +27,21 @@ const COLS = [
       { href: '/login', label: 'Log in' },
     ],
   },
+  {
+    title: 'Support',
+    links: [
+      { href: '/#faq', label: 'FAQ' },
+      { href: '/contact', label: 'Contact us' },
+    ],
+  },
 ]
 
 export function Footer() {
   return (
     <footer className="market-board text-grain/70 mt-auto">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-12 sm:py-14">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10 mb-10">
-          <div className="col-span-2 sm:col-span-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 sm:gap-10 mb-10">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <p className="font-display text-2xl text-grain mb-3">WEN</p>
             <p className="text-[13px] leading-relaxed text-grain/60 max-w-[16rem]">
               Start small. Buy better. Chicken, eggs, fish, rice, beans — for kitchens that buy regularly.
