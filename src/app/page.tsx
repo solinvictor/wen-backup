@@ -6,44 +6,18 @@ import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
 import { ArrowRight, Plus } from 'lucide-react'
 import { CATEGORY_IMAGES } from '@/lib/category-images'
+import { ACTIVE_CATEGORY_META } from '@/lib/categories'
+import { CategoryChip } from '@/components/CategoryChip'
 
-const CATEGORIES = [
-  {
-    label: 'Chicken',
-    slug: 'chicken',
-    unit: 'kg',
-    img: CATEGORY_IMAGES.chicken,
-    body: 'Reliable supply for your kitchen.',
-  },
-  {
-    label: 'Eggs',
-    slug: 'eggs',
-    unit: 'crate',
-    img: CATEGORY_IMAGES.eggs,
-    body: 'Fresh eggs at competitive prices.',
-  },
-  {
-    label: 'Fish',
-    slug: 'fish',
-    unit: 'kg',
-    img: CATEGORY_IMAGES.fish,
-    body: 'Selected fish from our supply network.',
-  },
-  {
-    label: 'Rice',
-    slug: 'rice',
-    unit: 'bag',
-    img: CATEGORY_IMAGES.rice,
-    body: 'Bulk rice for businesses that buy regularly.',
-  },
-  {
-    label: 'Beans',
-    slug: 'beans',
-    unit: 'bag',
-    img: CATEGORY_IMAGES.beans,
-    body: 'Quality beans at a better buying price.',
-  },
-]
+// Only categories marked active in lib/categories.ts are orderable right now —
+// bring one back there and it reappears here automatically.
+const CATEGORIES = ACTIVE_CATEGORY_META.map((c) => ({
+  label: c.label,
+  slug: c.slug,
+  unit: c.slug === 'chicken' ? 'kg' : 'crate',
+  img: CATEGORY_IMAGES[c.slug],
+  body: c.blurb,
+}))
 
 const HOW_IT_WORKS = [
   {
@@ -88,7 +62,7 @@ const FAQS = [
   },
   {
     q: 'What can I actually order from WEN?',
-    a: 'Five things, on purpose: chicken, eggs, fish, rice and beans. We’d rather do a few things reliably than everything badly.',
+    a: 'Chicken and eggs, for now. We’re starting narrow on purpose — more staples (fish, rice, beans) are coming as we scale.',
   },
   {
     q: 'How do I pay?',
@@ -519,30 +493,18 @@ export default function LandingPage() {
         {/* ── Product photos grid ── */}
         <FeaturedProducts />
 
-        {/* ── Category strip with images ── */}
+        {/* ── Shop by category ── */}
         <section className="bg-[#eef1f4] py-12 sm:py-16">
           <div className="max-w-6xl mx-auto px-5 sm:px-8">
-            <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-6 text-center">
-              Chicken · Eggs · Fish · Rice · Beans
+            <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2 text-center">
+              Shop by category
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {CATEGORIES.map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/store?c=${c.slug}`}
-                  className="group relative rounded-2xl overflow-hidden aspect-[4/5] sm:aspect-square"
-                >
-                  <img
-                    src={c.img}
-                    alt={c.label}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-soil/85 via-soil/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                    <p className="text-white font-semibold text-[14px]">{c.label}</p>
-                    <p className="text-white/70 text-[11px] mt-0.5 line-clamp-2">{c.body}</p>
-                  </div>
-                </Link>
+            <h2 className="font-display text-soil text-2xl sm:text-3xl mb-7 text-center">
+              What we&apos;re carrying right now
+            </h2>
+            <div className="flex flex-wrap justify-center gap-3">
+              {ACTIVE_CATEGORY_META.map((cat) => (
+                <CategoryChip key={cat.slug} category={cat} href={`/store?c=${cat.slug}`} />
               ))}
             </div>
           </div>
@@ -565,7 +527,7 @@ export default function LandingPage() {
               Your kitchen has enough to worry about.
             </h2>
             <p className="text-grain/75 text-[15px] leading-relaxed mb-4">
-              Let WEN handle five things: chicken, eggs, fish, rice, beans.
+              Let WEN handle it: chicken, eggs. More staples on the way.
             </p>
             <p className="text-grain/65 text-[15px] leading-relaxed mb-8">
               If you regularly buy them, you&apos;re exactly who we&apos;re building for.
@@ -616,7 +578,7 @@ export default function LandingPage() {
             <p className="font-display text-soil text-2xl sm:text-3xl mb-2">WEN</p>
             <p className="text-soil/70 text-[16px] mb-1">Start small. Buy better.</p>
             <p className="text-soil font-semibold text-[15px] mb-2">
-              Chicken. Eggs. Fish. Rice. Beans.
+              Chicken. Eggs.
             </p>
             <p className="text-stone/50 text-[14px] mb-8">That&apos;s WEN. For now.</p>
             <Link

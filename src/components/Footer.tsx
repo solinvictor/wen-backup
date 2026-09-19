@@ -1,15 +1,12 @@
 import Link from 'next/link'
+import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 
 const COLS = [
   {
     title: 'Shop',
     links: [
       { href: '/store', label: 'Order from WEN' },
-      { href: '/store?c=chicken', label: 'Chicken' },
-      { href: '/store?c=eggs', label: 'Eggs' },
-      { href: '/store?c=fish', label: 'Fish' },
-      { href: '/store?c=rice', label: 'Rice' },
-      { href: '/store?c=beans', label: 'Beans' },
+      ...ACTIVE_CATEGORY_META.map((c) => ({ href: `/store?c=${c.slug}`, label: c.label })),
     ],
   },
   {
@@ -44,7 +41,7 @@ export function Footer() {
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <p className="font-display text-2xl text-grain mb-3">WEN</p>
             <p className="text-[13px] leading-relaxed text-grain/60 max-w-[16rem]">
-              Start small. Buy better. Chicken, eggs, fish, rice, beans — for kitchens that buy regularly.
+              Start small. Buy better. {ACTIVE_CATEGORY_META.map((c) => c.label).join(', ')} — for kitchens that buy regularly.
             </p>
           </div>
           {COLS.map((col) => (

@@ -10,7 +10,7 @@ import {
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
 import { LocationPicker } from '@/components/LocationPicker'
-import { CATEGORY_META } from '@/lib/categories'
+import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { CategoryChip } from '@/components/CategoryChip'
 
 // ── Search ─────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ function CategoryRow() {
   return (
     <div className="border-t border-soil/8 py-3">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-2 overflow-x-auto scrollbar-hide">
-        {CATEGORY_META.map((cat) => (
+        {ACTIVE_CATEGORY_META.map((cat) => (
           <CategoryChip
             key={cat.slug}
             category={cat}

@@ -10,6 +10,7 @@ import { useCart } from '@/context/CartContext'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { FALLBACK_PRODUCTS, type Product } from '@/lib/fallback-products'
+import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { BottomTabBar } from '@/components/BottomTabBar'
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -142,8 +143,10 @@ function StoreInner() {
     load()
   }, [])
 
+  const activeCategorySlugs = useMemo(() => new Set(ACTIVE_CATEGORY_META.map((c) => c.slug)), [])
+
   const grouped = useMemo(() => {
-    let filtered = products
+    let filtered = products.filter((p) => activeCategorySlugs.has(p.category))
     if (query.trim()) filtered = filtered.filter(p => p.name.toLowerCase().includes(query.trim().toLowerCase()))
     if (categoryFilter) filtered = filtered.filter(p => p.category === categoryFilter)
     return filtered.reduce<Record<string, Product[]>>((acc, p) => {
