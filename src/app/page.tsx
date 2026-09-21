@@ -31,8 +31,8 @@ const HOW_IT_WORKS = [
     step: '02',
     title: 'We List',
     body: "We show you what's available and the current price.",
-    img: '/landing/steps/02-list.jpg',
-    imgAlt: 'Produce listed and ready to buy',
+    img: '/landing/steps/02-list-market.jpg',
+    imgAlt: 'Crates of fresh grapes, pomegranates and oranges at a produce market',
   },
   {
     step: '03',
