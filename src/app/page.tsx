@@ -24,8 +24,8 @@ const HOW_IT_WORKS = [
     step: '01',
     title: 'We Source',
     body: 'We find the best available deals from our selected suppliers.',
-    img: '/landing/steps/01-source.jpg',
-    imgAlt: 'Fresh produce sourced in bulk',
+    img: '/landing/steps/01-source-greenhouse.jpg',
+    imgAlt: 'Smiling grower carrying a crate of fresh lettuce in a greenhouse',
   },
   {
     step: '02',
