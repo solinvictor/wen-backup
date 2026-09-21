@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
 import { ArrowRight, Plus } from 'lucide-react'
-import { CATEGORY_IMAGES } from '@/lib/category-images'
+import { CATEGORY_IMAGES, HOME_CARD_IMAGES } from '@/lib/category-images'
 import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { Logo } from '@/components/Logo'
 
@@ -310,9 +310,9 @@ function FeaturedProducts() {
                 href={`/store?c=${p.category}`}
                 className="group block rounded-[1.75rem] overflow-hidden bg-white shadow-[0_4px_20px_rgba(2,42,67,0.08)] hover:shadow-[0_8px_28px_rgba(2,42,67,0.14)] transition-shadow"
               >
-                <div className="aspect-[5/4] bg-white overflow-hidden">
+                <div className="aspect-[10/9] bg-white overflow-hidden">
                   <img
-                    src={p.image_url || CATEGORY_IMAGES[p.category] || CATEGORY_IMAGES.other}
+                    src={HOME_CARD_IMAGES[p.category] || p.image_url || CATEGORY_IMAGES[p.category] || CATEGORY_IMAGES.other}
                     alt={p.name}
                     className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
                     loading="lazy"
@@ -472,7 +472,7 @@ export default function LandingPage() {
             </div>
             <div className="relative min-h-[260px] sm:min-h-[340px] lg:min-h-full">
               <img
-                src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1400&h=900&fit=crop&q=80"
+                src="/landing/restaurants-kitchen.jpg"
                 alt=""
                 aria-hidden="true"
                 className="absolute inset-0 w-full h-full object-cover"

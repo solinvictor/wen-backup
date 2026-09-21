@@ -20,3 +20,10 @@ export const CATEGORY_IMAGES: Record<string, string> = {
   other:      'https://images.pexels.com/photos/1093837/pexels-photo-1093837.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
 }
 
+
+// Homepage "What's available this week" cards. These curated photos (white background,
+// subject centred) win over a product's own image_url so the cards always match the design.
+export const HOME_CARD_IMAGES: Record<string, string> = {
+  chicken: '/landing/products/chicken.jpg',
+  eggs:    '/landing/products/eggs.jpg',
+}
