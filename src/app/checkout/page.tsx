@@ -3,12 +3,12 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { CATEGORY_IMAGES } from '@/lib/category-images'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import {
   ChevronLeft, ShoppingBag, Loader2, Truck,
   Phone, MapPin, User, FileText, Zap, Clock, Navigation, Pencil, Mail,
 } from 'lucide-react'
+import { Logo } from '@/components/Logo'
 
 const LocationMapPicker = lazy(() => import('@/components/LocationMapPicker'))
 
@@ -173,7 +173,7 @@ export default function CheckoutPage() {
             </button>
             <span className="font-body text-soil text-[17px] font-semibold">Checkout</span>
             <div className="flex-1" />
-            <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
+            <Logo height={24} />
           </div>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-3 flex items-center gap-2 text-[11px] font-mono uppercase tracking-wide">
             <span className="text-pepper font-semibold">1 · Details</span>

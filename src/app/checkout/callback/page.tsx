@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { CheckCircle2, XCircle, Loader2, ShoppingBag, Phone, Truck, MapPin } from 'lucide-react'
+import { Logo } from '@/components/Logo'
 
 function fmt(n: number | null | undefined) {
   if (n == null) return '—'
@@ -85,7 +86,7 @@ function CallbackContent() {
     return (
       <div className="min-h-screen bg-[#eef1f4] flex flex-col">
         <header className="bg-white border-b border-soil/8 px-5 h-14 flex items-center">
-          <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
+          <Logo height={24} />
         </header>
         <main className="flex-1 flex items-center justify-center px-5 py-10">
           <div className="w-full max-w-md text-center">
@@ -116,7 +117,7 @@ function CallbackContent() {
   return (
     <div className="min-h-screen bg-[#eef1f4] flex flex-col">
       <header className="bg-white border-b border-soil/8 px-5 h-14 flex items-center justify-between">
-        <Link href="/" className="font-display text-xl font-bold text-soil">WEN</Link>
+        <Logo height={24} />
         <span className="text-[11px] font-mono uppercase tracking-wider text-pepper">Paid</span>
       </header>
       <main className="flex-1 flex items-center justify-center px-4 sm:px-5 py-10">

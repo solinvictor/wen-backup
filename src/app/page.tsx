@@ -8,6 +8,7 @@ import { ArrowRight, Plus } from 'lucide-react'
 import { CATEGORY_IMAGES } from '@/lib/category-images'
 import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { CategoryChip } from '@/components/CategoryChip'
+import { Logo } from '@/components/Logo'
 
 // Only categories marked active in lib/categories.ts are orderable right now —
 // bring one back there and it reappears here automatically.
@@ -575,7 +576,7 @@ export default function LandingPage() {
         {/* ── Close ── */}
         <section className="bg-grain py-14 sm:py-16 border-t border-soil/8">
           <div className="max-w-3xl mx-auto px-5 sm:px-8 text-center">
-            <p className="font-display text-soil text-2xl sm:text-3xl mb-2">WEN</p>
+            <Logo height={44} href={null} className="mb-3" />
             <p className="text-soil/70 text-[16px] mb-1">Start small. Buy better.</p>
             <p className="text-soil font-semibold text-[15px] mb-2">
               Chicken. Eggs.

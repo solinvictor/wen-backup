@@ -10,6 +10,7 @@ import {
 import { useCart } from '@/context/CartContext'
 import { useLocation } from '@/context/LocationContext'
 import { LocationPicker } from '@/components/LocationPicker'
+import { Logo } from '@/components/Logo'
 
 const TABS = [
   { href: '/',        label: 'Home',    icon: Home },
@@ -179,9 +180,7 @@ export function Nav() {
             <Menu size={22} />
           </button>
 
-          <Link href="/" className="font-display text-2xl font-bold tracking-tight text-soil shrink-0 ml-1.5 sm:ml-0 sm:mr-6">
-            WEN
-          </Link>
+          <Logo height={26} className="shrink-0 ml-1.5 sm:ml-0 sm:mr-6" />
 
           <div className="hidden sm:flex flex-1 mx-4">
             <Suspense fallback={
@@ -261,9 +260,7 @@ export function Nav() {
           <div className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl">
 
             <div className="flex items-center justify-between px-5 h-14 border-b border-soil/10">
-              <Link href="/" onClick={() => setDrawerOpen(false)} className="font-display text-2xl font-bold tracking-tight text-soil">
-                WEN
-              </Link>
+              <Logo height={24} onClick={() => setDrawerOpen(false)} />
               <button onClick={() => setDrawerOpen(false)} className="p-1 text-soil/50 hover:text-soil transition-colors">
                 <X size={20} />
               </button>
