@@ -38,15 +38,15 @@ const HOW_IT_WORKS = [
     step: '03',
     title: 'You Order',
     body: 'Pick what you need from the store.',
-    img: '/landing/steps/03-order.jpg',
-    imgAlt: 'Choosing what your kitchen needs',
+    img: '/landing/steps/03-order-phone.jpg',
+    imgAlt: 'Person holding a phone showing an order payment success screen',
   },
   {
     step: '04',
     title: 'We Deliver',
     body: 'We coordinate fulfilment and get it to you.',
-    img: '/landing/steps/04-deliver.jpg',
-    imgAlt: 'Order packed and on the way',
+    img: '/landing/steps/04-deliver-door.jpg',
+    imgAlt: 'Delivery man handing over a paper bag of fresh groceries at a door',
   },
 ]
 
