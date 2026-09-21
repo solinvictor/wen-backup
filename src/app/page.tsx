@@ -8,6 +8,8 @@ import { ArrowRight, Plus } from 'lucide-react'
 import { CATEGORY_IMAGES } from '@/lib/category-images'
 import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { Logo } from '@/components/Logo'
+import { HeroVideos } from '@/components/HeroVideos'
+import { HERO_VIDEOS } from '@/lib/hero-videos'
 
 // Only categories marked active in lib/categories.ts are orderable right now —
 // bring one back there and it reappears here automatically.
@@ -347,6 +349,7 @@ export default function LandingPage() {
             aria-hidden="true"
             className="absolute inset-0 w-full h-full object-cover object-[70%_center]"
           />
+          <HeroVideos sources={HERO_VIDEOS} />
           <div
             className="absolute inset-0"
             style={{
