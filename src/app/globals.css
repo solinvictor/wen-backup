@@ -34,6 +34,18 @@
   --font-mono: var(--font-mono);
 }
 
+/* Font stacks. next/font provides --font-nohemi and --font-poppins (layout.tsx).
+   When an Adobe Fonts project ID is set in src/lib/typekit.ts, layout.tsx puts
+   data-font="museo" on <html>: Museo Sans goes first, Nohemi/Poppins stay as fallback. */
+:root {
+  --font-display: var(--font-nohemi), 'Nohemi', sans-serif;
+  --font-body: var(--font-poppins), 'Poppins', sans-serif;
+}
+html[data-font='museo'] {
+  --font-display: 'museo-sans', var(--font-nohemi), 'Nohemi', sans-serif;
+  --font-body: 'museo-sans', var(--font-poppins), 'Poppins', sans-serif;
+}
+
 html,
 body {
   overflow-x: hidden;
@@ -41,17 +53,17 @@ body {
 }
 
 body {
-  font-family: var(--font-body), 'Poppins', sans-serif;
+  font-family: var(--font-body);
 }
 
 h1, h2, .font-display {
-  font-family: var(--font-display), 'Nohemi', sans-serif;
+  font-family: var(--font-display);
   letter-spacing: -0.01em;
 }
 
 /* Hero h1 — maximum weight */
 .hero-headline {
-  font-family: var(--font-display), 'Nohemi', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
   letter-spacing: -0.02em;
 }

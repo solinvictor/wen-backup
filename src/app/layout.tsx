@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { JetBrains_Mono, Poppins } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { LocationProvider } from "@/context/LocationContext";
+import { TYPEKIT_KIT_ID } from "@/lib/typekit";
 import "./globals.css";
 
 const nohemi = localFont({
@@ -13,7 +14,7 @@ const nohemi = localFont({
     { path: "../../public/fonts/nohemi/Nohemi-Bold-BF6438cc577b524.woff",     weight: "700", style: "normal" },
     { path: "../../public/fonts/nohemi/Nohemi-ExtraBold-BF6438cc5761ae2.woff",weight: "800", style: "normal" },
   ],
-  variable: "--font-display",
+  variable: "--font-nohemi",
   display: "swap",
 });
 
@@ -25,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const poppins = Poppins({
-  variable: "--font-body",
+  variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
@@ -37,6 +38,9 @@ export const metadata: Metadata = {
     "WEN connects farmers directly to buyers to ensure fresh produce, fair pricing, and faster delivery across communities.",
 };
 
+// True once an Adobe Fonts project ID is set in src/lib/typekit.ts
+const museo = TYPEKIT_KIT_ID !== "";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,8 +49,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-font={museo ? "museo" : undefined}
       className={`${nohemi.variable} ${jetbrainsMono.variable} ${poppins.variable} h-full antialiased`}
     >
+      {museo && (
+        <head>
+          <link rel="preconnect" href="https://use.typekit.net" crossOrigin="anonymous" />
+          <link rel="preconnect" href="https://p.typekit.net" crossOrigin="anonymous" />
+          <link rel="stylesheet" href={`https://use.typekit.net/${TYPEKIT_KIT_ID}.css`} />
+        </head>
+      )}
       <body className="min-h-full flex flex-col bg-grain text-soil">
         <LocationProvider>
           <CartProvider>
