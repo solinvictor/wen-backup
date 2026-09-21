@@ -229,37 +229,32 @@ function WeeklyBoard() {
   }, [])
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden shadow-xl max-w-md w-full">
-      <div className="px-4 sm:px-5 py-3 border-b border-soil/8 flex items-center justify-between gap-2">
-        <p className="text-[12px] font-semibold text-soil/55 uppercase tracking-wide">
+    <div className="bg-soil/55 backdrop-blur-md rounded-2xl border border-white/15 p-3 sm:p-4 shadow-xl w-full max-w-[22rem]">
+      <div className="bg-leaf rounded-lg px-3 py-1.5 flex items-center justify-between gap-2">
+        <p className="text-[11px] font-bold text-soil uppercase tracking-wide">
           This week, WEN has
         </p>
-        <p className="text-[10px] text-stone/45 font-data shrink-0">
-          {loaded ? 'From live stock' : 'Loading…'}
+        <p className="text-[9px] text-soil/60 font-data shrink-0">
+          {loaded ? 'Live' : '…'}
         </p>
       </div>
-      <ul className="divide-y divide-soil/6">
+      <ul className="mt-2.5 space-y-0.5">
         {rows.map((r) => {
           const price = fmtPrice(r.price)
           return (
             <li key={r.slug}>
               <Link
                 href={r.href}
-                className="px-4 sm:px-5 py-3 flex items-baseline justify-between gap-3 hover:bg-pepper/5 transition-colors group"
+                className="px-3 py-1.5 flex items-baseline justify-between gap-3 rounded-md hover:bg-white/10 transition-colors"
               >
-                <span className="font-semibold text-soil text-[14px] uppercase tracking-wide group-hover:text-pepper transition-colors">
-                  {r.label}
-                </span>
-                <span className="font-data text-[14px] font-bold tabular-nums text-right shrink-0">
+                <span className="text-grain text-[13px]">{r.label}</span>
+                <span className="text-grain text-[13px] tabular-nums text-right shrink-0">
                   {price ? (
                     <>
-                      <span className="text-pepper">{price}</span>
-                      <span className="text-stone/40 font-medium text-[11px]"> / {r.unit}</span>
+                      {price} <span className="text-grain/70">per {r.unit}</span>
                     </>
                   ) : (
-                    <span className="text-pepper text-[13px] font-semibold underline-offset-2 group-hover:underline">
-                      See store
-                    </span>
+                    <span className="text-leaf font-semibold">See store</span>
                   )}
                 </span>
               </Link>
@@ -267,15 +262,6 @@ function WeeklyBoard() {
           )
         })}
       </ul>
-      <div className="px-4 sm:px-5 py-2.5 border-t border-soil/8 bg-grain-dim/50">
-        <Link
-          href="/store"
-          className="text-[12px] font-semibold text-pepper hover:text-pepper-deep inline-flex items-center gap-1"
-        >
-          Browse full store
-          <ArrowRight size={12} />
-        </Link>
-      </div>
     </div>
   )
 }
@@ -380,55 +366,47 @@ export default function LandingPage() {
       <Nav />
 
       <main>
-        {/* ── Hero (photo kept) ── */}
-        <section className="relative overflow-hidden min-h-[560px] sm:min-h-[680px] flex items-center">
+        {/* ── Hero ── */}
+        <section className="relative overflow-hidden min-h-[520px] sm:min-h-[640px] flex items-center">
           <img
             src="https://images.pexels.com/photos/36846177/pexels-photo-36846177.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
             alt=""
             aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover object-[70%_center]"
           />
           <div
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(135deg, rgba(15,41,64,0.92) 0%, rgba(15,41,64,0.78) 55%, rgba(15,41,64,0.55) 100%)',
+                'linear-gradient(90deg, rgba(2,42,67,0.88) 0%, rgba(2,42,67,0.62) 45%, rgba(2,42,67,0.35) 100%)',
             }}
           />
 
-          <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 py-14 sm:py-20 w-full">
-            <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-              <div>
-                <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.25em] mb-5">
-                  WEN Food Network
-                </p>
-                <h1
-                  className="hero-headline text-grain leading-[1.05] mb-4"
-                  style={{ fontSize: 'clamp(36px, 6vw, 56px)' }}
-                >
-                  Food. At a better price.
-                </h1>
-                <p className="text-grain/85 text-[16px] sm:text-[17px] leading-relaxed mb-6 max-w-lg">
-                  Want in? Tell us where you are and what you need.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Link
-                    href="/store"
-                    className="inline-flex items-center justify-center gap-2 bg-pepper hover:bg-pepper-deep text-white font-semibold text-[15px] px-7 py-3.5 rounded-full transition-colors"
-                  >
-                    Order from WEN
-                    <ArrowRight size={16} />
-                  </Link>
-                  <Link
-                    href="/farmers"
-                    className="inline-flex items-center justify-center gap-2 border border-grain/25 text-grain/85 hover:border-grain/50 hover:text-grain font-medium text-[15px] px-7 py-3.5 rounded-full transition-colors"
-                  >
-                    Become a supplier
-                  </Link>
-                </div>
-              </div>
-              <WeeklyBoard />
+          <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 py-12 sm:py-16 w-full">
+            <h1
+              className="text-grain leading-[1.08] mb-7 max-w-[11ch] sm:max-w-[14ch]"
+              style={{ fontSize: 'clamp(38px, 7vw, 68px)', fontWeight: 500, letterSpacing: '-0.02em' }}
+            >
+              We found a better way to{' '}
+              <span className="text-leaf font-extrabold block">buy food.</span>
+            </h1>
+
+            <div className="flex flex-row flex-nowrap gap-2.5 sm:gap-3 mb-8">
+              <Link
+                href="/store"
+                className="inline-flex items-center justify-center bg-leaf hover:bg-leaf-deep text-soil font-semibold text-[13px] sm:text-[15px] px-5 sm:px-6 py-2.5 rounded-full transition-colors whitespace-nowrap"
+              >
+                Start Buying
+              </Link>
+              <Link
+                href="/farmers"
+                className="inline-flex items-center justify-center border border-grain/70 text-grain hover:bg-white/10 font-semibold text-[13px] sm:text-[15px] px-5 sm:px-6 py-2.5 rounded-full transition-colors whitespace-nowrap"
+              >
+                Become a Supplier
+              </Link>
             </div>
+
+            <WeeklyBoard />
           </div>
         </section>
 

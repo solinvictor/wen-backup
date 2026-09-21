@@ -7,6 +7,8 @@ const RATIO = 1280 / 431
 type LogoProps = {
   /** Rendered height in px. Width is derived from the logo's aspect ratio. */
   height?: number
+  /** Optional larger height from the `sm` breakpoint (640px) up. */
+  smHeight?: number
   className?: string
   /** Link target. Pass null to render the bare image with no link. */
   href?: string | null
@@ -17,7 +19,7 @@ type LogoProps = {
  * WEN wordmark. The artwork is navy + green, so only use it on LIGHT
  * backgrounds. On dark sections (footer, admin sidebar) the navy letters vanish.
  */
-export function Logo({ height = 28, className = '', href = '/', onClick }: LogoProps) {
+export function Logo({ height = 28, smHeight, className = '', href = '/', onClick }: LogoProps) {
   const img = (
     <Image
       src="/brand/wen-logo.png"
@@ -25,7 +27,13 @@ export function Logo({ height = 28, className = '', href = '/', onClick }: LogoP
       width={Math.round(height * RATIO)}
       height={height}
       loading="eager"
-      style={{ height, width: 'auto' }}
+      className="logo-img"
+      style={{
+        width: 'auto',
+        maxWidth: 'none',
+        ['--logo-h' as string]: `${height}px`,
+        ['--logo-h-sm' as string]: `${smHeight ?? height}px`,
+      }}
     />
   )
 

@@ -19,7 +19,7 @@ const TABS = [
   { href: '/contact', label: 'Contact', icon: Phone },
 ]
 
-function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
+function NavSearchBar() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [query, setQuery] = useState(searchParams?.get('q') ?? '')
@@ -29,32 +29,17 @@ function NavSearchBar({ size }: { size: 'sm' | 'lg' }) {
     router.push(q ? `/store?q=${encodeURIComponent(q)}` : '/store')
   }
 
-  if (size === 'lg') {
-    return (
-      <div className="flex items-center flex-1 max-w-2xl bg-white border border-soil/15 rounded-full px-4 py-2.5 gap-2 hover:border-soil/30 focus-within:border-soil/40 focus-within:shadow-sm transition-all">
-        <Search size={16} className="text-stone/50 shrink-0" />
-        <input
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && go()}
-          placeholder="Search produce — tomatoes, yam, catfish…"
-          className="flex-1 text-[14px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
-        />
-      </div>
-    )
-  }
-
   return (
-    <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-3 gap-2.5 shadow-sm focus-within:border-soil/35 transition-all">
-      <Search size={17} className="text-stone/45 shrink-0" />
+    <div className="flex items-center w-full bg-transparent border border-soil/25 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 gap-2.5 hover:border-soil/40 focus-within:border-soil/60 focus-within:bg-white/60 transition-all">
+      <Search size={18} className="text-stone/50 shrink-0" />
       <input
         type="text"
         value={query}
         onChange={e => setQuery(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && go()}
-        placeholder="Search products and farmers"
-        className="flex-1 text-[15px] text-soil placeholder:text-stone/40 bg-transparent outline-none"
+        placeholder="Search produce - Chicken, Eggs, Tomatoes, Catfish..."
+        aria-label="Search produce"
+        className="flex-1 min-w-0 text-[14px] sm:text-[15px] text-soil placeholder:text-stone/50 placeholder:italic bg-transparent outline-none"
       />
     </div>
   )
@@ -120,7 +105,7 @@ function TabBar() {
   if (pathname === '/') return null
 
   return (
-    <div className="flex overflow-x-auto scrollbar-hide border-t border-soil/8">
+    <div className="flex overflow-x-auto scrollbar-hide border-t border-soil/8 bg-mint sm:px-4">
       {TABS.map(tab => {
         const active = tab.href === '/' ? pathname === '/' : pathname?.startsWith(tab.href)
         return (
@@ -168,86 +153,72 @@ export function Nav() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-grain-dim shadow-sm">
+      <header className="sticky top-0 z-50 bg-mint">
+        <div className="max-w-6xl mx-auto px-3 min-[360px]:px-4 sm:px-8">
 
-        {/* Row 1 */}
-        <div className="flex items-center px-4 sm:px-6 h-14 gap-3">
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="p-1.5 -ml-1 text-soil sm:hidden shrink-0"
-            aria-label="Open menu"
-          >
-            <Menu size={22} />
-          </button>
+          {/* Row 1: logo + auth actions */}
+          <div className="flex items-center h-16 sm:h-[72px] gap-1 min-[360px]:gap-2 sm:gap-3">
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="sm:hidden -ml-2 p-1.5 text-soil shrink-0"
+              aria-label="Open menu"
+            >
+              <Menu size={22} />
+            </button>
 
-          <Logo height={26} className="shrink-0 ml-1.5 sm:ml-0 sm:mr-6" />
+            {/* Compact on phones so the row fits at 360px, larger from sm up */}
+            <Logo height={24} smHeight={32} className="shrink-0 -ml-1 sm:ml-0" />
 
-          <div className="hidden sm:flex flex-1 mx-4">
-            <Suspense fallback={
-              <div className="flex items-center flex-1 max-w-2xl bg-white border border-soil/15 rounded-full px-4 py-2.5 gap-2">
-                <Search size={16} className="text-stone/50" />
-                <span className="text-[14px] text-stone/40">Search produce…</span>
-              </div>
-            }>
-              <NavSearchBar size="lg" />
-            </Suspense>
-          </div>
+            <div className="flex-1" />
 
-          <div className="flex-1 sm:hidden" />
+            {/* Location: desktop only (mobile has it in the drawer) */}
+            <div className="hidden md:block mr-2">
+              <LocationPill onClick={() => setPickerOpen(true)} />
+            </div>
 
-          {/* Auth-aware right side */}
-          <div className="flex items-center gap-2 shrink-0">
-            {authed ? (
-              <CartButton />
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-[13px] font-semibold text-soil/70 hover:text-soil transition-colors whitespace-nowrap hidden sm:block"
-                >
-                  Log in
-                </Link>
-                {!hasAccount && (
+            <div className="flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-2 shrink-0">
+              {authed ? (
+                <>
                   <Link
-                    href="/signup"
-                    className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap"
+                    href="/store"
+                    className="hidden sm:inline-flex text-[13px] font-semibold text-soil/75 hover:text-soil transition-colors px-2"
                   >
-                    Sign up
+                    Shop
                   </Link>
-                )}
-                {hasAccount && (
+                  <CartButton />
+                </>
+              ) : (
+                <>
                   <Link
                     href="/login"
-                    className="text-[13px] sm:text-[14px] font-semibold bg-pepper text-white px-4 py-2 rounded-full hover:bg-pepper-deep transition-colors whitespace-nowrap sm:hidden"
+                    className="text-[11px] sm:text-[13px] font-medium text-soil border border-soil/40 hover:border-soil hover:bg-white/60 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-colors whitespace-nowrap"
                   >
-                    Log in
+                    Welcome Back
                   </Link>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Row 2 (mobile): location pill */}
-        <div className="sm:hidden flex justify-center pb-2 px-4">
-          <LocationPill onClick={() => setPickerOpen(true)} />
-        </div>
-
-        {/* Row 2 (desktop): location pill */}
-        <div className="hidden sm:flex items-center px-6 pb-2 gap-3">
-          <LocationPill onClick={() => setPickerOpen(true)} />
-        </div>
-
-        {/* Row 3 (mobile): search bar */}
-        <div className="sm:hidden px-4 pb-3">
-          <Suspense fallback={
-            <div className="flex items-center w-full bg-white border border-soil/15 rounded-full px-4 py-3 gap-2.5 shadow-sm">
-              <Search size={17} className="text-stone/45" />
-              <span className="text-[15px] text-stone/40">Search products and farmers</span>
+                  {!hasAccount && (
+                    <Link
+                      href="/signup"
+                      className="text-[11px] sm:text-[13px] font-semibold bg-leaf text-soil hover:bg-leaf-deep px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full transition-colors whitespace-nowrap"
+                    >
+                      Get Started
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
-          }>
-            <NavSearchBar size="sm" />
-          </Suspense>
+          </div>
+
+          {/* Row 2: search */}
+          <div className="pb-4 sm:pb-5">
+            <Suspense fallback={
+              <div className="flex items-center w-full border border-soil/25 rounded-full px-5 py-3 gap-2.5">
+                <Search size={18} className="text-stone/50" />
+                <span className="text-[14px] italic text-stone/50">Search produce - Chicken, Eggs, Tomatoes, Catfish...</span>
+              </div>
+            }>
+              <NavSearchBar />
+            </Suspense>
+          </div>
         </div>
 
         <TabBar />

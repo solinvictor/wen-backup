@@ -10,6 +10,9 @@
   --color-okra: #0F2940;       /* navy reused as secondary accent (badges, icons) */
   --color-turmeric: #A8D48A;   /* light green tint - highlights, soft badges */
   --color-stone: #6B7785;      /* muted navy-gray text on white */
+  --color-mint: #F8FEF4;       /* pale mint page background (redesign) */
+  --color-leaf: #89C34A;       /* logo green - redesign CTAs, accents */
+  --color-leaf-deep: #74AC3B;  /* hover state for leaf */
 }
 
 @theme inline {
@@ -21,6 +24,9 @@
   --color-okra: var(--color-okra);
   --color-turmeric: var(--color-turmeric);
   --color-stone: var(--color-stone);
+  --color-mint: var(--color-mint);
+  --color-leaf: var(--color-leaf);
+  --color-leaf-deep: var(--color-leaf-deep);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
   --font-mono: var(--font-mono);
@@ -130,3 +136,8 @@ h1, h2, .font-display {
 .tint-fish     { background: #EAF4FF; color: #1D4ED8; }
 .tint-rice     { background: #F3F0E8; color: #78716C; }
 .tint-beans    { background: #EDF7E9; color: #2D5E1E; }
+
+
+/* WEN logo: height set per-instance via --logo-h / --logo-h-sm (see components/Logo.tsx) */
+.logo-img { height: var(--logo-h); }
+@media (min-width: 640px) { .logo-img { height: var(--logo-h-sm); } }
