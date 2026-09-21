@@ -7,7 +7,6 @@ import { Footer } from '@/components/Footer'
 import { ArrowRight, Plus } from 'lucide-react'
 import { CATEGORY_IMAGES } from '@/lib/category-images'
 import { ACTIVE_CATEGORY_META } from '@/lib/categories'
-import { CategoryChip } from '@/components/CategoryChip'
 import { Logo } from '@/components/Logo'
 
 // Only categories marked active in lib/categories.ts are orderable right now —
@@ -23,28 +22,28 @@ const CATEGORIES = ACTIVE_CATEGORY_META.map((c) => ({
 const HOW_IT_WORKS = [
   {
     step: '01',
-    title: 'We source',
+    title: 'We Source',
     body: 'We find the best available deals from our selected suppliers.',
     img: '/landing/steps/01-source.jpg',
     imgAlt: 'Fresh produce sourced in bulk',
   },
   {
     step: '02',
-    title: 'We list',
+    title: 'We List',
     body: "We show you what's available and the current price.",
     img: '/landing/steps/02-list.jpg',
     imgAlt: 'Produce listed and ready to buy',
   },
   {
     step: '03',
-    title: 'You order',
+    title: 'You Order',
     body: 'Pick what you need from the store.',
     img: '/landing/steps/03-order.jpg',
     imgAlt: 'Choosing what your kitchen needs',
   },
   {
     step: '04',
-    title: 'We deliver',
+    title: 'We Deliver',
     body: 'We coordinate fulfilment and get it to you.',
     img: '/landing/steps/04-deliver.jpg',
     imgAlt: 'Order packed and on the way',
@@ -296,64 +295,38 @@ function FeaturedProducts() {
   }, [])
 
   return (
-    <section className="bg-grain py-14 sm:py-20">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8">
-        <div className="flex items-end justify-between mb-8 gap-4">
-          <div>
-            <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">
-              Available from WEN
-            </p>
-            <h2 className="font-display text-soil text-2xl sm:text-3xl">
-              That&apos;s our list for now
-            </h2>
-            <p className="text-soil/60 text-[14px] mt-2 max-w-md">
-              We&apos;re starting small so we can get it right.
-            </p>
-          </div>
-          <Link
-            href="/store"
-            className="hidden sm:inline-flex items-center gap-1 text-[13px] font-semibold text-pepper hover:text-pepper-deep transition-colors shrink-0"
-          >
-            Order from WEN <ArrowRight size={14} />
-          </Link>
-        </div>
+    <section className="bg-mint py-12 sm:py-16">
+      <div className="max-w-5xl mx-auto px-5 sm:px-8">
+        <p className="text-navy text-[12px] sm:text-[13px] font-bold uppercase tracking-wide text-center mb-8 sm:mb-10">
+          What&apos;s available this week?
+        </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
-          {products.map((p) => (
-            <Link
-              key={p.id}
-              href={`/store?c=${p.category}`}
-              className="group block bg-white rounded-2xl overflow-hidden border border-soil/8 hover:border-pepper/30 hover:shadow-md transition-all duration-300"
-            >
-              <div className="aspect-square overflow-hidden bg-grain-dim">
-                <img
-                  src={p.image_url || CATEGORY_IMAGES[p.category] || CATEGORY_IMAGES.other}
-                  alt={p.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-3 sm:p-4">
-                <p className="font-body text-soil font-bold text-[14px] sm:text-[15px] leading-tight truncate">
-                  {p.name}
-                </p>
-                {p.unit && <p className="text-soil/55 text-[12px] mt-0.5">{p.unit}</p>}
-                {p.price != null && (
-                  <p className="font-data text-pepper font-bold text-[13px] mt-1">
-                    ₦{Number(p.price).toLocaleString('en-NG')}
-                  </p>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <div className="sm:hidden">
-          <Link
-            href="/store"
-            className="flex items-center justify-center gap-1.5 w-full border-2 border-soil/15 text-soil font-bold py-3.5 rounded-xl hover:bg-grain-dim transition-colors text-[14px]"
-          >
-            Order from WEN <ArrowRight size={15} />
-          </Link>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          {products.map((p) => {
+            const unit = p.unit ? (/^per\s/i.test(p.unit) ? p.unit : `per ${p.unit}`) : null
+            return (
+              <Link
+                key={p.id}
+                href={`/store?c=${p.category}`}
+                className="group block rounded-[1.75rem] overflow-hidden bg-white shadow-[0_4px_20px_rgba(2,42,67,0.08)] hover:shadow-[0_8px_28px_rgba(2,42,67,0.14)] transition-shadow"
+              >
+                <div className="aspect-[5/4] bg-white overflow-hidden">
+                  <img
+                    src={p.image_url || CATEGORY_IMAGES[p.category] || CATEGORY_IMAGES.other}
+                    alt={p.name}
+                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="bg-leaf px-5 py-4">
+                  <p className="font-display text-navy text-xl font-bold leading-tight truncate">{p.name}</p>
+                  {unit && (
+                    <p className="text-navy/70 text-[10px] font-bold uppercase tracking-wide mt-1">{unit}</p>
+                  )}
+                </div>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -410,114 +383,102 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Why WEN (copy only) ── */}
-        <section className="bg-grain py-14 sm:py-20">
-          <div className="max-w-3xl mx-auto px-5 sm:px-8">
-            <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-3">
-              Why WEN?
+        {/* ── Why WEN Foods ── */}
+        <section className="bg-mint py-14 sm:py-20">
+          <div className="max-w-4xl mx-auto px-5 sm:px-8">
+            <p className="inline-block bg-leaf text-navy text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 mb-5">
+              Why WEN Foods
             </p>
-            <h2 className="font-display text-soil text-2xl sm:text-3xl mb-5 leading-tight">
+            <h2
+              className="text-navy leading-[1.1] mb-6"
+              style={{ fontSize: 'clamp(28px, 5vw, 46px)', fontWeight: 800, letterSpacing: '-0.02em' }}
+            >
               You already buy these things.
-              <span className="block text-soil/65 mt-1">We just make buying them easier.</span>
+              <span className="block">We just make buying them easier.</span>
             </h2>
-            <div className="space-y-4 text-[15px] text-soil/75 leading-relaxed">
-              <p>
-                We work with selected suppliers, buy in volume and pass the advantage to
-                businesses that buy regularly.
-              </p>
-              <p className="text-soil font-medium">
+            <p className="text-navy/80 text-[15px] sm:text-[16px] leading-relaxed max-w-2xl">
+              We work with selected suppliers, buy in volume and pass the advantage to
+              businesses that buy regularly.
+              <br />
+              <strong className="font-bold text-navy">
                 No endless searching. No calling five suppliers. No complicated marketplace.
-              </p>
-              <p>Just what&apos;s available. At a good price.</p>
-            </div>
+              </strong>{' '}
+              Just what&apos;s available. At a good price.
+            </p>
           </div>
         </section>
 
-        {/* ── How it works (photos kept) ── */}
-        <section className="bg-grain-dim py-14 sm:py-20">
+        {/* ── How it works ── */}
+        <section className="bg-navy py-12 sm:py-16">
           <div className="max-w-6xl mx-auto px-5 sm:px-8">
-            <div className="text-center mb-10">
-              <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2">
-                How it works
-              </p>
-              <h2 className="font-display text-soil text-2xl sm:text-3xl">Simple.</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <p className="text-grain text-[12px] sm:text-[13px] font-bold uppercase tracking-wide text-center mb-9 sm:mb-12">
+              How it works
+            </p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-9 sm:gap-x-6">
               {HOW_IT_WORKS.map((item) => (
-                <div
-                  key={item.step}
-                  className="bg-white rounded-2xl overflow-hidden border border-soil/8"
-                >
-                  <div className="aspect-[3/2] overflow-hidden">
+                <div key={item.step}>
+                  <div className="relative aspect-square overflow-hidden rounded-lg">
                     <img
                       src={item.img}
                       alt={item.imgAlt}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-1.5 left-3 font-display text-4xl sm:text-5xl font-bold text-white/70 leading-none drop-shadow"
+                    >
+                      {Number(item.step)}
+                    </span>
                   </div>
-                  <div className="p-5 sm:p-6">
-                    <p className="font-data text-[11px] text-pepper/70 mb-3">{item.step}</p>
-                    <h3 className="font-body text-soil text-lg mb-2 font-semibold">
-                      {item.title}
-                    </h3>
-                    <p className="text-soil/75 text-[14px] leading-relaxed">{item.body}</p>
-                  </div>
+                  <h3 className="font-display text-grain text-[18px] sm:text-xl font-bold mt-4 mb-1.5">
+                    {item.title}
+                  </h3>
+                  <p className="text-grain/80 text-[13px] sm:text-[14px] leading-relaxed max-w-[15rem]">
+                    {item.body}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Product photos grid ── */}
+        {/* ── What's available this week ── */}
         <FeaturedProducts />
 
-        {/* ── Shop by category ── */}
-        <section className="bg-[#eef1f4] py-12 sm:py-16">
-          <div className="max-w-6xl mx-auto px-5 sm:px-8">
-            <p className="font-data text-[11px] text-pepper uppercase tracking-[0.2em] mb-2 text-center">
-              Shop by category
-            </p>
-            <h2 className="font-display text-soil text-2xl sm:text-3xl mb-7 text-center">
-              What we&apos;re carrying right now
-            </h2>
-            <div className="flex flex-wrap justify-center gap-3">
-              {ACTIVE_CATEGORY_META.map((cat) => (
-                <CategoryChip key={cat.slug} category={cat} href={`/store?c=${cat.slug}`} />
-              ))}
+        {/* ── For restaurants & food businesses ── */}
+        <section className="bg-navy">
+          <div className="grid lg:grid-cols-2">
+            <div className="flex items-center px-5 sm:px-10 lg:px-16 py-12 sm:py-16 lg:py-20">
+              <div className="max-w-md">
+                <h2
+                  className="text-grain leading-[1.1] mb-5"
+                  style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 500, letterSpacing: '-0.02em' }}
+                >
+                  For restaurants &amp; food businesses
+                </h2>
+                <div className="space-y-1.5 text-grain/90 text-[14px] sm:text-[15px] leading-relaxed mb-7">
+                  <p>Your kitchen has enough to worry about.</p>
+                  <p>Let WEN Foods handle it: chicken, eggs. More staples on the way.</p>
+                  <p>If you regularly buy them, you&apos;re exactly who we&apos;re building for.</p>
+                </div>
+                <Link
+                  href="/store"
+                  className="inline-flex items-center justify-center bg-leaf hover:bg-leaf-deep text-navy font-semibold text-[14px] px-6 py-2.5 rounded-full transition-colors"
+                >
+                  Get Started
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
-
-        {/* ── Restaurants ── */}
-        <section className="relative overflow-hidden py-14 sm:py-20">
-          <img
-            src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1400&h=700&fit=crop&q=80"
-            alt=""
-            aria-hidden
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-soil/88" />
-          <div className="relative z-10 max-w-3xl mx-auto px-5 sm:px-8 text-grain">
-            <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.2em] mb-3">
-              For restaurants &amp; food businesses
-            </p>
-            <h2 className="font-display text-2xl sm:text-3xl mb-4 leading-tight">
-              Your kitchen has enough to worry about.
-            </h2>
-            <p className="text-grain/75 text-[15px] leading-relaxed mb-4">
-              Let WEN handle it: chicken, eggs. More staples on the way.
-            </p>
-            <p className="text-grain/65 text-[15px] leading-relaxed mb-8">
-              If you regularly buy them, you&apos;re exactly who we&apos;re building for.
-            </p>
-            <Link
-              href="/buyers"
-              className="inline-flex items-center gap-2 bg-pepper hover:bg-pepper-deep text-white font-semibold text-[15px] px-8 py-3.5 rounded-full transition-colors"
-            >
-              Join WEN
-              <ArrowRight size={16} />
-            </Link>
+            <div className="relative min-h-[260px] sm:min-h-[340px] lg:min-h-full">
+              <img
+                src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=1400&h=900&fit=crop&q=80"
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
           </div>
         </section>
 

@@ -13,6 +13,7 @@
   --color-mint: #F8FEF4;       /* pale mint page background (redesign) */
   --color-leaf: #89C34A;       /* logo green - redesign CTAs, accents */
   --color-leaf-deep: #74AC3B;  /* hover state for leaf */
+  --color-navy: #022A43;       /* deep navy used by the redesigned sections */
 }
 
 @theme inline {
@@ -27,6 +28,7 @@
   --color-mint: var(--color-mint);
   --color-leaf: var(--color-leaf);
   --color-leaf-deep: var(--color-leaf-deep);
+  --color-navy: var(--color-navy);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
   --font-mono: var(--font-mono);
