@@ -62,7 +62,24 @@ export function HeroVideos({ sources }: Props) {
       }
     }
     load(first, sources[0])
-    first.play().catch(() => {})
+
+    // Autoplay can be silently blocked (varies by browser/OS/power-saving mode) even
+    // when muted + inline. If that happens, retry on the first sign of life from the
+    // visitor instead of leaving the hero photo showing forever.
+    let retried = false
+    function tryPlay(el: HTMLVideoElement) {
+      el.play().catch(() => {
+        if (retried) return
+        retried = true
+        const retry = () => {
+          el.play().catch(() => {})
+          events.forEach((ev) => window.removeEventListener(ev, retry))
+        }
+        const events: (keyof WindowEventMap)[] = ['scroll', 'touchstart', 'pointerdown', 'keydown']
+        events.forEach((ev) => window.addEventListener(ev, retry, { once: true, passive: true }))
+      })
+    }
+    tryPlay(first)
 
     const box = boxRef.current
     let io: IntersectionObserver | undefined
@@ -71,7 +88,7 @@ export function HeroVideos({ sources }: Props) {
         ([entry]) => {
           const el = slots[activeRef.current]
           if (!el) return
-          if (entry.isIntersecting) el.play().catch(() => {})
+          if (entry.isIntersecting) tryPlay(el)
           else el.pause()
         },
         { threshold: 0.05 }
@@ -102,6 +119,8 @@ export function HeroVideos({ sources }: Props) {
     load(nextEl, sources[nextIndex]) // no-op when it was already preloaded
     nextEl.currentTime = 0
     nextEl.play().catch(() => {})
+    // (a blocked play() here is rare — it only happens on the very first clip;
+    // once one clip has played, the browser treats the page as already "engaged")
     activeRef.current = next
     indexRef.current = nextIndex
     setActive(next)

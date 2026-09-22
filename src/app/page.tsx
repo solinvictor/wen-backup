@@ -13,6 +13,11 @@ import { HERO_VIDEOS } from '@/lib/hero-videos'
 
 // Only categories marked active in lib/categories.ts are orderable right now —
 // bring one back there and it reappears here automatically.
+const FALLBACK_PRICE: Record<string, number> = {
+  chicken: 2400,
+  eggs: 5700,
+}
+
 const CATEGORIES = ACTIVE_CATEGORY_META.map((c) => ({
   label: c.label,
   slug: c.slug,
@@ -167,11 +172,10 @@ function WeeklyBoard() {
       slug: c.slug,
       label: c.label,
       unit: c.unit,
-      price: null,
+      price: FALLBACK_PRICE[c.slug] ?? null,
       href: `/store?c=${c.slug}`,
     }))
   )
-  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -208,11 +212,12 @@ function WeeklyBoard() {
               .sort((a, b) => Number(a.price) - Number(b.price))
             const pick = withPrice[0] || inCat[0]
             const unitRaw = pick?.unit?.replace(/^per\s+/i, '') || c.unit
+            const livePrice = pick?.price != null ? Number(pick.price) : null
             return {
               slug: c.slug,
               label: c.label,
               unit: unitRaw,
-              price: pick?.price != null ? Number(pick.price) : null,
+              price: livePrice ?? FALLBACK_PRICE[c.slug] ?? null,
               href: `/store?c=${c.slug}`,
             }
           })
@@ -220,7 +225,7 @@ function WeeklyBoard() {
       } catch {
         /* keep category fallbacks */
       } finally {
-        if (!cancelled) setLoaded(true)
+        /* fallback prices already cover the unloaded state; nothing to flag here */
       }
     }
     load()
@@ -230,13 +235,10 @@ function WeeklyBoard() {
   }, [])
 
   return (
-    <div className="bg-soil/55 backdrop-blur-md rounded-2xl border border-white/15 p-3 sm:p-4 shadow-xl w-full max-w-[22rem]">
+    <div className="bg-soil/55 backdrop-blur-md rounded-2xl p-3 sm:p-4 shadow-xl w-full max-w-[22rem]">
       <div className="bg-leaf rounded-lg px-3 py-1.5 flex items-center justify-between gap-2">
         <p className="text-[11px] font-bold text-soil uppercase tracking-wide">
           This week, WEN has
-        </p>
-        <p className="text-[9px] text-soil/60 font-data shrink-0">
-          {loaded ? 'Live' : '…'}
         </p>
       </div>
       <ul className="mt-2.5 space-y-0.5">
@@ -297,7 +299,7 @@ function FeaturedProducts() {
   }, [])
 
   return (
-    <section className="bg-mint py-12 sm:py-16">
+    <section className="bg-mint py-16 sm:py-24">
       <div className="max-w-5xl mx-auto px-5 sm:px-8">
         <p className="text-navy text-[12px] sm:text-[13px] font-bold uppercase tracking-wide text-center mb-8 sm:mb-10">
           What&apos;s available this week?
@@ -321,9 +323,9 @@ function FeaturedProducts() {
                   />
                 </div>
                 <div className="bg-leaf px-5 py-4">
-                  <p className="font-display text-navy text-xl font-bold leading-tight truncate">{p.name}</p>
+                  <p className="font-display text-navy text-xl font-bold leading-none truncate">{p.name}</p>
                   {unit && (
-                    <p className="text-navy/70 text-[10px] font-bold uppercase tracking-wide mt-1">{unit}</p>
+                    <p className="text-navy/70 text-[10px] font-bold uppercase tracking-wide mt-1.5 leading-none">{unit}</p>
                   )}
                 </div>
               </Link>
@@ -387,7 +389,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Why WEN Foods ── */}
-        <section className="bg-mint py-14 sm:py-20">
+        <section className="bg-mint py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-5 sm:px-8">
             <p className="inline-block bg-leaf text-navy text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 mb-5">
               Why WEN Foods
@@ -412,7 +414,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── How it works ── */}
-        <section className="bg-navy py-12 sm:py-16">
+        <section className="bg-navy py-16 sm:py-24">
           <div className="max-w-6xl mx-auto px-5 sm:px-8">
             <p className="text-grain text-[12px] sm:text-[13px] font-bold uppercase tracking-wide text-center mb-9 sm:mb-12">
               How it works

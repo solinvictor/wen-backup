@@ -30,8 +30,8 @@ function NavSearchBar() {
   }
 
   return (
-    <div className="flex items-center w-full bg-transparent border border-soil/25 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 gap-2.5 hover:border-soil/40 focus-within:border-soil/60 focus-within:bg-white/60 transition-all">
-      <Search size={18} className="text-stone/50 shrink-0" />
+    <div className="flex items-center w-full bg-transparent border border-soil/25 rounded-full px-4 py-2 sm:py-2.5 gap-2 hover:border-soil/40 focus-within:border-soil/60 focus-within:bg-white/60 transition-all">
+      <Search size={16} className="text-stone/50 shrink-0" />
       <input
         type="text"
         value={query}
@@ -39,7 +39,7 @@ function NavSearchBar() {
         onKeyDown={e => e.key === 'Enter' && go()}
         placeholder="Search produce - Chicken, Eggs, Tomatoes, Catfish..."
         aria-label="Search produce"
-        className="flex-1 min-w-0 text-[14px] sm:text-[15px] text-soil placeholder:text-stone/50 placeholder:italic bg-transparent outline-none"
+        className="flex-1 min-w-0 text-[13px] sm:text-[14px] text-soil placeholder:text-stone/50 placeholder:italic bg-transparent outline-none"
       />
     </div>
   )
@@ -153,6 +153,10 @@ export function Nav() {
 
   return (
     <>
+      {/* Scrolls away with the page before the header below takes over — gives the very
+          top of the page a little breathing room instead of the nav sitting flush at y=0. */}
+      <div className="h-3 sm:h-5 bg-mint" aria-hidden="true" />
+
       <header className="sticky top-0 z-50 bg-mint">
         <div className="max-w-6xl mx-auto px-3 min-[360px]:px-4 sm:px-8">
 
@@ -211,9 +215,9 @@ export function Nav() {
           {/* Row 2: search */}
           <div className="pb-4 sm:pb-5">
             <Suspense fallback={
-              <div className="flex items-center w-full border border-soil/25 rounded-full px-5 py-3 gap-2.5">
-                <Search size={18} className="text-stone/50" />
-                <span className="text-[14px] italic text-stone/50">Search produce - Chicken, Eggs, Tomatoes, Catfish...</span>
+              <div className="flex items-center w-full border border-soil/25 rounded-full px-4 py-2 gap-2">
+                <Search size={16} className="text-stone/50" />
+                <span className="text-[13px] italic text-stone/50">Search produce - Chicken, Eggs, Tomatoes, Catfish...</span>
               </div>
             }>
               <NavSearchBar />

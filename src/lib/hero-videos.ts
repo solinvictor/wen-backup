@@ -10,4 +10,4 @@
  * - Files in /public/hero/ are referenced as '/hero/clip-1.mp4'.
  * - Full URLs (for example a public Supabase Storage bucket) work too.
  */
-export const HERO_VIDEOS: string[] = ['/hero/clip-1.mp4', '/hero/clip-2.mp4']
+export const HERO_VIDEOS: string[] = ['/hero/clip-2.mp4', '/hero/clip-1.mp4']
