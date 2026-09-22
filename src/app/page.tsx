@@ -452,30 +452,32 @@ export default function LandingPage() {
         <FeaturedProducts />
 
         {/* ── For restaurants & food businesses ── */}
+        {/* Navy text on the left, photo on the right, side by side at every width —
+            not just desktop, per the mockup (WEN Foods.pdf). */}
         <section className="bg-navy">
-          <div className="grid lg:grid-cols-2">
-            <div className="flex items-center px-5 sm:px-10 lg:px-16 py-12 sm:py-16 lg:py-20">
+          <div className="grid grid-cols-2">
+            <div className="flex items-center px-4 py-8 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
               <div className="max-w-md">
                 <h2
-                  className="text-grain leading-[1.1] mb-5"
-                  style={{ fontSize: 'clamp(30px, 4.5vw, 44px)', fontWeight: 500, letterSpacing: '-0.02em' }}
+                  className="text-grain leading-[1.1] mb-2 sm:mb-5"
+                  style={{ fontSize: 'clamp(18px, 4.2vw, 44px)', fontWeight: 500, letterSpacing: '-0.02em' }}
                 >
                   For restaurants &amp; food businesses
                 </h2>
-                <div className="space-y-1.5 text-grain/90 text-[14px] sm:text-[15px] leading-relaxed mb-7">
+                <div className="hidden sm:block space-y-1.5 text-grain/90 text-[14px] sm:text-[15px] leading-relaxed mb-7">
                   <p>Your kitchen has enough to worry about.</p>
                   <p>Let WEN Foods handle it: chicken, eggs. More staples on the way.</p>
                   <p>If you regularly buy them, you&apos;re exactly who we&apos;re building for.</p>
                 </div>
                 <Link
                   href="/store"
-                  className="inline-flex items-center justify-center bg-leaf hover:bg-leaf-deep text-navy font-semibold text-[14px] px-6 py-2.5 rounded-full transition-colors"
+                  className="inline-flex items-center justify-center bg-leaf hover:bg-leaf-deep text-navy font-semibold text-[11px] sm:text-[14px] px-3 py-1.5 sm:px-6 sm:py-2.5 rounded-full transition-colors whitespace-nowrap"
                 >
                   Get Started
                 </Link>
               </div>
             </div>
-            <div className="relative min-h-[260px] sm:min-h-[340px] lg:min-h-full">
+            <div className="relative min-h-[200px] sm:min-h-[340px] lg:min-h-full">
               <img
                 src="/landing/restaurants-kitchen.jpg"
                 alt=""
