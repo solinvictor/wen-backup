@@ -352,11 +352,16 @@ export default function LandingPage() {
             className="absolute inset-0 w-full h-full object-cover object-[70%_center]"
           />
           <HeroVideos sources={HERO_VIDEOS} />
+          {/* Stays solidly dark past the text column (the text box's own max-width caps
+              the text; the container itself can still stretch wide on big screens) so
+              the woman in the photo/video, whose focal point sits further right
+              (object-[70%_center]), doesn't visually compete with the headline on wide
+              desktops. Only lightens close to the right edge. */}
           <div
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(90deg, rgba(2,42,67,0.88) 0%, rgba(2,42,67,0.62) 45%, rgba(2,42,67,0.35) 100%)',
+                'linear-gradient(90deg, rgba(2,42,67,0.90) 0%, rgba(2,42,67,0.86) 55%, rgba(2,42,67,0.5) 78%, rgba(2,42,67,0.3) 100%)',
             }}
           />
 
@@ -490,28 +495,27 @@ export default function LandingPage() {
         </section>
 
         {/* ── Suppliers ── */}
-        <section className="market-board py-14 sm:py-20">
-          <div className="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-8">
-            <div>
-              <p className="font-data text-[11px] text-turmeric uppercase tracking-[0.2em] mb-3">
-                For suppliers
-              </p>
-              <h2 className="font-display text-grain text-2xl sm:text-3xl mb-3">
-                We bring the demand. You bring the supply.
-              </h2>
-              <p className="text-grain/80 text-[15px] leading-relaxed max-w-md mb-2">
-                WEN works with selected suppliers who can consistently provide the products we
-                list.
-              </p>
-              <p className="text-grain/70 text-[14px] leading-relaxed max-w-md">
-                We&apos;re not looking for everything — just reliable supply for what we sell.
-              </p>
-            </div>
+        {/* Mint background, navy text, left-aligned, stacked — matching the mockup's
+            "For suppliers" block, not a dark market-board panel. */}
+        <section className="bg-mint py-14 sm:py-20">
+          <div className="max-w-4xl mx-auto px-5 sm:px-8">
+            <h2
+              className="text-navy leading-[1.1] mb-4"
+              style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-0.02em' }}
+            >
+              For suppliers
+            </h2>
+            <p className="text-navy/80 text-[15px] sm:text-[16px] leading-relaxed max-w-2xl mb-6">
+              <strong className="font-bold text-navy">We bring the demand. You bring the supply.</strong>{' '}
+              WEN works with selected suppliers who can consistently provide the products we list.
+              <br />
+              We&apos;re not looking for everything — just reliable supply for what we sell.
+            </p>
             <Link
               href="/farmers"
-              className="shrink-0 inline-flex items-center gap-2 bg-pepper hover:bg-pepper-deep text-white font-semibold text-[15px] px-8 py-3.5 rounded-full transition-colors whitespace-nowrap"
+              className="inline-flex items-center justify-center bg-leaf hover:bg-leaf-deep text-navy font-semibold text-[14px] px-6 py-2.5 rounded-full transition-colors"
             >
-              Become a WEN supplier
+              Become a WEN Supplier
             </Link>
           </div>
         </section>

@@ -46,7 +46,11 @@ html[data-font='museo'] {
   --font-body: 'museo-sans', var(--font-poppins), 'Poppins', sans-serif;
 }
 
-html,
+/* overflow-x only on body, not html: setting it on html makes html itself a
+   scroll container (its overflow-y silently computes to auto), which breaks
+   `position: sticky` on the header — it ends up sticking relative to html
+   instead of the viewport, and stops working. body alone is enough to stop
+   horizontal scroll. */
 body {
   overflow-x: hidden;
   max-width: 100vw;
