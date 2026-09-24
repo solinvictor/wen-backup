@@ -344,13 +344,7 @@ export default function LandingPage() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden min-h-[520px] sm:min-h-[640px] flex items-center">
-          <img
-            src="https://images.pexels.com/photos/36846177/pexels-photo-36846177.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop"
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover object-[70%_center]"
-          />
+        <section className="relative overflow-hidden min-h-[520px] sm:min-h-[640px] flex items-center bg-navy">
           <HeroVideos sources={HERO_VIDEOS} />
           {/* Stays solidly dark past the text column (the text box's own max-width caps
               the text; the container itself can still stretch wide on big screens) so
