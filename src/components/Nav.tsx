@@ -171,7 +171,7 @@ export function Nav() {
             </button>
 
             {/* Compact on phones so the row fits at 360px, larger from sm up */}
-            <Logo height={24} smHeight={32} className="shrink-0 -ml-1 sm:ml-0" />
+            <Logo height={20} smHeight={26} className="shrink-0 -ml-1 sm:ml-0" />
 
             <div className="flex-1" />
 

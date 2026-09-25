@@ -344,45 +344,39 @@ export default function LandingPage() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden min-h-[520px] sm:min-h-[640px] flex items-center bg-navy">
-          <HeroVideos sources={HERO_VIDEOS} />
-          {/* Stays solidly dark past the text column (the text box's own max-width caps
-              the text; the container itself can still stretch wide on big screens) so
-              the woman in the photo/video, whose focal point sits further right
-              (object-[70%_center]), doesn't visually compete with the headline on wide
-              desktops. Only lightens close to the right edge. */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(90deg, rgba(2,42,67,0.90) 0%, rgba(2,42,67,0.86) 55%, rgba(2,42,67,0.5) 78%, rgba(2,42,67,0.3) 100%)',
-            }}
-          />
-
-          <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 py-12 sm:py-16 w-full">
+        {/* Headline + buttons sit on plain mint, not on the video — the video is its
+            own block right below, full-bleed, with no dark overlay on it now that
+            there's no white text sitting on top of it to protect contrast for. */}
+        <section className="bg-mint pt-10 sm:pt-16 pb-8 sm:pb-10">
+          <div className="max-w-6xl mx-auto px-5 sm:px-8 text-center">
             <h1
-              className="text-grain leading-[1.08] mb-7 max-w-[11ch] sm:max-w-[14ch]"
-              style={{ fontSize: 'clamp(38px, 7vw, 68px)', fontWeight: 500, letterSpacing: '-0.02em' }}
+              className="text-navy leading-[1.2] mb-6 mx-auto max-w-[13ch]"
+              style={{ fontSize: 'clamp(24px, 5vw, 44px)', fontWeight: 500, letterSpacing: '-0.02em' }}
             >
-              We found a better way to{' '}
-              <span className="text-leaf font-extrabold block">buy food.</span>
+              We found a better way to <span className="font-extrabold">buy food.</span>
             </h1>
 
-            <div className="flex flex-row flex-nowrap gap-2.5 sm:gap-3 mb-8">
+            <div className="flex flex-row flex-nowrap items-center justify-center gap-2.5 sm:gap-3">
               <Link
                 href="/store"
-                className="inline-flex items-center justify-center bg-leaf hover:bg-leaf-deep text-soil font-semibold text-[13px] sm:text-[15px] px-5 sm:px-6 py-2.5 rounded-full transition-colors whitespace-nowrap"
+                className="inline-flex items-center justify-center bg-leaf hover:bg-leaf-deep text-navy font-semibold text-[13px] sm:text-[15px] px-5 sm:px-6 py-2.5 rounded-full transition-colors whitespace-nowrap"
               >
                 Start Buying
               </Link>
               <Link
                 href="/farmers"
-                className="inline-flex items-center justify-center border border-grain/70 text-grain hover:bg-white/10 font-semibold text-[13px] sm:text-[15px] px-5 sm:px-6 py-2.5 rounded-full transition-colors whitespace-nowrap"
+                className="inline-flex items-center justify-center border border-navy/25 text-navy hover:bg-navy/5 font-semibold text-[13px] sm:text-[15px] px-5 sm:px-6 py-2.5 rounded-full transition-colors whitespace-nowrap"
               >
                 Become a Supplier
               </Link>
             </div>
+          </div>
+        </section>
 
+        {/* ── Hero video ── */}
+        <section className="relative overflow-hidden min-h-[320px] sm:min-h-[460px] flex items-end bg-navy">
+          <HeroVideos sources={HERO_VIDEOS} />
+          <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 pb-6 sm:pb-8 w-full">
             <WeeklyBoard />
           </div>
         </section>
