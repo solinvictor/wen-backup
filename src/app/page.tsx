@@ -61,7 +61,7 @@ const HOW_IT_WORKS = [
 const FAQS = [
   {
     q: 'What areas do you deliver to?',
-    a: 'Right now, Abuja. Add your address at checkout and we’ll confirm before anything ships.',
+    a: 'We deliver across Nigeria. Add your address at checkout and we’ll confirm before anything ships.',
   },
   {
     q: 'How much is delivery, and how long does it take?',
@@ -69,7 +69,7 @@ const FAQS = [
   },
   {
     q: 'What can I actually order from WEN?',
-    a: 'Chicken and eggs, for now. We’re starting narrow on purpose — more staples (fish, rice, beans) are coming as we scale.',
+    a: 'Chicken and eggs. We’re starting narrow on purpose — more staples (fish, rice, beans) are coming as we scale.',
   },
   {
     q: 'How do I pay?',
@@ -565,7 +565,7 @@ export default function LandingPage() {
             <p className="text-soil font-semibold text-[15px] mb-2">
               Chicken. Eggs.
             </p>
-            <p className="text-stone/50 text-[14px] mb-8">That&apos;s WEN. For now.</p>
+            <p className="text-stone/50 text-[14px] mb-8">That&apos;s WEN.</p>
             <Link
               href="/store"
               className="inline-flex items-center gap-2 bg-pepper hover:bg-pepper-deep text-white font-semibold text-[15px] px-8 py-3.5 rounded-full transition-colors"

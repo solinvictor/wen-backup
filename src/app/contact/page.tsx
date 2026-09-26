@@ -35,7 +35,7 @@ const QUICK_LINKS = [
   {
     icon: Building2,
     title: 'Visit us',
-    desc: 'Abuja, Nigeria',
+    desc: 'Nigeria',
     action: 'Get directions',
     href: '#',
   },
@@ -189,7 +189,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-[12px] font-semibold text-soil uppercase tracking-wide mb-0.5">Location</p>
-                    <p className="text-stone/70 text-[14px]">Abuja, Nigeria</p>
+                    <p className="text-stone/70 text-[14px]">Nigeria</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3.5">

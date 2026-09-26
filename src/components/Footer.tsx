@@ -65,7 +65,7 @@ export function Footer() {
           ))}
         </div>
         <div className="border-t border-grain/10 pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[12px] font-data text-grain/40">
-          <span>© {new Date().getFullYear()} WEN. Abuja, Nigeria.</span>
+          <span>© {new Date().getFullYear()} WEN. Nigeria.</span>
           <span>Mon – Sat · 9:00 AM – 6:00 PM</span>
         </div>
       </div>
