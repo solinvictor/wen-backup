@@ -60,6 +60,15 @@ body {
   font-family: var(--font-body);
 }
 
+/* Browsers apply their own default font to form controls — they don't pick
+   up the body's font-family just by being nested inside it. Without this,
+   buttons, inputs, selects and textareas across the app (search bar, every
+   form field, filters, etc.) silently fall back to the system font, even
+   with Museo Sans set on body. */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 h1, h2, .font-display {
   font-family: var(--font-display);
   letter-spacing: -0.01em;
