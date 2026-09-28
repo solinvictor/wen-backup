@@ -249,11 +249,14 @@ export default function CheckoutPage() {
 
                   {/* Full name */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+                    <label htmlFor="checkout-name" className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
                       <User size={13} />
                       Full name
                     </label>
                     <input
+                      id="checkout-name"
+                      name="name"
+                      autoComplete="name"
                       value={form.fullName}
                       onChange={e => setForm({ ...form, fullName: e.target.value })}
                       placeholder="Your full name"
@@ -264,11 +267,15 @@ export default function CheckoutPage() {
 
                   {/* Phone */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+                    <label htmlFor="checkout-phone" className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
                       <Phone size={13} />
                       Phone number
                     </label>
                     <input
+                      id="checkout-phone"
+                      name="tel"
+                      autoComplete="tel"
+                      inputMode="tel"
                       value={form.phone}
                       onChange={e => setForm({ ...form, phone: e.target.value })}
                       placeholder="08012345678"
@@ -280,11 +287,13 @@ export default function CheckoutPage() {
 
                   {/* Email */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+                    <label htmlFor="checkout-email" className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
                       <Mail size={13} />
                       Email
                     </label>
                     <input
+                      id="checkout-email"
+                      name="email"
                       value={form.email}
                       onChange={e => setForm({ ...form, email: e.target.value })}
                       placeholder="you@example.com"

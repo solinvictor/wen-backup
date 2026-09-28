@@ -116,21 +116,21 @@ export default function FarmersPage() {
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-[13px] font-medium text-soil mb-1.5">Full Name</label>
-                      <input required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                      <label htmlFor="farmer-name" className="block text-[13px] font-medium text-soil mb-1.5">Full Name</label>
+                      <input id="farmer-name" name="name" autoComplete="name" required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                         className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none focus:border-pepper transition-colors bg-white ${fieldErrors.fullName ? "border-red-400" : "border-soil/15"}`} />
                       {fieldErrors.fullName && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.fullName}</p>}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[13px] font-medium text-soil mb-1.5">Phone Number</label>
-                        <input required type="tel" value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+                        <label htmlFor="farmer-phone" className="block text-[13px] font-medium text-soil mb-1.5">Phone Number</label>
+                        <input id="farmer-phone" name="tel" autoComplete="tel" required type="tel" value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
                           className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none focus:border-pepper transition-colors bg-white ${fieldErrors.phoneNumber ? "border-red-400" : "border-soil/15"}`} />
                         {fieldErrors.phoneNumber && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.phoneNumber}</p>}
                       </div>
                       <div>
-                        <label className="block text-[13px] font-medium text-soil mb-1.5">Location</label>
-                        <input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
+                        <label htmlFor="farmer-location" className="block text-[13px] font-medium text-soil mb-1.5">Location</label>
+                        <input id="farmer-location" name="location" autoComplete="address-level2" required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
                           placeholder="e.g. Gwagwalada, Abuja"
                           className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none focus:border-pepper transition-colors bg-white ${fieldErrors.location ? "border-red-400" : "border-soil/15"}`} />
                         {fieldErrors.location && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.location}</p>}

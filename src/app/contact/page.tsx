@@ -255,8 +255,11 @@ export default function ContactPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[12px] font-semibold text-soil uppercase tracking-wide mb-1.5">Name</label>
+                      <label htmlFor="contact-name" className="block text-[12px] font-semibold text-soil uppercase tracking-wide mb-1.5">Name</label>
                       <input
+                        id="contact-name"
+                        name="name"
+                        autoComplete="name"
                         required
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -266,8 +269,11 @@ export default function ContactPage() {
                       {fieldErrors.name && <p className="text-[12px] text-red-500 mt-1">{fieldErrors.name}</p>}
                     </div>
                     <div>
-                      <label className="block text-[12px] font-semibold text-soil uppercase tracking-wide mb-1.5">Phone</label>
+                      <label htmlFor="contact-phone" className="block text-[12px] font-semibold text-soil uppercase tracking-wide mb-1.5">Phone</label>
                       <input
+                        id="contact-phone"
+                        name="tel"
+                        autoComplete="tel"
                         type="tel"
                         value={form.phone}
                         onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -278,10 +284,13 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[12px] font-semibold text-soil uppercase tracking-wide mb-1.5">
+                    <label htmlFor="contact-email" className="block text-[12px] font-semibold text-soil uppercase tracking-wide mb-1.5">
                       Email <span className="text-stone/40 normal-case tracking-normal font-normal">(optional)</span>
                     </label>
                     <input
+                      id="contact-email"
+                      name="email"
+                      autoComplete="email"
                       type="email"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
