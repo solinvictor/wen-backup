@@ -11,10 +11,10 @@ const CONTACT_PHONE = ''
 const CONTACT_EMAIL = ''
 
 const CONTACT_REASONS = [
-  { value: 'order', label: 'Order enquiry', icon: '📦' },
-  { value: 'partnership', label: 'Partnership', icon: '🤝' },
-  { value: 'farmer', label: 'Farmer onboarding', icon: '🌱' },
-  { value: 'other', label: 'Other', icon: '💬' },
+  { value: 'order', label: 'Order enquiry' },
+  { value: 'partnership', label: 'Partnership' },
+  { value: 'farmer', label: 'Farmer onboarding' },
+  { value: 'other', label: 'Other' },
 ]
 
 const QUICK_LINKS = [
@@ -241,13 +241,12 @@ export default function ContactPage() {
                           key={r.value}
                           type="button"
                           onClick={() => setForm({ ...form, reason: r.value })}
-                          className={`flex items-center gap-2.5 text-[13px] py-2.5 px-3.5 rounded-xl border transition-all ${
+                          className={`flex items-center justify-center text-[13px] py-2.5 px-3.5 rounded-xl border transition-all ${
                             form.reason === r.value
                               ? 'bg-pepper text-white border-pepper shadow-sm'
                               : 'border-soil/12 text-soil/70 hover:border-soil/25 bg-grain-dim'
                           }`}
                         >
-                          <span>{r.icon}</span>
                           {r.label}
                         </button>
                       ))}
