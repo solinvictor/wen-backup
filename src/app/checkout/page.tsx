@@ -9,6 +9,8 @@ import {
   Phone, MapPin, User, FileText, Zap, Clock, Navigation, Pencil, Mail,
 } from 'lucide-react'
 import { Logo } from '@/components/Logo'
+import { MarketDayBanner } from '@/components/MarketDayBanner'
+import { calculateMarketDayDiscount, getMarketDayInfo, type MarketDayInfo } from '@/lib/market-day'
 
 const LocationMapPicker = lazy(() => import('@/components/LocationMapPicker'))
 
@@ -70,15 +72,22 @@ export default function CheckoutPage() {
   const [errors, setErrors]         = useState<Partial<FormData>>({})
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [showMap, setShowMap]       = useState(false)
+  const [marketDay, setMarketDay]   = useState<MarketDayInfo | null>(null)
 
   useEffect(() => {
     if (cartCount === 0) router.replace('/store')
   }, [cartCount, router])
 
+  useEffect(() => {
+    setMarketDay(getMarketDayInfo())
+  }, [])
+
   const hasPrices   = cartLines.some(l => l.price)
+  const marketDayDiscount = marketDay && hasPrices ? calculateMarketDayDiscount(cartTotal ?? 0, marketDay) : 0
   const deliveryOpt = DELIVERY_OPTIONS.find(o => o.id === delivery)!
   const deliveryFee = deliveryOpt.fee
-  const grandTotal  = hasPrices ? (cartTotal ?? 0) + deliveryFee : null
+  const deliveryDuration = marketDay?.isMarketDay && delivery === 'standard' ? 'tomorrow' : deliveryOpt.duration
+  const grandTotal  = hasPrices ? (cartTotal ?? 0) - marketDayDiscount + deliveryFee : null
 
   function validate(): boolean {
     const e: Partial<FormData> = {}
@@ -111,7 +120,6 @@ export default function CheckoutPage() {
           buyerType:   form.buyerType,
           notes:       form.notes,
           deliveryType: delivery,
-          deliveryFee,
           items: cartLines.map(l => ({
             id: l.id, name: l.name, category: l.category, unit: l.unit,
             quantity: l.quantity,
@@ -185,6 +193,7 @@ export default function CheckoutPage() {
         </header>
 
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 pb-10">
+          <MarketDayBanner compact />
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
 
             {/* ── Left: form ── */}
@@ -225,7 +234,7 @@ export default function CheckoutPage() {
                           <span className={`text-[12px] font-medium px-2.5 py-0.5 rounded-full ${
                             active ? 'bg-pepper text-white' : 'bg-soil/8 text-soil/50'
                           }`}>
-                            {opt.duration}
+                            {marketDay?.isMarketDay && opt.id === 'standard' ? 'Tomorrow' : opt.duration}
                           </span>
                         </div>
                         {active && (
@@ -462,12 +471,18 @@ export default function CheckoutPage() {
                         ? <Zap size={12} className="text-amber-500" />
                         : <Clock size={12} className="text-soil/40" />
                       }
-                      Delivery ({deliveryOpt.duration})
+                      Delivery ({deliveryDuration})
                     </span>
                     <span className={deliveryOpt.id === 'express' ? 'text-amber-600 font-semibold' : ''}>
                       {fmt(deliveryFee)}
                     </span>
                   </div>
+                  {marketDayDiscount > 0 && (
+                    <div className="flex justify-between text-[13px] text-pepper-deep">
+                      <span>Market Day saving ({marketDay?.discountPercent ?? 0}%)</span>
+                      <span className="font-semibold">− {fmt(marketDayDiscount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-body text-soil text-[16px] font-bold pt-2 border-t border-soil/8">
                     <span>Total</span>
                     <span>{grandTotal ? fmt(grandTotal) : hasPrices ? fmt(deliveryFee) : '—'}</span>

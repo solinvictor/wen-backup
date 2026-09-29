@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { calculateMarketDayDiscount, getMarketDayInfo } from '@/lib/market-day'
 
 interface CartItem {
   id: string
@@ -14,13 +15,18 @@ function genRef() {
   return 'WEN-' + Math.random().toString(36).substring(2, 8).toUpperCase()
 }
 
+const DELIVERY_FEES = {
+  standard: 1500,
+  express: 3500,
+} as const
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
       fullName, phoneNumber, email, location, landmark,
       deliveryLat, deliveryLng,
-      buyerType, items, notes, deliveryType, deliveryFee,
+      buyerType, items, notes, deliveryType,
     } = body as {
       fullName?: string
       phoneNumber?: string
@@ -33,7 +39,6 @@ export async function POST(req: NextRequest) {
       items?: CartItem[]
       notes?: string
       deliveryType?: 'standard' | 'express'
-      deliveryFee?: number
     }
 
     if (!fullName?.trim() || !phoneNumber?.trim() || !location?.trim() || !buyerType?.trim()) {
@@ -47,6 +52,12 @@ export async function POST(req: NextRequest) {
     }
     if (items.some(i => !i.id)) {
       return NextResponse.json({ error: 'Something went wrong with your cart. Please refresh and try again.' }, { status: 400 })
+    }
+    if (deliveryType !== 'standard' && deliveryType !== 'express') {
+      return NextResponse.json({ error: 'Please choose a delivery option.' }, { status: 400 })
+    }
+    if (items.some(i => !Number.isInteger(i.quantity) || i.quantity < 1 || i.quantity > 100)) {
+      return NextResponse.json({ error: 'Please check the quantities in your cart and try again.' }, { status: 400 })
     }
 
     const supabase = createAdminClient()
@@ -89,7 +100,10 @@ export async function POST(req: NextRequest) {
       }
       itemsTotal += Number(product.price) * item.quantity
     }
-    const amountTotal = itemsTotal + (deliveryFee ?? 0)
+    const marketDay = getMarketDayInfo()
+    const marketDayDiscount = calculateMarketDayDiscount(itemsTotal, marketDay)
+    const deliveryFee = DELIVERY_FEES[deliveryType]
+    const amountTotal = itemsTotal - marketDayDiscount + deliveryFee
 
     let userId: string | null = null
     try {
@@ -135,8 +149,11 @@ export async function POST(req: NextRequest) {
       buyer_id: buyer.id,
       product_summary: productSummary,
       notes: notes?.trim() || null,
-      delivery_type: deliveryType ?? null,
-      delivery_fee: deliveryFee ?? null,
+      delivery_type: deliveryType,
+      delivery_fee: deliveryFee,
+      market_day: marketDay.marketDay,
+      discount_amount: marketDayDiscount,
+      expected_delivery_date: marketDay.deliveryDate,
       order_ref: orderRef,
       amount_total: amountTotal,
       status: 'pending_payment',
@@ -147,7 +164,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, orderRef, amountTotal, email: email.trim() })
+    return NextResponse.json({
+      success: true,
+      orderRef,
+      amountTotal,
+      discountAmount: marketDayDiscount,
+      expectedDeliveryDate: marketDay.deliveryDate,
+      email: email.trim(),
+    })
   } catch (err) {
     console.error('[orders] unexpected error:', err)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })

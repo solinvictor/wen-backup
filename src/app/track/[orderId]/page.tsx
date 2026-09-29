@@ -15,6 +15,9 @@ interface TrackedOrder {
   product_summary: string
   delivery_type: 'standard' | 'express' | null
   delivery_fee: number | null
+  market_day?: 'Tuesday' | 'Friday' | null
+  discount_amount?: number | null
+  expected_delivery_date?: string | null
   status: 'pending' | 'matched' | 'in_progress' | 'delivered' | 'cancelled'
   notes: string | null
   created_at: string
@@ -39,7 +42,14 @@ function fmtFee(n: number | null) {
   return '₦' + n.toLocaleString('en-NG')
 }
 
-function expectedBy(createdAt: string, deliveryType: TrackedOrder['delivery_type']) {
+function expectedBy(
+  createdAt: string,
+  deliveryType: TrackedOrder['delivery_type'],
+  expectedDeliveryDate?: string | null,
+) {
+  if (expectedDeliveryDate) {
+    return new Date(`${expectedDeliveryDate}T12:00:00`).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })
+  }
   const days = deliveryType === 'express' ? 1 : 3
   const d = new Date(createdAt)
   d.setDate(d.getDate() + days)
@@ -158,9 +168,14 @@ export default function TrackOrderPage() {
                   <div>
                     <p className="text-[11.5px] text-stone/45 mb-0.5">Expected by</p>
                     <p className="text-soil text-[13.5px]">
-                      {expectedBy(order.created_at, order.delivery_type)}
+                      {expectedBy(order.created_at, order.delivery_type, order.expected_delivery_date)}
                       {order.delivery_type && (
                         <span className="text-stone/45"> · {order.delivery_type === 'express' ? 'Express' : 'Standard'}</span>
+                      )}
+                      {order.market_day && (
+                        <span className="block text-pepper text-[11px] font-medium mt-1">
+                          Market Day order · {order.discount_amount ? `₦${Number(order.discount_amount).toLocaleString('en-NG')} saved` : 'next-day delivery'}
+                        </span>
                       )}
                     </p>
                   </div>

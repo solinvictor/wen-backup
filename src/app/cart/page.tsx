@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ChevronLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { CATEGORY_IMAGES } from '@/lib/category-images'
 import { categoryMeta } from '@/lib/categories'
+import { calculateMarketDayDiscount, getMarketDayInfo, type MarketDayInfo } from '@/lib/market-day'
 
 function fmt(n: number | null) {
   if (!n) return '—'
@@ -16,6 +18,12 @@ export default function CartPage() {
   const router = useRouter()
   const { cartLines, cartCount, cartTotal, addOne, removeOne, deleteLine } = useCart()
   const hasPrices = cartLines.some((l) => l.price)
+  const [marketDay, setMarketDay] = useState<MarketDayInfo | null>(null)
+  useEffect(() => {
+    setMarketDay(getMarketDayInfo())
+  }, [])
+  const marketDayDiscount = marketDay && hasPrices ? calculateMarketDayDiscount(cartTotal, marketDay) : 0
+  const estimatedTotal = hasPrices ? cartTotal - marketDayDiscount : null
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -108,10 +116,18 @@ export default function CartPage() {
           {/* Sticky checkout bar */}
           <div className="sticky bottom-0 border-t border-soil/8 bg-white px-4 sm:px-6 pt-4 pb-6 space-y-3">
             <div className="max-w-2xl mx-auto w-full space-y-3">
+              {marketDayDiscount > 0 && (
+                <div className="flex items-center justify-between gap-3 rounded-xl bg-pepper/8 px-3.5 py-2.5 text-[12px]">
+                  <span className="font-medium text-pepper-deep">
+                    Market Day · delivery tomorrow
+                  </span>
+                  <span className="font-bold text-pepper-deep">− {fmt(marketDayDiscount)}</span>
+                </div>
+              )}
               {hasPrices && (
                 <div className="flex items-center justify-between">
                   <span className="text-soil/60 text-[14px]">Estimated total</span>
-                  <span className="font-body text-soil text-[19px] font-bold">{fmt(cartTotal)}</span>
+                  <span className="font-body text-soil text-[19px] font-bold">{fmt(estimatedTotal)}</span>
                 </div>
               )}
               <button
@@ -119,7 +135,7 @@ export default function CartPage() {
                 className="w-full bg-pepper text-white text-[15px] font-semibold py-4 rounded-2xl hover:bg-pepper-deep active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 Checkout
-                {hasPrices && <span className="opacity-80">· {fmt(cartTotal)}</span>}
+                {hasPrices && <span className="opacity-80">· {fmt(estimatedTotal)}</span>}
               </button>
               <p className="text-center text-stone/40 text-[11px]">
                 Prices confirmed by farmer before delivery

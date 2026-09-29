@@ -10,6 +10,7 @@ import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { Logo } from '@/components/Logo'
 import { HeroVideos } from '@/components/HeroVideos'
 import { HERO_VIDEOS } from '@/lib/hero-videos'
+import { MarketDayBanner } from '@/components/MarketDayBanner'
 
 // Only categories marked active in lib/categories.ts are orderable right now —
 // bring one back there and it reappears here automatically.
@@ -341,6 +342,7 @@ export default function LandingPage() {
   return (
     <>
       <Nav />
+      <MarketDayBanner />
 
       <main>
         {/* ── Hero (mobile only): headline + buttons on plain mint, video as its

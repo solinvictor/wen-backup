@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { FALLBACK_PRODUCTS, type Product } from '@/lib/fallback-products'
 import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { BottomTabBar } from '@/components/BottomTabBar'
+import { MarketDayBanner } from '@/components/MarketDayBanner'
 
 const CATEGORY_LABELS: Record<string, string> = {
   eggs: 'Eggs', fish: 'Fish', chicken: 'Chicken', rice: 'Rice', beans: 'Beans',
@@ -227,6 +228,25 @@ function StoreInner() {
 
         {/* Product grid */}
         <main className="flex-1 min-w-0 px-3 sm:px-6 py-5 pb-36">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <p className="font-data text-[10px] font-bold uppercase tracking-[0.18em] text-pepper">
+                Fresh supply
+              </p>
+              <h1 className="mt-1 font-body text-[23px] font-bold tracking-tight text-soil sm:text-[26px]">
+                Shop what&apos;s available
+              </h1>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-stone/55">
+                Choose a category, add what you need, and we&apos;ll confirm the final price.
+              </p>
+            </div>
+            {!loading && (
+              <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-stone/55 ring-1 ring-soil/8">
+                {Object.values(grouped).flat().length} item{Object.values(grouped).flat().length === 1 ? '' : 's'}
+              </span>
+            )}
+          </div>
+
           {(query || categoryFilter) && (
             <div className="flex items-center justify-between mb-4">
               <p className="text-[14px] text-stone">
@@ -327,6 +347,7 @@ export default function StorePage() {
   return (
     <div className="min-h-screen bg-[#eef1f4] flex flex-col">
       <StoreNav onCartOpen={() => router.push('/cart')} />
+      <MarketDayBanner compact />
       <Suspense fallback={
         <div className="flex-1 flex items-center justify-center py-32">
           <Loader2 size={24} className="animate-spin text-stone/40" />
