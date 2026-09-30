@@ -13,7 +13,7 @@ export function MarketDayBanner({ compact = false }: { compact?: boolean }) {
     : `Market Day returns Tuesday and Friday · Fresh produce, selected and delivered by WEN`
 
   return (
-    <section aria-label="Market Day offer" className={`overflow-hidden bg-soil text-white ${compact ? 'mx-auto max-w-5xl rounded-xl' : ''}`}>
+    <section aria-label="Market Day offer" className="overflow-hidden bg-soil text-white">
       <div className="market-day-marquee flex min-w-max items-center py-3.5">
         {[0, 1].map((copy) => (
           <div key={copy} className="flex shrink-0 items-center gap-8 px-5" aria-hidden={copy === 1}>
