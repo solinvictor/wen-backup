@@ -185,7 +185,7 @@ function StoreInner() {
 
   return (
     <>
-      <div className="max-w-5xl mx-auto flex min-h-0 flex-1 w-full">
+      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 min-w-0">
 
         {/* Desktop sidebar */}
         <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-soil/8">
@@ -262,7 +262,7 @@ function StoreInner() {
               {Array.from({ length: 2 }).map((_, si) => (
                 <div key={si}>
                   <div className="h-4 w-28 rounded-md bg-soil/8 animate-pulse mb-4" />
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
                     {Array.from({ length: 4 }).map((_, i) => (
                       <div key={i} className="bg-white rounded-2xl border border-soil/8 overflow-hidden">
                         <div className="bg-grain-dim p-2"><div className="aspect-square rounded-xl bg-soil/8 animate-pulse" /></div>
@@ -294,7 +294,7 @@ function StoreInner() {
                       {categoryItems.length}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
+                  <div className="grid min-w-0 grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4">
                     {categoryItems.map(item => (
                       <ProductCard
                         key={item.id}
@@ -345,7 +345,7 @@ export default function StorePage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-[#f4f5f1] flex flex-col">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-[#f4f5f1] flex flex-col">
       <StoreNav onCartOpen={() => router.push('/cart')} />
       <MarketDayBanner compact />
       <Suspense fallback={

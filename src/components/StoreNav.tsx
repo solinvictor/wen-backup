@@ -80,7 +80,7 @@ function CategoryRow() {
 
   return (
     <div className="border-t border-soil/8 py-3">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-2 overflow-x-auto scrollbar-hide">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 flex gap-2 overflow-x-auto scrollbar-hide">
         {ACTIVE_CATEGORY_META.map((cat) => (
           <CategoryChip
             key={cat.slug}
@@ -221,7 +221,7 @@ export function StoreNav({ onCartOpen }: { onCartOpen?: () => void }) {
   return (
     <>
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-soil/6">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8">
 
           {/* Row 1: hamburger | WEN | auth + cart */}
           <div className="flex items-center h-14 gap-3">
