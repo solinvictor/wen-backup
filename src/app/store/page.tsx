@@ -227,13 +227,13 @@ function StoreInner() {
         </aside>
 
         {/* Product grid */}
-        <main className="flex-1 min-w-0 px-3 sm:px-6 py-5 pb-36">
-          <div className="mb-5 flex items-end justify-between gap-4">
+        <main className="flex-1 min-w-0 px-3 py-6 pb-36 sm:px-8 sm:py-8">
+          <div className="mb-7 flex items-end justify-between gap-4 border-b border-soil/8 pb-5">
             <div>
               <p className="font-data text-[10px] font-bold uppercase tracking-[0.18em] text-pepper">
                 Fresh supply
               </p>
-              <h1 className="mt-1 font-body text-[23px] font-bold tracking-tight text-soil sm:text-[26px]">
+              <h1 className="mt-1 font-display text-[25px] font-bold tracking-[-0.025em] text-soil sm:text-[30px]">
                 Shop what&apos;s available
               </h1>
               <p className="mt-1 text-[12.5px] leading-relaxed text-stone/55">
@@ -345,7 +345,7 @@ export default function StorePage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-[#eef1f4] flex flex-col">
+    <div className="min-h-screen bg-[#f4f5f1] flex flex-col">
       <StoreNav onCartOpen={() => router.push('/cart')} />
       <MarketDayBanner compact />
       <Suspense fallback={

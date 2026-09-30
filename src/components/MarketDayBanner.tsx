@@ -1,20 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { ArrowRight, CalendarDays, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowRight, CalendarDays } from 'lucide-react'
 import { getMarketDayInfo, type MarketDayInfo } from '@/lib/market-day'
 
 export function MarketDayBanner({ compact = false }: { compact?: boolean }) {
-  const [marketDay, setMarketDay] = useState<MarketDayInfo | null>(null)
+  const [marketDay] = useState<MarketDayInfo>(() => getMarketDayInfo())
 
-  useEffect(() => {
-    setMarketDay(getMarketDayInfo())
-  }, [])
-
-  if (!marketDay?.isMarketDay || !marketDay.deliveryWeekday) return null
-
-  const message = `Market Day · Order today, receive it tomorrow · ${marketDay.discountPercent}% off your basket · Fresh produce delivered on ${marketDay.deliveryWeekday}`
+  const message = marketDay.isMarketDay
+    ? `Market Day · Order today, receive it tomorrow · ${marketDay.discountPercent}% off your basket · Fresh produce delivered on ${marketDay.deliveryWeekday}`
+    : `Market Day returns Tuesday and Friday · Fresh produce, selected and delivered by WEN`
 
   return (
     <section aria-label="Market Day offer" className={`overflow-hidden bg-soil text-white ${compact ? 'mx-auto max-w-5xl rounded-xl' : ''}`}>

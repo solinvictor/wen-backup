@@ -39,11 +39,11 @@
    data-font="museo" on <html>: Museo Sans goes first, Nohemi/Poppins stay as fallback. */
 :root {
   --font-display: var(--font-nohemi), 'Nohemi', sans-serif;
-  --font-body: var(--font-poppins), 'Poppins', sans-serif;
+  --font-body: var(--font-nohemi), 'Nohemi', sans-serif;
 }
 html[data-font='museo'] {
   --font-display: 'museo-sans', var(--font-nohemi), 'Nohemi', sans-serif;
-  --font-body: 'museo-sans', var(--font-poppins), 'Poppins', sans-serif;
+  --font-body: 'museo-sans', var(--font-nohemi), 'Nohemi', sans-serif;
 }
 
 /* overflow-x only on body, not html: setting it on html makes html itself a

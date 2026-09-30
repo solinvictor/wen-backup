@@ -107,20 +107,17 @@ function AuthArea({
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="flex items-center gap-2.5 shrink-0">
+    <div className="flex items-center gap-3 shrink-0">
       {user ? (
         <div className="relative">
           <button
             onClick={() => setMenuOpen(v => !v)}
-            className="flex items-center gap-2 bg-grain-dim border border-soil/12 rounded-full pl-3 pr-2 py-1.5 hover:border-soil/25 transition-all"
+            aria-label={`Open account menu for ${user.name}`}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-soil/12 bg-white shadow-sm transition-all hover:border-pepper/40 hover:shadow-md"
           >
-            <div className="w-6 h-6 rounded-full bg-pepper flex items-center justify-center text-white text-[11px] font-bold">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-pepper text-[11px] font-bold text-white">
               {user.name.charAt(0).toUpperCase()}
             </div>
-            <span className="text-[13px] font-medium text-soil max-w-[80px] truncate hidden sm:block">
-              {user.name.split(' ')[0]}
-            </span>
-            <ChevronDown size={13} className="text-soil/40" />
           </button>
 
           {menuOpen && (
