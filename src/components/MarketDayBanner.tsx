@@ -14,51 +14,32 @@ export function MarketDayBanner({ compact = false }: { compact?: boolean }) {
 
   if (!marketDay?.isMarketDay || !marketDay.deliveryWeekday) return null
 
-  return (
-    <section
-      aria-label="Market Day offer"
-      className={`bg-soil text-white ${compact ? 'mx-auto max-w-5xl px-3 pt-4 sm:px-6' : ''}`}
-    >
-      <div className={`${compact ? 'rounded-2xl' : ''} overflow-hidden bg-soil`}>
-        <div className={`relative ${compact ? 'px-4 py-4 sm:px-6 sm:py-5' : 'px-5 py-6 sm:px-8 sm:py-8'}`}>
-          <div className="absolute -right-8 -top-12 h-32 w-32 rounded-full bg-pepper/25 blur-2xl" aria-hidden="true" />
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3.5">
-              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-leaf text-soil">
-                <CalendarDays size={19} strokeWidth={2.2} />
-              </div>
-              <div>
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <p className="font-data text-[10px] font-bold uppercase tracking-[0.18em] text-leaf">
-                    Market Day
-                  </p>
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/80">
-                    {marketDay.marketDay}
-                  </span>
-                </div>
-                <h2 className={`font-body font-bold leading-tight ${compact ? 'text-[18px]' : 'text-[21px] sm:text-[24px]'}`}>
-                  Order today. Receive it tomorrow.
-                </h2>
-                <p className="mt-1 max-w-xl text-[12.5px] leading-relaxed text-white/70 sm:text-[13.5px]">
-                  Fresh produce delivered on {marketDay.deliveryWeekday}, with {marketDay.discountPercent}% off your basket.
-                </p>
-              </div>
-            </div>
+  const message = `Market Day · Order today, receive it tomorrow · ${marketDay.discountPercent}% off your basket · Fresh produce delivered on ${marketDay.deliveryWeekday}`
 
+  return (
+    <section aria-label="Market Day offer" className={`overflow-hidden bg-soil text-white ${compact ? 'mx-auto max-w-5xl rounded-xl' : ''}`}>
+      <div className="market-day-marquee flex min-w-max items-center py-3.5">
+        {[0, 1].map((copy) => (
+          <div key={copy} className="flex shrink-0 items-center gap-8 px-5" aria-hidden={copy === 1}>
+            <span className="flex items-center gap-2 font-data text-[11px] font-bold uppercase tracking-[0.16em] text-leaf">
+              <CalendarDays size={15} strokeWidth={2.2} />
+              Market Day
+            </span>
+            <span className="text-[13px] font-semibold text-white/90">{message}</span>
+            <span className="h-1 w-1 rounded-full bg-leaf" aria-hidden="true" />
             <Link
               href="/store"
-              className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-full bg-leaf px-4 py-2.5 text-[13px] font-bold text-soil transition-colors hover:bg-leaf-deep sm:self-center"
+              tabIndex={copy === 1 ? -1 : undefined}
+              className="inline-flex items-center gap-1.5 rounded-full bg-leaf px-3.5 py-1.5 text-[11px] font-bold text-soil transition-colors hover:bg-leaf-deep"
             >
               Shop Market Day
-              <ArrowRight size={15} />
+              <ArrowRight size={13} />
             </Link>
+            <span className="h-1 w-1 rounded-full bg-leaf" aria-hidden="true" />
           </div>
-          <div className="relative mt-4 flex items-center gap-1.5 text-[11px] font-medium text-white/55">
-            <Sparkles size={13} className="text-leaf" />
-            The saving is applied automatically at checkout.
-          </div>
-        </div>
+        ))}
       </div>
+      <p className="sr-only">{message}. The saving is applied automatically at checkout.</p>
     </section>
   )
 }

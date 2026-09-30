@@ -168,3 +168,24 @@ h1, h2, .font-display {
 /* WEN logo: height set per-instance via --logo-h / --logo-h-sm (see components/Logo.tsx) */
 .logo-img { height: var(--logo-h); }
 @media (min-width: 640px) { .logo-img { height: var(--logo-h-sm); } }
+
+
+@keyframes market-day-marquee {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+.market-day-marquee {
+  animation: market-day-marquee 28s linear infinite;
+}
+
+.market-day-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-day-marquee {
+    animation: none;
+    transform: translateX(0);
+  }
+}
