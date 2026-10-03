@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import {
   ChevronLeft, ShoppingBag, Loader2, Truck,
-  Phone, MapPin, User, FileText, Zap, Clock, Navigation, Pencil, Mail,
+  Phone, MapPin, User, FileText, Navigation, Pencil, Mail,
 } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { MarketDayBanner } from '@/components/MarketDayBanner'
 import { calculateMarketDayDiscount, getMarketDayInfo, type MarketDayInfo } from '@/lib/market-day'
+import { haversineKm, calcDeliveryFee, WEN_HQ, type DeliveryCalc } from '@/lib/delivery'
 
 const LocationMapPicker = lazy(() => import('@/components/LocationMapPicker'))
 
@@ -18,31 +19,6 @@ function fmt(n: number | null) {
   if (!n) return '—'
   return '₦' + n.toLocaleString('en-NG')
 }
-
-const DELIVERY_OPTIONS = [
-  {
-    id: 'standard' as const,
-    label: 'Standard delivery',
-    duration: '3 days',
-    fee: 1500,
-    Icon: Clock,
-    badge: 'Most popular',
-    badgeColor: 'bg-soil/8 text-soil/60',
-    desc: 'Fresh from farm, delivered within 3 days',
-  },
-  {
-    id: 'express' as const,
-    label: 'Express delivery',
-    duration: '24 hours',
-    fee: 3500,
-    Icon: Zap,
-    badge: 'Fastest',
-    badgeColor: 'bg-amber-50 text-amber-700',
-    desc: 'Priority harvest & same-day dispatch',
-  },
-]
-
-type DeliveryId = 'standard' | 'express'
 
 interface FormData {
   fullName: string
@@ -65,7 +41,6 @@ export default function CheckoutPage() {
   const { cartLines, cartCount, cartTotal } = useCart()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]           = useState('')
-  const [delivery, setDelivery]     = useState<DeliveryId>('standard')
   const [form, setForm]             = useState<FormData>({
     fullName: '', phone: '', email: '', address: '', landmark: '', notes: '', buyerType: 'household',
   })
@@ -73,6 +48,7 @@ export default function CheckoutPage() {
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [showMap, setShowMap]       = useState(false)
   const [marketDay, setMarketDay]   = useState<MarketDayInfo | null>(null)
+  const [deliveryCalc, setDeliveryCalc] = useState<DeliveryCalc | null>(null)
 
   useEffect(() => {
     if (cartCount === 0) router.replace('/store')
@@ -82,12 +58,19 @@ export default function CheckoutPage() {
     setMarketDay(getMarketDayInfo())
   }, [])
 
-  const hasPrices   = cartLines.some(l => l.price)
+  // Recalculate delivery fee whenever the pinned location or market-day state changes
+  useEffect(() => {
+    if (!deliveryCoords) { setDeliveryCalc(null); return }
+    const distKm = haversineKm(WEN_HQ.lat, WEN_HQ.lng, deliveryCoords.lat, deliveryCoords.lng)
+    setDeliveryCalc(calcDeliveryFee(distKm, marketDay?.isMarketDay ?? false))
+  }, [deliveryCoords, marketDay])
+
+  const hasPrices         = cartLines.some(l => l.price)
   const marketDayDiscount = marketDay && hasPrices ? calculateMarketDayDiscount(cartTotal ?? 0, marketDay) : 0
-  const deliveryOpt = DELIVERY_OPTIONS.find(o => o.id === delivery)!
-  const deliveryFee = deliveryOpt.fee
-  const deliveryDuration = marketDay?.isMarketDay && delivery === 'standard' ? 'tomorrow' : deliveryOpt.duration
-  const grandTotal  = hasPrices ? (cartTotal ?? 0) - marketDayDiscount + deliveryFee : null
+  const deliveryFee       = deliveryCalc?.finalFee ?? null
+  const grandTotal        = hasPrices && deliveryFee != null
+    ? (cartTotal ?? 0) - marketDayDiscount + deliveryFee
+    : null
 
   function validate(): boolean {
     const e: Partial<FormData> = {}
@@ -96,6 +79,9 @@ export default function CheckoutPage() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Enter a valid email — we\'ll send your receipt here'
     if (!form.address.trim() || form.address.trim().length < 5 || !deliveryCoords) {
       e.address = 'Pin your exact delivery location on the map so the rider can find you'
+    }
+    if (deliveryCoords && !deliveryCalc) {
+      e.address = 'Delivery fee is still calculating — please wait a moment'
     }
     setErrors(e)
     return Object.keys(e).length === 0
@@ -119,7 +105,6 @@ export default function CheckoutPage() {
           deliveryLng: deliveryCoords?.lng ?? null,
           buyerType:   form.buyerType,
           notes:       form.notes,
-          deliveryType: delivery,
           items: cartLines.map(l => ({
             id: l.id, name: l.name, category: l.category, unit: l.unit,
             quantity: l.quantity,
@@ -199,52 +184,54 @@ export default function CheckoutPage() {
             {/* ── Left: form ── */}
             <div className="w-full lg:flex-1 space-y-5">
 
-              {/* Delivery speed picker */}
+              {/* Delivery fee — distance-based */}
               <div className="wen-surface overflow-hidden">
                 <div className="flex items-center gap-2.5 px-5 py-4 border-b border-soil/8">
                   <Truck size={16} className="text-pepper" />
-                  <h2 className="font-body text-soil text-[16px] font-semibold">Delivery speed</h2>
+                  <h2 className="font-body text-soil text-[16px] font-semibold">Delivery</h2>
                 </div>
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {DELIVERY_OPTIONS.map(opt => {
-                    const active = delivery === opt.id
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => setDelivery(opt.id)}
-                        className={`relative flex flex-col gap-1.5 text-left p-4 rounded-xl border-2 transition-all ${
-                          active
-                            ? 'border-pepper bg-pepper/4 shadow-sm'
-                            : 'border-soil/10 bg-grain-dim hover:border-soil/25'
-                        }`}
-                      >
-                        <span className={`self-start text-[10px] font-bold px-2 py-0.5 rounded-full mb-0.5 ${opt.badgeColor}`}>
-                          {opt.badge}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <opt.Icon size={18} className={active ? 'text-pepper' : 'text-stone/50'} strokeWidth={active ? 2.2 : 1.8} />
-                          <span className={`text-[15px] font-semibold ${active ? 'text-soil' : 'text-soil/70'}`}>{opt.label}</span>
+                <div className="px-5 py-4">
+                  {!deliveryCoords ? (
+                    <div className="flex items-center gap-3 text-[13px] text-stone/50">
+                      <MapPin size={14} className="shrink-0" />
+                      <span>Pin your location below to see your delivery cost</span>
+                    </div>
+                  ) : !deliveryCalc ? (
+                    <div className="flex items-center gap-2 text-[13px] text-stone/50">
+                      <Loader2 size={14} className="animate-spin shrink-0" />
+                      <span>Calculating…</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[14px] font-semibold text-soil">
+                            ₦300 per km · {deliveryCalc.distanceKm} km
+                          </p>
+                          <p className="text-[12px] text-stone/50 mt-0.5">
+                            From our Welfare Quarters dispatch point
+                          </p>
                         </div>
-                        <p className="text-[12px] text-stone/55 leading-snug">{opt.desc}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className={`font-data text-[13px] font-bold ${active ? 'text-pepper-deep' : 'text-soil/60'}`}>
-                            + {fmt(opt.fee)}
-                          </span>
-                          <span className={`text-[12px] font-medium px-2.5 py-0.5 rounded-full ${
-                            active ? 'bg-pepper text-white' : 'bg-soil/8 text-soil/50'
-                          }`}>
-                            {marketDay?.isMarketDay && opt.id === 'standard' ? 'Tomorrow' : opt.duration}
+                        <div className="text-right">
+                          {deliveryCalc.discount > 0 && (
+                            <p className="text-[12px] text-stone/40 line-through font-data">
+                              ₦{deliveryCalc.baseFee.toLocaleString('en-NG')}
+                            </p>
+                          )}
+                          <p className="font-data text-[16px] font-bold text-pepper-deep">
+                            ₦{deliveryCalc.finalFee.toLocaleString('en-NG')}
+                          </p>
+                        </div>
+                      </div>
+                      {deliveryCalc.discount > 0 && (
+                        <div className="flex items-center gap-1.5 bg-pepper/6 rounded-lg px-3 py-1.5">
+                          <span className="text-[11px] font-bold text-pepper-deep">
+                            Market Day — 20% off delivery · saving ₦{deliveryCalc.discount.toLocaleString('en-NG')}
                           </span>
                         </div>
-                        {active && (
-                          <div className="absolute top-3 right-3 w-4 h-4 rounded-full bg-pepper flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                          </div>
-                        )}
-                      </button>
-                    )
-                  })}
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -467,27 +454,34 @@ export default function CheckoutPage() {
                   )}
                   <div className="flex justify-between text-[13px] text-stone/60">
                     <span className="flex items-center gap-1.5">
-                      {deliveryOpt.id === 'express'
-                        ? <Zap size={12} className="text-amber-500" />
-                        : <Clock size={12} className="text-soil/40" />
-                      }
-                      Delivery ({deliveryDuration})
+                      <Truck size={12} className="text-soil/40" />
+                      Delivery{deliveryCalc ? ` · ${deliveryCalc.distanceKm} km` : ''}
                     </span>
-                    <span className={deliveryOpt.id === 'express' ? 'text-amber-600 font-semibold' : ''}>
-                      {fmt(deliveryFee)}
+                    <span>
+                      {deliveryFee != null
+                        ? fmt(deliveryFee)
+                        : <span className="text-stone/35 italic text-[11px]">set location</span>}
                     </span>
                   </div>
+                  {(deliveryCalc?.discount ?? 0) > 0 && (
+                    <div className="flex justify-between text-[13px] text-pepper-deep">
+                      <span>Market Day delivery (20% off)</span>
+                      <span className="font-semibold">− {fmt(deliveryCalc!.discount)}</span>
+                    </div>
+                  )}
                   {marketDayDiscount > 0 && (
                     <div className="flex justify-between text-[13px] text-pepper-deep">
-                      <span>Market Day saving ({marketDay?.discountPercent ?? 0}%)</span>
+                      <span>Market Day basket ({marketDay?.discountPercent ?? 0}% off)</span>
                       <span className="font-semibold">− {fmt(marketDayDiscount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-body text-soil text-[16px] font-bold pt-2 border-t border-soil/8">
                     <span>Total</span>
-                    <span>{grandTotal ? fmt(grandTotal) : hasPrices ? fmt(deliveryFee) : '—'}</span>
+                    <span>{grandTotal ? fmt(grandTotal) : '—'}</span>
                   </div>
-                  <p className="text-[11px] text-stone/40">Final price confirmed before delivery</p>
+                  <p className="text-[11px] text-stone/40">
+                    {deliveryFee == null ? 'Pin your location to see the full total' : 'Final price confirmed before delivery'}
+                  </p>
                 </div>
 
                 <div className="px-5 pb-5">

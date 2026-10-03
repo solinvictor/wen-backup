@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { calculateMarketDayDiscount, getMarketDayInfo } from '@/lib/market-day'
+import { haversineKm, calcDeliveryFee, WEN_HQ } from '@/lib/delivery'
 
 interface CartItem {
   id: string
@@ -15,18 +16,13 @@ function genRef() {
   return 'WEN-' + Math.random().toString(36).substring(2, 8).toUpperCase()
 }
 
-const DELIVERY_FEES = {
-  standard: 1500,
-  express: 3500,
-} as const
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
       fullName, phoneNumber, email, location, landmark,
       deliveryLat, deliveryLng,
-      buyerType, items, notes, deliveryType,
+      buyerType, items, notes,
     } = body as {
       fullName?: string
       phoneNumber?: string
@@ -38,7 +34,6 @@ export async function POST(req: NextRequest) {
       buyerType?: string
       items?: CartItem[]
       notes?: string
-      deliveryType?: 'standard' | 'express'
     }
 
     if (!fullName?.trim() || !phoneNumber?.trim() || !location?.trim() || !buyerType?.trim()) {
@@ -53,8 +48,8 @@ export async function POST(req: NextRequest) {
     if (items.some(i => !i.id)) {
       return NextResponse.json({ error: 'Something went wrong with your cart. Please refresh and try again.' }, { status: 400 })
     }
-    if (deliveryType !== 'standard' && deliveryType !== 'express') {
-      return NextResponse.json({ error: 'Please choose a delivery option.' }, { status: 400 })
+    if (typeof deliveryLat !== 'number' || typeof deliveryLng !== 'number') {
+      return NextResponse.json({ error: 'Please pin your delivery location on the map.' }, { status: 400 })
     }
     if (items.some(i => !Number.isInteger(i.quantity) || i.quantity < 1 || i.quantity > 100)) {
       return NextResponse.json({ error: 'Please check the quantities in your cart and try again.' }, { status: 400 })
@@ -62,11 +57,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = createAdminClient()
 
-    // Fallback/demo items shown when the store has no live products yet
-    // carry non-UUID placeholder ids (e.g. "f-eggs") and were never meant
-    // to be purchasable — querying Postgres with one of these as a uuid
-    // throws instead of just finding nothing, so filter them out up front
-    // and treat them the same as "product not found" rather than crashing.
+    // Fallback/demo items carry non-UUID placeholder ids — filter them out up front.
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     const invalidItem = items.find(i => !UUID_RE.test(i.id))
     if (invalidItem) {
@@ -76,8 +67,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Never trust client-sent prices — look up the real, current price for
-    // every item server-side so a tampered request can't change what's charged.
+    // Never trust client-sent prices — look up real prices server-side.
     const { data: dbProducts, error: productsError } = await supabase
       .from('products')
       .select('id, price, is_available')
@@ -100,10 +90,17 @@ export async function POST(req: NextRequest) {
       }
       itemsTotal += Number(product.price) * item.quantity
     }
+
+    // Market Day — 10% off product subtotal (unchanged)
     const marketDay = getMarketDayInfo()
     const marketDayDiscount = calculateMarketDayDiscount(itemsTotal, marketDay)
-    const deliveryFee = DELIVERY_FEES[deliveryType]
-    const amountTotal = itemsTotal - marketDayDiscount + deliveryFee
+
+    // Distance-based delivery: ₦300/km from Welfare Quarters HQ
+    // 20% off delivery fee on Market Days (separate from the product discount)
+    const distanceKm = haversineKm(WEN_HQ.lat, WEN_HQ.lng, deliveryLat, deliveryLng)
+    const delivery   = calcDeliveryFee(distanceKm, marketDay.isMarketDay)
+
+    const amountTotal = itemsTotal - marketDayDiscount + delivery.finalFee
 
     let userId: string | null = null
     try {
@@ -120,14 +117,14 @@ export async function POST(req: NextRequest) {
     const { data: buyer, error: buyerError } = await supabase
       .from('buyers')
       .insert({
-        full_name: fullName.trim(),
-        phone_number: phoneNumber.trim(),
-        email: email.trim(),
-        location: location.trim(),
-        landmark: landmark?.trim() || null,
-        delivery_lat: deliveryLat ?? null,
-        delivery_lng: deliveryLng ?? null,
-        buyer_type: buyerType,
+        full_name:          fullName.trim(),
+        phone_number:       phoneNumber.trim(),
+        email:              email.trim(),
+        location:           location.trim(),
+        landmark:           landmark?.trim() || null,
+        delivery_lat:       deliveryLat,
+        delivery_lng:       deliveryLng,
+        buyer_type:         buyerType,
         products_interested: productsInterested,
         ...(userId ? { user_id: userId } : {}),
       })
@@ -146,17 +143,19 @@ export async function POST(req: NextRequest) {
     const orderRef = genRef()
 
     const { error: orderError } = await supabase.from('orders').insert({
-      buyer_id: buyer.id,
-      product_summary: productSummary,
-      notes: notes?.trim() || null,
-      delivery_type: deliveryType,
-      delivery_fee: deliveryFee,
-      market_day: marketDay.marketDay,
-      discount_amount: marketDayDiscount,
-      expected_delivery_date: marketDay.deliveryDate,
-      order_ref: orderRef,
-      amount_total: amountTotal,
-      status: 'pending_payment',
+      buyer_id:                 buyer.id,
+      product_summary:          productSummary,
+      notes:                    notes?.trim() || null,
+      delivery_type:            'standard',
+      delivery_fee:             delivery.finalFee,
+      delivery_distance_km:     delivery.distanceKm,
+      delivery_discount_amount: delivery.discount,
+      market_day:               marketDay.marketDay,
+      discount_amount:          marketDayDiscount,
+      expected_delivery_date:   marketDay.deliveryDate,
+      order_ref:                orderRef,
+      amount_total:             amountTotal,
+      status:                   'pending_payment',
     })
 
     if (orderError) {
@@ -165,12 +164,15 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      success: true,
+      success:              true,
       orderRef,
       amountTotal,
-      discountAmount: marketDayDiscount,
+      discountAmount:       marketDayDiscount,
+      deliveryFee:          delivery.finalFee,
+      deliveryDistanceKm:   delivery.distanceKm,
+      deliveryDiscount:     delivery.discount,
       expectedDeliveryDate: marketDay.deliveryDate,
-      email: email.trim(),
+      email:                email.trim(),
     })
   } catch (err) {
     console.error('[orders] unexpected error:', err)
