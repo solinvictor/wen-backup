@@ -5,5 +5,5 @@
 // 3. add the domains: wenfoods.com, www.wenfoods.com, localhost, and the Vercel preview domain
 // 4. copy the project ID: it is the part of the embed link between use.typekit.net/ and .css
 //
-// Leave empty to keep the current fonts (Poppins / Nohemi).
+// Leave empty to keep the current font (Nohemi).
 export const TYPEKIT_KIT_ID: string = 'hza4szq'

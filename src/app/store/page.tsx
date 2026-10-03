@@ -12,8 +12,6 @@ import Link from 'next/link'
 import { FALLBACK_PRODUCTS, type Product } from '@/lib/fallback-products'
 import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { BottomTabBar } from '@/components/BottomTabBar'
-import { MarketDayBanner } from '@/components/MarketDayBanner'
-
 const CATEGORY_LABELS: Record<string, string> = {
   eggs: 'Eggs', fish: 'Fish', chicken: 'Chicken', rice: 'Rice', beans: 'Beans',
 }
@@ -347,7 +345,6 @@ export default function StorePage() {
   return (
     <div className="min-h-screen min-w-0 overflow-x-hidden bg-[#f4f5f1] flex flex-col">
       <StoreNav onCartOpen={() => router.push('/cart')} />
-      <MarketDayBanner compact />
       <Suspense fallback={
         <div className="flex-1 flex items-center justify-center py-32">
           <Loader2 size={24} className="animate-spin text-stone/40" />

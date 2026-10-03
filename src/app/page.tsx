@@ -10,8 +10,6 @@ import { ACTIVE_CATEGORY_META } from '@/lib/categories'
 import { Logo } from '@/components/Logo'
 import { HeroVideos } from '@/components/HeroVideos'
 import { HERO_VIDEOS } from '@/lib/hero-videos'
-import { MarketDayBanner } from '@/components/MarketDayBanner'
-
 // Only categories marked active in lib/categories.ts are orderable right now —
 // bring one back there and it reappears here automatically.
 const FALLBACK_PRICE: Record<string, number> = {
@@ -66,7 +64,7 @@ const FAQS = [
   },
   {
     q: 'How much is delivery, and how long does it take?',
-    a: 'Standard delivery is ₦1,500 and arrives within 3 days. Need it sooner, express is ₦3,500 and arrives within 24 hours.',
+    a: 'Delivery is ₦300 per km from our dispatch point. On Market Days (Tuesday and Friday) you get 20% off the delivery fee. Final cost is shown at checkout before you pay.',
   },
   {
     q: 'What can I actually order from WEN?',
@@ -342,7 +340,6 @@ export default function LandingPage() {
   return (
     <>
       <Nav />
-      <MarketDayBanner />
 
       <main>
         {/* ── Hero (mobile only): headline + buttons on plain mint, video as its

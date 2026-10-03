@@ -34,9 +34,9 @@
   --font-mono: var(--font-mono);
 }
 
-/* Font stacks. next/font provides --font-nohemi and --font-poppins (layout.tsx).
+/* Font stacks. next/font provides --font-nohemi (layout.tsx).
    When an Adobe Fonts project ID is set in src/lib/typekit.ts, layout.tsx puts
-   data-font="museo" on <html>: Museo Sans goes first, Nohemi/Poppins stay as fallback. */
+   data-font="museo" on <html>: Museo Sans goes first, Nohemi stays as fallback. */
 :root {
   --font-display: var(--font-nohemi), 'Nohemi', sans-serif;
   --font-body: var(--font-nohemi), 'Nohemi', sans-serif;

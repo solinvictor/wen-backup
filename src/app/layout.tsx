@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { JetBrains_Mono, Poppins } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
 import { LocationProvider } from "@/context/LocationContext";
 import { TYPEKIT_KIT_ID } from "@/lib/typekit";
@@ -25,13 +25,6 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: "WEN — Fresh Farm Produce, Direct From Trusted Farmers",
   description:
@@ -50,7 +43,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-font={museo ? "museo" : undefined}
-      className={`${nohemi.variable} ${jetbrainsMono.variable} ${poppins.variable} h-full antialiased`}
+      className={`${nohemi.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       {museo && (
         <head>
