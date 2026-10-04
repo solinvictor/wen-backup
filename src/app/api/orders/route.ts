@@ -189,7 +189,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success:              true,
       orderRef,
       amountTotal,
@@ -200,6 +200,11 @@ export async function POST(req: NextRequest) {
       expectedDeliveryDate: marketDay.deliveryDate,
       email:                email.trim(),
     })
+
+    // Clear the referral cookie — it's been used (or wasn't valid); don't credit twice
+    response.cookies.set('wen_ref', '', { maxAge: 0, path: '/' })
+
+    return response
   } catch (err) {
     console.error('[orders] unexpected error:', err)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
