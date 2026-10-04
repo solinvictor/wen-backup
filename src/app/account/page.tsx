@@ -17,6 +17,14 @@ export default async function AccountPage() {
     .eq('id', user.id)
     .single()
 
+  const { data: buyer } = await supabase
+    .from('buyers')
+    .select('referral_code')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
   const name  = user.user_metadata?.full_name ?? ''
   const phone = user.user_metadata?.phone     ?? ''
 
@@ -26,6 +34,7 @@ export default async function AccountPage() {
       initialName={name}
       initialEmail={profile?.email ?? user.email ?? ''}
       initialPhone={phone}
+      referralCode={buyer?.referral_code ?? null}
     />
   )
 }

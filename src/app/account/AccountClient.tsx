@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   ChevronLeft, Package, User, LogOut, Loader2,
   CheckCircle2, Clock, Truck, XCircle, RefreshCw,
-  ChevronRight, Phone, Mail, MapPin,
+  ChevronRight, Phone, Mail, MapPin, Copy, Check,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { BottomTabBar } from '@/components/BottomTabBar'
@@ -31,6 +31,7 @@ interface Props {
   initialName: string
   initialEmail: string
   initialPhone: string
+  referralCode?: string | null
 }
 
 // ── Status badge ─────────────────────────────────────────────────────────────
@@ -138,7 +139,7 @@ function OrderCard({ order }: { order: Order }) {
 }
 
 // ── Main client component ─────────────────────────────────────────────────────
-export default function AccountClient({ userId, initialName, initialEmail, initialPhone }: Props) {
+export default function AccountClient({ userId, initialName, initialEmail, initialPhone, referralCode }: Props) {
   const router = useRouter()
 
   // Orders
@@ -155,6 +156,7 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
   // Active tab
   const [tab, setTab]               = useState<'orders' | 'profile'>('profile')
   const [ordersVisible, setOrdersVisible] = useState(false)
+  const [copied, setCopied]         = useState(false)
 
   // ── Fetch orders ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -246,6 +248,31 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
             )}
           </div>
         </div>
+
+        {/* Referral card */}
+        {referralCode && (
+          <div className="bg-white border border-soil/10 rounded-2xl px-5 py-4 mb-5">
+            <p className="text-[12px] font-semibold text-stone/50 uppercase tracking-wider mb-2">Your referral link</p>
+            <div className="flex items-center gap-2">
+              <p className="flex-1 font-data text-[13px] text-soil truncate bg-[#eef1f4] px-3 py-2 rounded-xl border border-soil/10">
+                {typeof window !== 'undefined' ? `${window.location.origin}/ref/${referralCode}` : `/ref/${referralCode}`}
+              </p>
+              <button
+                onClick={() => {
+                  const link = `${window.location.origin}/ref/${referralCode}`
+                  navigator.clipboard.writeText(link).then(() => {
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                  })
+                }}
+                className="shrink-0 w-9 h-9 rounded-xl bg-pepper flex items-center justify-center text-white hover:bg-pepper-deep transition-colors"
+              >
+                {copied ? <Check size={15} strokeWidth={2.5} /> : <Copy size={15} strokeWidth={2} />}
+              </button>
+            </div>
+            <p className="text-[12px] text-stone/40 mt-2">Share this link — when someone orders through it, they're credited to you.</p>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-1 bg-white border border-soil/10 rounded-2xl p-1 mb-5">
