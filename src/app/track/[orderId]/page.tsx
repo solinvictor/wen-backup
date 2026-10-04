@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ChevronLeft, Package, CheckCircle2, Truck, Home as HomeIcon,
-  XCircle, MapPin, Clock, Loader2, MessageCircle,
+  XCircle, MapPin, Clock, Loader2, MessageCircle, CreditCard,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -18,7 +18,7 @@ interface TrackedOrder {
   market_day?: 'Tuesday' | 'Friday' | null
   discount_amount?: number | null
   expected_delivery_date?: string | null
-  status: 'pending' | 'matched' | 'in_progress' | 'delivered' | 'cancelled'
+  status: 'pending_payment' | 'pending' | 'matched' | 'in_progress' | 'delivered' | 'cancelled'
   notes: string | null
   created_at: string
   delivery_address: string
@@ -26,10 +26,11 @@ interface TrackedOrder {
 }
 
 const STEPS = [
-  { key: 'pending',     label: 'Order placed',     Icon: Package },
-  { key: 'matched',     label: 'Confirmed',         Icon: CheckCircle2 },
-  { key: 'in_progress', label: 'Out for delivery',  Icon: Truck },
-  { key: 'delivered',   label: 'Delivered',         Icon: HomeIcon },
+  { key: 'pending_payment', label: 'Awaiting payment',  Icon: CreditCard },
+  { key: 'pending',         label: 'Order placed',      Icon: Package },
+  { key: 'matched',         label: 'Confirmed',          Icon: CheckCircle2 },
+  { key: 'in_progress',     label: 'Out for delivery',   Icon: Truck },
+  { key: 'delivered',       label: 'Delivered',          Icon: HomeIcon },
 ] as const
 
 function stepIndex(status: TrackedOrder['status']) {
