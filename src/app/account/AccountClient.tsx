@@ -153,7 +153,8 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
   const [saveMsg, setSaveMsg]       = useState('')
 
   // Active tab
-  const [tab, setTab]               = useState<'orders' | 'profile'>('orders')
+  const [tab, setTab]               = useState<'orders' | 'profile'>('profile')
+  const [ordersVisible, setOrdersVisible] = useState(false)
 
   // ── Fetch orders ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -267,32 +268,51 @@ export default function AccountClient({ userId, initialName, initialEmail, initi
         {/* Orders tab */}
         {tab === 'orders' && (
           <div className="space-y-3">
-            {ordersLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 size={22} className="animate-spin text-stone/40" />
-              </div>
-            ) : ordersError ? (
-              <div className="bg-red-50 border border-red-100 rounded-2xl px-5 py-4 text-[13px] text-red-600">
-                {ordersError}
-              </div>
-            ) : orders.length === 0 ? (
-              <div className="bg-white border border-soil/10 rounded-2xl px-5 py-14 flex flex-col items-center gap-3 text-center">
-                <div className="w-14 h-14 rounded-full bg-[#eef1f4] flex items-center justify-center">
-                  <Package size={24} className="text-stone/30" />
+            {/* Toggle */}
+            <button
+              onClick={() => setOrdersVisible(v => !v)}
+              className="w-full flex items-center justify-between bg-white border border-soil/10 rounded-2xl px-5 py-4 hover:bg-[#eef1f4]/60 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#eef1f4] flex items-center justify-center">
+                  <Package size={16} className="text-pepper" strokeWidth={2} />
                 </div>
-                <p className="font-body text-soil font-bold text-[16px]">No orders yet</p>
-                <p className="text-stone/50 text-[13.5px] max-w-[28ch]">
-                  When you place an order from the store, it will appear here.
-                </p>
-                <Link
-                  href="/store"
-                  className="mt-2 bg-pepper text-white text-[13.5px] font-semibold px-6 py-2.5 rounded-full hover:bg-pepper-deep transition-colors"
-                >
-                  Browse the store
-                </Link>
+                <span className="font-body text-soil font-bold text-[15px]">
+                  {ordersLoading ? 'Order history' : orders.length === 0 ? 'Order history' : `Order history · ${orders.length}`}
+                </span>
               </div>
-            ) : (
-              orders.map(o => <OrderCard key={o.id} order={o} />)
+              <ChevronRight
+                size={16}
+                className={`text-soil/30 transition-transform ${ordersVisible ? 'rotate-90' : ''}`}
+              />
+            </button>
+
+            {/* List */}
+            {ordersVisible && (
+              ordersLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 size={22} className="animate-spin text-stone/40" />
+                </div>
+              ) : ordersError ? (
+                <div className="bg-red-50 border border-red-100 rounded-2xl px-5 py-4 text-[13px] text-red-600">
+                  {ordersError}
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="bg-white border border-soil/10 rounded-2xl px-5 py-12 flex flex-col items-center gap-3 text-center">
+                  <p className="font-body text-soil font-bold text-[16px]">No orders yet</p>
+                  <p className="text-stone/50 text-[13.5px] max-w-[28ch]">
+                    When you place an order from the store, it will appear here.
+                  </p>
+                  <Link
+                    href="/store"
+                    className="mt-2 bg-pepper text-white text-[13.5px] font-semibold px-6 py-2.5 rounded-full hover:bg-pepper-deep transition-colors"
+                  >
+                    Browse the store
+                  </Link>
+                </div>
+              ) : (
+                orders.map(o => <OrderCard key={o.id} order={o} />)
+              )
             )}
           </div>
         )}
