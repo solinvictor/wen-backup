@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
 
     const orderRef = genRef()
 
-    const { error: orderError } = await supabase.from('orders').insert({
+    const { data: order, error: orderError } = await supabase.from('orders').insert({
       buyer_id:                 buyer.id,
       product_summary:          productSummary,
       notes:                    notes?.trim() || null,
@@ -156,11 +156,37 @@ export async function POST(req: NextRequest) {
       order_ref:                orderRef,
       amount_total:             amountTotal,
       status:                   'pending_payment',
-    })
+    }).select('id').single()
 
-    if (orderError) {
-      console.error('[orders] order insert failed:', orderError.message)
+    if (orderError || !order) {
+      console.error('[orders] order insert failed:', orderError?.message)
       return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
+    }
+
+    // --- Referral tracking ---
+    const refCode = req.cookies.get('wen_ref')?.value?.trim().toUpperCase()
+    if (refCode) {
+      try {
+        const { data: referrer } = await supabase
+          .from('buyers')
+          .select('id')
+          .eq('referral_code', refCode)
+          .single()
+
+        if (referrer && referrer.id !== buyer.id) {
+          await supabase.from('referrals').insert({
+            referrer_id:  referrer.id,
+            referred_id:  buyer.id,
+            order_id:     order.id,
+            code_used:    refCode,
+            status:       'converted',
+            converted_at: new Date().toISOString(),
+          })
+        }
+      } catch (refErr) {
+        // Non-fatal — order still goes through
+        console.error('[orders] referral insert failed:', refErr)
+      }
     }
 
     return NextResponse.json({
