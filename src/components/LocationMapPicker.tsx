@@ -6,6 +6,7 @@ import { Loader2, MapPin, Navigation, X, LocateFixed } from 'lucide-react'
 interface Props {
   onConfirm: (coords: { lat: number; lng: number }, label: string) => void
   onClose: () => void
+  initialLocation?: { lat: number; lng: number; label: string }
 }
 
 /** Max GPS accuracy (meters) we accept without requiring a manual pin adjust */
@@ -13,7 +14,7 @@ const GOOD_ACCURACY_M = 30
 /** Soft threshold — warn but still allow confirm if user explicitly adjusted pin */
 const FAIR_ACCURACY_M = 75
 
-export default function LocationMapPicker({ onConfirm, onClose }: Props) {
+export default function LocationMapPicker({ onConfirm, onClose, initialLocation }: Props) {
   const mapRef     = useRef<HTMLDivElement>(null)
   const mapObj     = useRef<any>(null)
   const markerObj  = useRef<any>(null)
@@ -31,7 +32,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   const [label,     setLabel]     = useState('')
   const [resolving, setResolving] = useState(false)
   const [accuracy,  setAccuracy]  = useState<number | null>(null)
-  const [pinSource, setPinSource] = useState<'gps' | 'manual' | null>(null)
+  const [pinSource, setPinSource] = useState<'gps' | 'manual' | 'address' | null>(null)
 
   const DEFAULT = { lat: 7.7322, lng: 8.5391 }
 
@@ -83,7 +84,7 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     }
   }
 
-  function movePin(lat: number, lng: number, zoom?: number, fromManual = false) {
+  function movePin(lat: number, lng: number, zoom?: number, fromManual = false, suppliedLabel?: string) {
     const L   = LRef.current
     const map = mapObj.current
     if (!L || !map) return
@@ -115,7 +116,13 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
     }
 
     map.setView([lat, lng], zoom ?? map.getZoom())
-    resolvePin(lat, lng)
+    if (suppliedLabel) {
+      setCoords({ lat, lng })
+      setLabel(suppliedLabel)
+      setResolving(false)
+    } else {
+      resolvePin(lat, lng)
+    }
   }
 
   function resolvePin(lat: number, lng: number) {
@@ -218,8 +225,8 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
       })
 
       const map = L.map(mapRef.current!, {
-        center: [DEFAULT.lat, DEFAULT.lng],
-        zoom: 15,
+        center: [initialLocation?.lat ?? DEFAULT.lat, initialLocation?.lng ?? DEFAULT.lng],
+        zoom: initialLocation ? 17 : 15,
         zoomControl: true,
       })
 
@@ -234,7 +241,13 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
 
       LRef.current   = L
       mapObj.current = map
-      startWatching()
+      if (initialLocation) {
+        setPinSource('address')
+        setLoading(false)
+        movePin(initialLocation.lat, initialLocation.lng, 17, false, initialLocation.label)
+      } else {
+        startWatching()
+      }
     }).catch(() => {
       setGpsError('Map failed to load — check your connection and try again')
       setLoading(false)
@@ -257,18 +270,22 @@ export default function LocationMapPicker({ onConfirm, onClose }: Props) {
   }, [])
 
   const isManual = pinSource === 'manual'
+  const isAddress = pinSource === 'address'
   const isGood   = accuracy !== null && accuracy <= GOOD_ACCURACY_M
   const isFair   = accuracy !== null && accuracy > GOOD_ACCURACY_M && accuracy <= FAIR_ACCURACY_M
   const isPoor   = accuracy !== null && accuracy > FAIR_ACCURACY_M
 
   // Block confirm on poor GPS unless user deliberately adjusted the pin
-  const canConfirm = !!coords && !resolving && !loading && (isManual || isGood || isFair)
+  const canConfirm = !!coords && !resolving && !loading && (isManual || isAddress || isGood || isFair)
 
   let accuracyHint: string | null = null
   let accuracyColor = 'text-stone/50'
   if (isManual) {
     accuracyHint = '✓ Pin placed by you — drag to fine-tune the exact gate or door'
     accuracyColor = 'text-green-600'
+  } else if (isAddress) {
+    accuracyHint = 'Address match shown — drag the pin to the recipient’s exact gate or door'
+    accuracyColor = 'text-amber-600'
   } else if (isGood) {
     accuracyHint = `✓ Strong GPS — ±${accuracy}m — good for the rider`
     accuracyColor = 'text-green-600'

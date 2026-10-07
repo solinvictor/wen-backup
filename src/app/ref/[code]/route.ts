@@ -4,9 +4,10 @@ import { NextRequest, NextResponse } from 'next/server'
 // The cookie is read at order creation time to credit the referrer.
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { code: string } },
+  { params }: { params: Promise<{ code: string }> },
 ) {
-  const code = params.code?.trim().toUpperCase()
+  const { code: rawCode } = await params
+  const code = rawCode?.trim().toUpperCase()
 
   const destination = new URL('/', _req.url)
   destination.pathname = '/store'

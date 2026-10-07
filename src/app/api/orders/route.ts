@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const {
       fullName, phoneNumber, email, location, landmark,
       deliveryLat, deliveryLng,
-      buyerType, items, notes,
+      locationSource, buyerType, items, notes,
     } = body as {
       fullName?: string
       phoneNumber?: string
@@ -31,12 +31,17 @@ export async function POST(req: NextRequest) {
       landmark?: string
       deliveryLat?: number | null
       deliveryLng?: number | null
+      locationSource?: string
       buyerType?: string
       items?: CartItem[]
       notes?: string
     }
 
-    if (!fullName?.trim() || !phoneNumber?.trim() || !location?.trim() || !buyerType?.trim()) {
+    if (
+      !fullName?.trim() || !phoneNumber?.trim()
+      || !location?.trim() || location.trim().length < 5
+      || !buyerType?.trim()
+    ) {
       return NextResponse.json({ error: 'Please fill in all required fields.' }, { status: 400 })
     }
     if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
@@ -45,11 +50,23 @@ export async function POST(req: NextRequest) {
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Your list is empty — add at least one product.' }, { status: 400 })
     }
+    if (locationSource !== undefined && locationSource !== 'address' && locationSource !== 'pin') {
+      return NextResponse.json({ error: 'Please choose a valid delivery location.' }, { status: 400 })
+    }
     if (items.some(i => !i.id)) {
       return NextResponse.json({ error: 'Something went wrong with your cart. Please refresh and try again.' }, { status: 400 })
     }
     if (typeof deliveryLat !== 'number' || typeof deliveryLng !== 'number') {
-      return NextResponse.json({ error: 'Please pin your delivery location on the map.' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Choose an address suggestion or add an optional map pin to calculate delivery.' },
+        { status: 400 }
+      )
+    }
+    if (
+      !Number.isFinite(deliveryLat) || !Number.isFinite(deliveryLng)
+      || deliveryLat < -90 || deliveryLat > 90 || deliveryLng < -180 || deliveryLng > 180
+    ) {
+      return NextResponse.json({ error: 'Please choose a valid delivery address or map pin.' }, { status: 400 })
     }
     if (items.some(i => !Number.isInteger(i.quantity) || i.quantity < 1 || i.quantity > 100)) {
       return NextResponse.json({ error: 'Please check the quantities in your cart and try again.' }, { status: 400 })
@@ -122,8 +139,10 @@ export async function POST(req: NextRequest) {
         email:              email.trim(),
         location:           location.trim(),
         landmark:           landmark?.trim() || null,
-        delivery_lat:       deliveryLat,
-        delivery_lng:       deliveryLng,
+        // Address-search coordinates are only an estimate for pricing. Save
+        // rider-navigation coordinates only when the buyer confirmed a pin.
+        delivery_lat:       locationSource === 'address' ? null : deliveryLat,
+        delivery_lng:       locationSource === 'address' ? null : deliveryLng,
         buyer_type:         buyerType,
         products_interested: productsInterested,
         ...(userId ? { user_id: userId } : {}),
