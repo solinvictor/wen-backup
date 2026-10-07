@@ -6,12 +6,13 @@ import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import {
   ChevronLeft, ShoppingBag, Loader2, Truck,
-  Phone, MapPin, User, FileText, Navigation, Pencil, Mail,
+  Phone, MapPin, User, FileText, Navigation, Mail,
 } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 import { MarketDayBanner } from '@/components/MarketDayBanner'
 import { calculateMarketDayDiscount, getMarketDayInfo, type MarketDayInfo } from '@/lib/market-day'
 import { haversineKm, calcDeliveryFee, WEN_HQ, type DeliveryCalc } from '@/lib/delivery'
+import { AddressAutocomplete, type AddressSuggestion } from '@/components/AddressAutocomplete'
 
 const LocationMapPicker = lazy(() => import('@/components/LocationMapPicker'))
 
@@ -25,10 +26,13 @@ interface FormData {
   phone: string
   email: string
   address: string
+  addressDetails: string
   landmark: string
   notes: string
   buyerType: 'household' | 'business' | 'restaurant'
 }
+
+type LocationSource = 'address' | 'pin' | null
 
 const BUYER_TYPES = [
   { value: 'household',   label: 'Household'  },
@@ -42,10 +46,11 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError]           = useState('')
   const [form, setForm]             = useState<FormData>({
-    fullName: '', phone: '', email: '', address: '', landmark: '', notes: '', buyerType: 'household',
+    fullName: '', phone: '', email: '', address: '', addressDetails: '', landmark: '', notes: '', buyerType: 'household',
   })
   const [errors, setErrors]         = useState<Partial<FormData>>({})
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [locationSource, setLocationSource] = useState<LocationSource>(null)
   const [showMap, setShowMap]       = useState(false)
   const [marketDay, setMarketDay]   = useState<MarketDayInfo | null>(null)
   const [deliveryCalc, setDeliveryCalc] = useState<DeliveryCalc | null>(null)
@@ -58,7 +63,7 @@ export default function CheckoutPage() {
     setMarketDay(getMarketDayInfo())
   }, [])
 
-  // Recalculate delivery fee whenever the pinned location or market-day state changes
+  // Recalculate delivery fee whenever the selected address, pin, or market-day state changes
   useEffect(() => {
     if (!deliveryCoords) { setDeliveryCalc(null); return }
     const distKm = haversineKm(WEN_HQ.lat, WEN_HQ.lng, deliveryCoords.lat, deliveryCoords.lng)
@@ -77,14 +82,29 @@ export default function CheckoutPage() {
     if (!form.fullName.trim() || form.fullName.trim().length < 2) e.fullName = 'Enter your full name'
     if (!/^0[789][01]\d{8}$/.test(form.phone.trim())) e.phone = 'Enter a valid Nigerian phone number'
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Enter a valid email — we\'ll send your receipt here'
-    if (!form.address.trim() || form.address.trim().length < 5 || !deliveryCoords) {
-      e.address = 'Pin your exact delivery location on the map so the rider can find you'
+    if (!form.address.trim() || form.address.trim().length < 5) {
+      e.address = 'Enter the recipient’s delivery address or area'
+    } else if (!deliveryCoords) {
+      e.address = 'Choose an address suggestion or add a map pin to calculate delivery'
     }
     if (deliveryCoords && !deliveryCalc) {
       e.address = 'Delivery fee is still calculating — please wait a moment'
     }
     setErrors(e)
     return Object.keys(e).length === 0
+  }
+
+  function handleAddressChange(address: string) {
+    setForm(current => ({ ...current, address }))
+    setDeliveryCoords(null)
+    setLocationSource(null)
+    setErrors(current => ({ ...current, address: undefined }))
+  }
+
+  function handleAddressSelect(suggestion: AddressSuggestion) {
+    setDeliveryCoords({ lat: suggestion.lat, lng: suggestion.lng })
+    setLocationSource('address')
+    setErrors(current => ({ ...current, address: undefined }))
   }
 
   async function handleSubmit() {
@@ -99,8 +119,9 @@ export default function CheckoutPage() {
           fullName:    form.fullName,
           phoneNumber: form.phone,
           email:       form.email,
-          location:    form.address,
+          location:    [form.address.trim(), form.addressDetails.trim()].filter(Boolean).join(', '),
           landmark:    form.landmark,
+          locationSource,
           deliveryLat: deliveryCoords?.lat ?? null,
           deliveryLng: deliveryCoords?.lng ?? null,
           buyerType:   form.buyerType,
@@ -147,9 +168,11 @@ export default function CheckoutPage() {
           </div>
         }>
           <LocationMapPicker
+            initialLocation={deliveryCoords ? { ...deliveryCoords, label: form.address } : undefined}
             onConfirm={(coords, label) => {
               setDeliveryCoords(coords)
-              setForm(f => ({ ...f, address: label }))
+              setLocationSource('pin')
+              setForm(f => ({ ...f, address: f.address.trim() ? f.address : label }))
               setErrors(e => ({ ...e, address: undefined }))
               setShowMap(false)
             }}
@@ -194,7 +217,7 @@ export default function CheckoutPage() {
                   {!deliveryCoords ? (
                     <div className="flex items-center gap-3 text-[13px] text-stone/50">
                       <MapPin size={14} className="shrink-0" />
-                      <span>Pin your location below to see your delivery cost</span>
+                      <span>Choose an address suggestion below, or add an optional map pin, to estimate delivery.</span>
                     </div>
                   ) : !deliveryCalc ? (
                     <div className="flex items-center gap-2 text-[13px] text-stone/50">
@@ -209,7 +232,9 @@ export default function CheckoutPage() {
                             ₦300 per km · {deliveryCalc.distanceKm} km
                           </p>
                           <p className="text-[12px] text-stone/50 mt-0.5">
-                            From our Welfare Quarters dispatch point
+                            {locationSource === 'address'
+                              ? 'Estimated from the selected address'
+                              : 'From our Welfare Quarters dispatch point'}
                           </p>
                         </div>
                         <div className="text-right">
@@ -305,67 +330,72 @@ export default function CheckoutPage() {
 
                   {/* Location picker */}
                   <div>
-                    <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+                    <label htmlFor="checkout-address" className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
                       <MapPin size={13} />
-                      Delivery location
+                      Recipient&apos;s delivery address
                     </label>
+                    <AddressAutocomplete
+                      id="checkout-address"
+                      value={form.address}
+                      invalid={!!errors.address}
+                      onChange={handleAddressChange}
+                      onSelect={handleAddressSelect}
+                    />
+                    {errors.address && <p className="text-[12px] text-red-500 mt-1">{errors.address}</p>}
 
-                    {form.address ? (
-                      /* Location set — show it with an edit button */
-                      <div className={`flex items-start gap-3 border rounded-xl px-4 py-3.5 bg-green-50 ${errors.address ? 'border-red-400' : 'border-green-200'}`}>
-                        <MapPin size={15} className="text-green-600 shrink-0 mt-0.5" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] text-soil leading-snug">{form.address}</p>
-                          {deliveryCoords ? (
-                            <p className="text-[11px] text-green-600 font-medium mt-0.5">
-                              📍 Exact pin saved ({deliveryCoords.lat.toFixed(5)}, {deliveryCoords.lng.toFixed(5)})
-                            </p>
-                          ) : (
-                            <p className="text-[11px] text-amber-600 font-medium mt-0.5">
-                              ⚠ No GPS pin — open map again and confirm your exact spot
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setShowMap(true)}
-                          className="shrink-0 text-soil/40 hover:text-pepper transition-colors p-1"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                      </div>
-                    ) : (
-                      /* No location yet — big tap target */
+                    {locationSource === 'address' && (
+                      <p className="mt-2 text-[11.5px] font-medium text-green-700">
+                        Address selected. The optional pin can refine the delivery estimate to the exact gate or door.
+                      </p>
+                    )}
+                    {locationSource === 'pin' && (
+                      <p className="mt-2 text-[11.5px] font-medium text-green-700">
+                        Exact map pin saved ({deliveryCoords?.lat.toFixed(5)}, {deliveryCoords?.lng.toFixed(5)}).
+                      </p>
+                    )}
+
+                    <div className="mt-3">
+                      <label htmlFor="checkout-address-details" className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+                        House number, street, or apartment <span className="font-normal text-stone/40">(optional)</span>
+                      </label>
+                      <input
+                        id="checkout-address-details"
+                        autoComplete="address-line2"
+                        maxLength={180}
+                        value={form.addressDetails}
+                        onChange={e => setForm({ ...form, addressDetails: e.target.value })}
+                        placeholder="e.g. 12B, flat 3, second floor"
+                        className="wen-input bg-white"
+                      />
+                    </div>
+
+                    <div className="mt-3">
                       <button
                         type="button"
                         onClick={() => setShowMap(true)}
-                        className={`w-full flex items-center justify-center gap-2.5 border-2 border-dashed rounded-xl py-5 transition-all hover:border-pepper hover:bg-pepper/3 ${
-                          errors.address ? 'border-red-400 bg-red-50' : 'border-soil/20 bg-grain-dim'
-                        }`}
+                        className="w-full flex items-center justify-center gap-2 border border-soil/15 rounded-xl py-3 text-[13px] font-semibold text-soil/70 hover:border-pepper/40 hover:bg-pepper/3 transition-colors"
                       >
-                        <Navigation size={18} className={errors.address ? 'text-red-400' : 'text-pepper'} />
-                        <span className={`text-[15px] font-semibold ${errors.address ? 'text-red-500' : 'text-soil/70'}`}>
-                          Set delivery location
-                        </span>
+                        <Navigation size={15} className="text-pepper" />
+                        {locationSource === 'pin' ? 'Adjust exact map pin' : 'Add an exact map pin (optional)'}
                       </button>
-                    )}
-                    {errors.address && <p className="text-[12px] text-red-500 mt-1">{errors.address}</p>}
+                    </div>
 
-                    {/* Landmark / directions — shown once location is set */}
                     {form.address && (
                       <div className="mt-3">
-                        <label className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
+                        <label htmlFor="checkout-landmark" className="flex items-center gap-1.5 text-[13px] font-medium text-soil/70 mb-1.5">
                           <MapPin size={13} />
-                          Landmark / directions for rider
+                          Landmark / directions <span className="font-normal text-stone/40">(optional)</span>
                         </label>
                         <input
+                          id="checkout-landmark"
+                          maxLength={180}
                           value={form.landmark}
                           onChange={e => setForm({ ...form, landmark: e.target.value })}
-                          placeholder="e.g. Beside First Bank, blue gate, 2nd house on the left"
+                          placeholder="e.g. beside First Bank, blue gate"
                           className="wen-input bg-white"
                         />
                         <p className="text-[11.5px] text-stone/50 mt-1">
-                          Strongly recommended — gate colour, nearby shop, or how to reach you
+                          Add a nearby shop, gate colour, or directions that will help the rider.
                         </p>
                       </div>
                     )}
@@ -480,7 +510,11 @@ export default function CheckoutPage() {
                     <span>{grandTotal ? fmt(grandTotal) : '—'}</span>
                   </div>
                   <p className="text-[11px] text-stone/40">
-                    {deliveryFee == null ? 'Pin your location to see the full total' : 'Final price confirmed before delivery'}
+                    {deliveryFee == null
+                      ? 'Choose an address suggestion or add a map pin to estimate your total'
+                      : locationSource === 'address'
+                        ? 'Delivery estimated from the selected address; final fee confirmed before delivery'
+                        : 'Final price confirmed before delivery'}
                   </p>
                 </div>
 
