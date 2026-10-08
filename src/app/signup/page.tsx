@@ -27,6 +27,7 @@ function SignupForm() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
+  const [duplicate, setDuplicate] = useState(false)
   const [form, setForm]           = useState({
     fullName: '', email: '', phone: '', password: '', confirm: '',
   })
@@ -47,9 +48,10 @@ function SignupForm() {
     e.preventDefault()
     if (!validate()) return
     setError('')
+    setDuplicate(false)
     setLoading(true)
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: form.email.trim(),
       password: form.password,
       options: {
@@ -59,10 +61,15 @@ function SignupForm() {
     setLoading(false)
     if (error) {
       if (error.message.includes('already registered')) {
-        setError('An account with this email already exists. Try logging in instead.')
+        setDuplicate(true)
       } else {
         setError(error.message)
       }
+      return
+    }
+    // Supabase hides duplicate signups: it returns success with an empty identities array
+    if (data?.user && data.user.identities?.length === 0) {
+      setDuplicate(true)
       return
     }
     setStep('check-email')
@@ -191,6 +198,17 @@ function SignupForm() {
             </div>
             {errors.confirm && <p className="text-[12px] text-red-500 mt-1">{errors.confirm}</p>}
           </div>
+
+          {duplicate && (
+            <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+              <p className="text-[13px] text-red-600">
+                This email already has an account.{' '}
+                <Link href="/login" className="font-semibold underline">Log in</Link>
+                {' '}or{' '}
+                <Link href="/forgot-password" className="font-semibold underline">reset your password</Link>.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
