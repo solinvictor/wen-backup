@@ -5,8 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 /**
  * Creates a subscription row and starts the first (tokenizing) payment.
  * A subscription only becomes 'active' once that first payment succeeds
- * and the webhook captures a reusable card token — see
- * /api/payment/monnify-webhook.
+ * and the webhook captures a reusable authorization — see
+ * /api/payment/paystack-webhook.
  *
  * Body: { productId, quantity, frequencyDays, email, fullName, phoneNumber, location, landmark? }
  */

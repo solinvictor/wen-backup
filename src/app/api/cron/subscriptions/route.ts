@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getMonnifyConfig, monnifyRequest, type MonnifyChargeCardTokenResponse } from '@/lib/monnify'
 
 /**
  * Runs daily (see vercel.json). Finds every active subscription whose
  * next_delivery_date has arrived, creates a real order for it, and
- * charges the buyer's saved, reusable Monnify card token directly —
+ * charges the buyer's saved, reusable Paystack authorization directly —
  * no checkout page, no redirect, this is a true background charge.
  *
  * The actual order gets marked 'paid' by the SAME webhook that handles
- * normal checkouts, once Monnify's success event for this reference
- * comes back — this route only creates the pending_payment order and
- * fires the charge request; it does not mark anything paid itself, to
- * keep exactly one source of truth for "is this order paid".
+ * normal checkouts, once Paystack's charge.success event for this
+ * reference comes back — this route only creates the pending_payment
+ * order and fires the charge request; it does not mark anything paid
+ * itself, to keep exactly one source of truth for "is this order paid".
+ *
+ * Reuses the monnify_card_token / monnify_email columns from the brief
+ * Monnify era rather than renaming anything back — see paystack-initialize.
+ * monnify_card_token holds a Paystack authorization_code again now.
  */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -20,9 +23,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const config = getMonnifyConfig()
-  if (!config) {
-    console.error('[cron/subscriptions] Monnify env vars are not fully set')
+  const secretKey = process.env.PAYSTACK_SECRET_KEY
+  if (!secretKey) {
+    console.error('[cron/subscriptions] PAYSTACK_SECRET_KEY is not set')
     return NextResponse.json({ error: 'Not configured' }, { status: 500 })
   }
 
@@ -44,11 +47,10 @@ export async function GET(req: NextRequest) {
 
   for (const sub of due ?? []) {
     const productRow = Array.isArray(sub.products) ? sub.products[0] : sub.products
-    const buyerRow = Array.isArray(sub.buyers) ? sub.buyers[0] : sub.buyers
 
     if (!sub.monnify_card_token || !sub.monnify_email) {
       await supabase.from('subscriptions').update({ status: 'payment_issue' }).eq('id', sub.id)
-      results.push({ subscriptionId: sub.id, outcome: 'missing_card_token' })
+      results.push({ subscriptionId: sub.id, outcome: 'missing_authorization' })
       continue
     }
     if (!productRow || productRow.is_available === false || productRow.price == null) {
@@ -87,23 +89,23 @@ export async function GET(req: NextRequest) {
       continue
     }
 
-    const chargeRes = await monnifyRequest<MonnifyChargeCardTokenResponse>(config, '/api/v1/merchant/cards/charge-card-token', {
+    const psRes = await fetch('https://api.paystack.co/transaction/charge_authorization', {
       method: 'POST',
-      body: {
-        cardToken: sub.monnify_card_token,
-        customerEmail: sub.monnify_email,
-        customerName: buyerRow?.full_name || 'WEN buyer',
-        amount,
-        currencyCode: 'NGN',
-        paymentReference: orderRef,
-        paymentDescription: `WEN Foods subscription charge ${orderRef}`,
-        contractCode: config.contractCode,
-        apiKey: config.apiKey,
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        authorization_code: sub.monnify_card_token,
+        email: sub.monnify_email,
+        amount: Math.round(amount * 100),
+        reference: orderRef,
+      }),
     })
+    const psData = await psRes.json()
 
-    if (!chargeRes.requestSuccessful) {
-      console.error('[cron/subscriptions] charge-card-token failed for', sub.id, chargeRes.responseMessage)
+    if (!psRes.ok || !psData?.status) {
+      console.error('[cron/subscriptions] charge_authorization failed for', sub.id, psData?.message)
       await supabase.from('orders').update({ status: 'payment_failed' }).eq('id', order.id)
       await supabase.from('subscriptions').update({ status: 'payment_issue', last_order_id: order.id }).eq('id', sub.id)
       results.push({ subscriptionId: sub.id, outcome: 'charge_failed' })
