@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
         amount,
         currencyCode: 'NGN',
         paymentReference: orderRef,
-        paymentDescription: `WEN subscription charge ${orderRef}`,
+        paymentDescription: `WEN Foods subscription charge ${orderRef}`,
         contractCode: config.contractCode,
         apiKey: config.apiKey,
       },

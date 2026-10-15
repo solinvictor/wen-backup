@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
         customerName,
         customerEmail: email,
         paymentReference: reference,
-        paymentDescription: `WEN payment ${reference}`,
+        paymentDescription: `WEN Foods payment ${reference}`,
         currencyCode: 'NGN',
         contractCode: config.contractCode,
         redirectUrl: `${siteUrl}${callbackPath}`,
